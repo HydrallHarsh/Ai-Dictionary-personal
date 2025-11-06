@@ -71,7 +71,7 @@ export default function Home() {
                 <p className="text-sm md:text-base text-gray-200 leading-relaxed opacity-80 mb-4">
                   Google has been investing in AI for many years and bringing
                   its benefits to individuals, businesses and communities.
-                  Whether it's publishing state-of-the-art research, building
+                  Whether it&apos;s publishing state-of-the-art research, building
                   helpful products or developing tools and resources that make
                   AI accessible to everyone. The integration of VR and AI
                   technologies is revolutionizing the gaming industry, creating
