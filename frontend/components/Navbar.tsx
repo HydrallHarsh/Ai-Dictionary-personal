@@ -65,7 +65,7 @@ export default function Navbar() {
           ))}
 
           {/* ALWAYS READABLE BUTTON */}
-          <ContactButton className="!text-white !bg-black/70 !hover:bg-black" />
+          <ContactButton className="!text-white !bg-black/70 hover:!bg-black" />
         </NavigationMenuList>
       </NavigationMenu>
     </motion.nav>
