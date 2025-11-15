@@ -11,20 +11,29 @@ export default function Home() {
       <div className="relative isolate">
 
         {/* ---------------- HERO SECTION ---------------- */}
-        <main className="bg-gray-700 relative min-h-screen overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-r from-purple-600 via-blue-600 to-purple-800 z-0">
+        <main className="bg-gray-950 relative min-h-screen overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-950 to-gray-900 ">
 
             {/* Floating wave animation */}
             <motion.img
               src="/home_design_waves_2.svg"
               alt="wave"
               className="absolute -top-35 left-0.5 w-[45%] z-0 pointer-events-none select-none"
-              animate={{ y: [0, -15, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ 
+                opacity: 1, 
+                x: 0,
+                y: [0, -15, 0]
+              }}
+              transition={{ 
+                opacity: { duration: 1.2, ease: "easeOut" },
+                x: { duration: 1.3, ease: "easeOut" },
+                y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
+              }}
             />
 
             <div className="relative z-40 container mx-auto py-10 px-4 md:px-16 lg:py-20">
-              <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center md:items-center">
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center md:items-center pt-30">
 
                 {/* ---- LEFT HERO ---- */}
                 <motion.div
@@ -57,7 +66,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                   >
-                    <Button className="px-8 py-3 bg-white text-purple-600 hover:bg-gray-100 font-semibold">
+                    <Button className="px-8 py-3 bg-white text-gray-900 hover:bg-gray-100 font-semibold">
                       Read more
                     </Button>
                   </motion.div>
@@ -71,13 +80,13 @@ export default function Home() {
                   transition={{ duration: 0.9, ease: "easeOut" }}
                 >
                   <motion.div
-                    className="rounded-3xl overflow-hidden border-3 border-white shadow-2xl bg-linear-to-br from-slate-900 to-slate-800 w-full max-w-md aspect-square flex items-center justify-center"
+                    className="rounded-3xl overflow-hidden w-full max-w-md  flex items-center justify-center"
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                   >
                     <img
-                      src="/ai_logo_page_1.svg"
-                      alt="AI Icon"
+                      src="/undraw_ai-agent_pdkp.svg"
+                      alt="AI Agent illustration"
                       className="w-full h-full object-cover"
                     />
                   </motion.div>
@@ -88,7 +97,7 @@ export default function Home() {
         </main>
 
         {/* ---------------- POSTS SECTION ---------------- */}
-        <section className="bg-gray-700 py-12 md:py-16 lg:py-20">
+        <section className="bg-gray-950 pb-12 md:pb-16 lg:pb-20">
           <div className="container mx-auto px-4 md:px-6 ">
 
             {/* Section Header */}
@@ -140,7 +149,7 @@ export default function Home() {
                 </h3>
 
                 <p className="text-sm md:text-base text-gray-200 leading-relaxed opacity-80 mb-4">
-                  Google has been investing in AI for many years, driving innovation across industries and redefining the boundaries of technology. In the gaming world, the integration of VR and AI is transforming how players interact with virtual environments, offering unprecedented levels of visual fidelity and immersive storytelling. Adaptive gameplay powered by AI personalizes experiences, while VR brings these worlds to life, making games more attractive and engaging than ever before. As developers continue to push the limits, the synergy between AI and VR promises a future where games are not only visually stunning but also deeply responsive to each player's unique style.
+                  Google has been investing in AI for many years, driving innovation across industries and redefining the boundaries of technology. In the gaming world, the integration of VR and AI is transforming how players interact with virtual environments, offering unprecedented levels of visual fidelity and immersive storytelling. Adaptive gameplay powered by AI personalizes experiences, while VR brings these worlds to life, making games more attractive and engaging than ever before. As developers continue to push the limits, the synergy between AI and VR promises a future where games are not only visually stunning but also deeply responsive to each player&apos;s unique style.
                 </p>
 
                 <Button

@@ -16,29 +16,17 @@ export default function Navbar() {
   const { scrollY } = useScroll();
 
   // Navbar shrinking
-  const navHeight = useTransform(scrollY, [0, 120], ["4.5rem", "3.2rem"]);
-  const navRadius = useTransform(scrollY, [0, 120], ["0px", "16px"]);
-  const navWidth = useTransform(scrollY, [0, 120], ["100%", "80%"]);
-  const navY = useTransform(scrollY, [0, 120], ["0px", "12px"]);
+  const navHeight = useTransform(scrollY, [0, 120], ["4.5rem", "4.2rem"]);
+  const navRadius = useTransform(scrollY, [0, 120], ["0px", "25px"]);
+  const navWidth = useTransform(scrollY, [0, 120], ["100%", "75%"]);
+  const navY = useTransform(scrollY, [0, 120], ["0px", "30px"]);
   const navShadow = useTransform(
     scrollY,
     [0, 120],
     ["0px 0px 0px rgba(0,0,0,0)", "0px 6px 20px rgba(0,0,0,0.25)"]
   );
 
-  // TOP = gradient solid
-  // SCROLLED = dark translucent
-  const background = useTransform(
-    scrollY,
-    [0, 120],
-    [
-      "linear-gradient(to right, #9333EA, #2563EB, #6D28D9)", // FULL SOLID GRADIENT
-      "rgba(20,20,20,0.75)"                                 // DARK glass after scroll
-    ]
-  );
-
-  // Blur only after scroll
-  const blur = useTransform(scrollY, [0, 120], ["blur(0px)", "blur(12px)"]);
+  const blur = useTransform(scrollY, [0, 120], ["blur(1px)", "blur(20px)"]);
 
   return (
     <motion.nav
@@ -48,7 +36,6 @@ export default function Navbar() {
         borderRadius: navRadius,
         y: navY,
         boxShadow: navShadow,
-        background,
         backdropFilter: blur,
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
