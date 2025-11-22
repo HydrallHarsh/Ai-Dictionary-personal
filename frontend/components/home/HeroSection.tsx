@@ -12,7 +12,7 @@ export function HeroSection() {
               variant="outline"
               className="px-3 py-1 text-sm font-medium rounded-full border-foreground/10 bg-secondary/50 backdrop-blur-sm"
             >
-              <Sparkles className="h-3.5 w-3.5 mr-1.5 strokeWidth = {1} text-indigo-700" />
+              <Sparkles className="h-3.5 w-3.5 mr-1.5 text-indigo-700" strokeWidth={1} />
               Daily AI Intelligence
             </Badge>
           </div>
