@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 import os
+load_dotenv()
 
-DB_PASSWORD = os.environ('DB_PASSWORD')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DATABASE_URL = f"postgresql+asyncpg://postgres:{DB_PASSWORD}@localhost:5432/postgres"
 
 
