@@ -33,6 +33,8 @@ def url_call(_query,access_token):
 '''Product Hunt Wrapper Class - contains methods to fetch top products for specific topics'''
 class ProductHuntWrapper:
     def __init__(self,access_token):
+        if not access_token or not isinstance(access_token, str) or not access_token.strip():
+            raise ValueError("Product Hunt access token is required and must be a non-empty string")
         self.access_token = access_token
     
     def get_top_products_topic_ai(self):
