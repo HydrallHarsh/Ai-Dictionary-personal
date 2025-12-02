@@ -1,4 +1,5 @@
 import axios from 'axios';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 export async function loginUser(username: string, password: string) {
     try {
         const formData = new URLSearchParams();
@@ -9,7 +10,7 @@ export async function loginUser(username: string, password: string) {
         formData.append('client_id', '');
         formData.append('client_secret', '');
         const response = await axios.post(
-            "http://127.0.0.1:8000/auth/auth/jwt/login",
+            `${API_URL}/auth/auth/jwt/login`,
             formData,
             {
                 headers: {
@@ -28,5 +29,6 @@ export async function loginUser(username: string, password: string) {
     }
     catch (error) {
         console.log("Error Occured while loginUser");
+        throw error;
     }
 }
