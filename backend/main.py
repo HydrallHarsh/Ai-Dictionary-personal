@@ -7,7 +7,7 @@ import uvicorn
 
 load_dotenv()
 
-ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")]
+ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",") if origin.strip()]
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
