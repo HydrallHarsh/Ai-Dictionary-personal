@@ -1,25 +1,56 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { loginUser } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [load, setLoad] = useState(false);
+  const [user, setUser] = useState(null);
+  const router = useRouter(); //Simple Router Hook for redirecting after successful login
+
+  async function handleLoginSubmit(e: React.FormEvent) {
+    e.preventDefault(); // Prevents Default Reload Behavior
+    setLoad(true);
+
+    const form = e.target as HTMLFormElement;
+    const username = form.email.value;
+    const password = form.password.value;
+    
+    try{
+      const formData = await loginUser(username, password);
+      localStorage.setItem("access_token", formData.access_token);
+      setUser(formData.data);
+      console.log("Login Successful"); // For Debugging
+      router.push("/");
+    } catch (error) {
+      console.log("Login Failed from login-form component");
+    }
+    finally {
+      setLoad(false);
+    }
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -30,7 +61,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleLoginSubmit}>
             <FieldGroup>
               <Field>
                 <Button variant="outline" type="button">
@@ -91,5 +122,5 @@ export function LoginForm({
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>
-  )
+  );
 }
