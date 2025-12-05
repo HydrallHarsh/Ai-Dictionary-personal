@@ -56,8 +56,8 @@ export interface DiagramBlock extends Block {
     }
 }
 
-export interface ExplainationBlock extends Block {
-    type: 'explaination';
+export interface ExplanationBlock extends Block {
+    type: 'explanation';
     data: {
         content: string
     }
@@ -74,9 +74,9 @@ export interface ExampleBlock extends Block {
 export interface RelatedTopicsBlock extends Block {
     type: 'related_topics';
     data: {
-        topics: Array<{ topic_name: string, link: string }>
+        topics: string[] //NEED TO USE THIS FOR LATER - Array<{ topic_name: string }> //TODO :  Need to add one IMP field topic_url later
     }
 }
 
 export type AllContentBlock =
-    TitleBlock | SummaryBlock | CodeBlock | ImageBlock | DiagramBlock | ExplainationBlock | ExampleBlock | RelatedTopicsBlock;
+    TitleBlock | SummaryBlock | CodeBlock | ImageBlock | DiagramBlock | ExplanationBlock | ExampleBlock | RelatedTopicsBlock;

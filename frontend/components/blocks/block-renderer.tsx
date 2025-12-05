@@ -1,7 +1,7 @@
 import { AllContentBlock } from "@/types/content";
 import { CodeComponent } from "./code-block";
-import { DifficultyComponent } from "./difficulty-block";
-import { ExplainationComponent } from "./explaination-block";
+// import { DifficultyComponent } from "./difficulty-block";
+import { ExplanationComponent } from "./explaination-block";
 import { ExampleComponent } from "./example-block";
 import { ImageComponent } from "./image-block";
 import React from "react";
@@ -11,24 +11,25 @@ import { TitleComponent } from "./header-block";
 
 //Registry
 const BLOCK_REGISTRY: Record<string, React.FC<any>> = {
-  header: TitleComponent,
-  difficulty: DifficultyComponent,
+  title: TitleComponent,
+  // difficulty: DifficultyComponent,
   summary: SummaryComponent,
   code: CodeComponent,
   image: ImageComponent,
   //TODO : Adding Diagram Component after completing it in content.ts.
-  explaination: ExplainationComponent,
+  explanation: ExplanationComponent,
   example: ExampleComponent,
   related_topics: RelatedTopicsComponent,
 };
 
 interface BlockRendererProps {
-  block: AllContentBlock[];
+  blocks: AllContentBlock[];
 }
 
-export function BlockRenderer({ block }: BlockRendererProps) {
+export function BlockRenderer({ blocks }: BlockRendererProps) {
   // Check if block is present or not
-  if (!block || block.length === 0) {
+  console.log(blocks);
+  if (!blocks || blocks.length === 0) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col text-center">
@@ -46,5 +47,24 @@ export function BlockRenderer({ block }: BlockRendererProps) {
     );
   }
   
-  return <></>;
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto">
+      {blocks.map((block) => {
+        const Component = BLOCK_REGISTRY[block.type];
+        if (!Component) {
+          // In Dev: Warn us so we can fix it
+          if (process.env.NODE_ENV === "development") {
+            return (
+              <div key={block.id} className="p-4 border border-red-500 bg-red-500/10 text-red-500 rounded my-4">
+                ⚠️ Unknown Block Type: <strong>{block.type}</strong>
+              </div>
+            );
+          }
+          // In Prod: Hide it gracefully
+          return null;
+        }
+        return <Component key={block.id} {...block.data} />;
+      })}
+    </div>
+  );
 }

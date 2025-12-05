@@ -39,9 +39,9 @@ export function TitleComponent({
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-[1.1]">
           {content}
           <br className="hidden md:block" />
-          <span className="text-muted-foreground">
+          {/* <span className="text-muted-foreground">
             Architecture & Implementation
-          </span>
+          </span> */}
         </h1>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-6 pt-4 border-t border-border/50">
@@ -61,7 +61,7 @@ export function TitleComponent({
 
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <span className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" /> {date.toLocaleDateString()}
+              <Calendar className="w-4 h-4" /> {date.toUTCString().slice(4, 16)}
             </span>
             <span className="flex items-center gap-2">
               <Clock className="w-4 h-4" /> {estimated_time} read
