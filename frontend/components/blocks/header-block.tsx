@@ -28,8 +28,8 @@ export function TitleComponent({
           </span> */}
         {tags && (
           <div className="flex flex-wrap gap-3">
-            {tags.map((tag) => (
-              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
+            {tags.map((tag, index) => (
+              <span key={index} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
                 {tag}
               </span>
             ))}

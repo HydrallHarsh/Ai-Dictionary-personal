@@ -1,7 +1,7 @@
 import { AllContentBlock } from "@/types/content";
 import { CodeComponent } from "./code-block";
 // import { DifficultyComponent } from "./difficulty-block";
-import { ExplanationComponent } from "./explaination-block";
+import { ExplanationComponent } from "./explanation-block";
 import { ExampleComponent } from "./example-block";
 import { ImageComponent } from "./image-block";
 import React from "react";
