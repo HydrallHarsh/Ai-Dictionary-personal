@@ -8,7 +8,7 @@ a platform where ai meets developers
 - [x] Theme provider and Dark/Light mode toggle
 - [x] Basic UI components (Hero Section, Latest Insights)
 - [ ] Backend integration (Pending)
-- [ ] Authentication (Pending)
+- [x] Authentication 
 
 ## Frontend — Run locally
 
