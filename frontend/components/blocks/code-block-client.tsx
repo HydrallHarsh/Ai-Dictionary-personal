@@ -27,8 +27,7 @@ export function CodeBlockClient({ html, filename }: Props) {
           <div className="w-2.5 h-2.5 rounded-full bg-green-500/40"></div>
         </div>
       </div>
-      <div className="p-4 overflow-x-auto text-sm leading-relaxed" dangerouslySetInnerHTML={{__html:html}}>
-      </div>
+      <div className="p-4 overflow-x-auto text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: html }} />
       <style jsx global>{`
         pre.shiki {
             background-color: transparent !important;
