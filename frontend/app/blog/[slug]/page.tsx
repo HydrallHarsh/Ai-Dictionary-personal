@@ -5,88 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { ScrollProgress } from "@/components/scroll-progress";
 
-// const MOCK_DATA: AllContentBlock[] = [
-//   {
-//     id: "1",
-//     type: "title", // Maps to TitleComponent
-//     data: {
-//       content: "Understanding Advanced AI Agents: Architecture & Implementation",
-//       level: 1,
-//       tags: ["System Design", "LLMs", "AI Agents"],
-//       author: "Harsh (You)",
-//       date: "August 15, 2024",
-//       estimated_time: "10 min read",
-//       difficulty: "Intermediate"
-//     } as any // Cast because our base type is strict, but we extended the component
-//   },
-//   {
-//     id: "2",
-//     type: "summary", // Maps to SummaryComponent
-//     data: {
-//       content: "A comprehensive guide to building, deploying, and optimizing autonomous AI agents. We'll explore the architecture, decision-making processes, and real-world applications that make these systems powerful tools for automation."
-//     }
-//   },
-//   {
-//     id: "3",
-//     type: "code", // Maps to CodeComponent
-//     data: {
-//       language: "typescript",
-//       filename: "example.ts",
-//       content: `interface Person {
-//   name: string;
-//   age: number;
-//   isStudent?: boolean; // Optional property
-// }
 
-// // Function with type annotations for parameters and return value
-// function greetPerson(person: Person): string {
-//   let greeting = Hello, my name is  and I am  years old.
-//   if (person.isStudent) {
-//     greeting += " I am also a student.";
-//   }
-//   return greeting;
-// }
-
-// // Create objects conforming to the Person interface
-// const person1: Person = {
-//   name: "Alice",
-//   age: 30,
-//   isStudent: false,
-// };
-
-// const person2: Person = {
-//   name: "Bob",
-//   age: 22,
-//   isStudent: true,
-// };`
-//     }
-//   },
-  
-//   {
-//     id: "5",
-//     type: "image", // Maps to ImageComponent
-//     data: {
-//       url: "/ai_logo_page_1.svg",
-//       caption: "Figure 1: AI Agent Architecture Overview",
-//       alt: "Diagram showing the architecture of an AI agent"
-//     }
-//   },
-//   {
-//     id: "4",
-//     type: "explanation", // Maps to ExplanationComponent
-//     data: {
-//       content: `
-//       The Agent class serves as the blueprint for creating autonomous AI agents. Each agent is initialized with a name and a language model that drives its decision-making process. The think method allows the agent to process contextual information and generate a plan of action using its underlying model. This modular design enables flexibility in defining various types of agents with different capabilities and behaviors.`
-//     }
-//   },
-//   {
-//     id: "6",
-//     type: "related_topics", // Maps to RelatedTopicsComponent
-//     data: {
-//       topics: ["Reinforcement Learning", "Natural Language Processing", "Computer Vision", "Robotics"]
-//     }
-//   }
-// ];
 export const BLOG_DATABASE: Record<string, AllContentBlock[]> = {
   "introduction-to-deep-learning": [
     {
@@ -405,9 +324,9 @@ nmap -sV 192.168.1.0/24`
 };
 
 interface PageProps{
-  params:{
+  params:Promise<{ 
     slug:string;
-  }
+  }>;
 }
 export default async function BlogPostPage({ params }: PageProps) {
   const {slug} = await params;
@@ -421,6 +340,11 @@ export default async function BlogPostPage({ params }: PageProps) {
       </div>
     );
   }
+
+  //Extracting title block for breadcrumbs 
+  const titleBlock = MOCK_DATA.find((b) => b.type === "title");
+  const postTitle = titleBlock?.data.content ?? "Blog Post";
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary relative">
       <ScrollProgress />
@@ -434,12 +358,12 @@ export default async function BlogPostPage({ params }: PageProps) {
             <Home className="w-3.5 h-3.5" /> Home
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <Link href="/blogs" className="hover:text-primary transition-colors">
+          <Link href="/blog" className="hover:text-primary transition-colors">
             Blog
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-foreground font-medium">
-            Understanding Advanced AI Agents
+          <span className="text-foreground font-medium max-w-[250px] truncate">
+            {postTitle}
           </span>
         </nav>
         {/* Passing an empty array triggers the "No content" if-statement */}
