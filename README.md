@@ -8,7 +8,10 @@ a platform where ai meets developers
 - [x] Theme provider and Dark/Light mode toggle
 - [x] Basic UI components (Hero Section, Latest Insights)
 - [ ] Backend integration (Pending)
-- [x] Authentication 
+- [x] Authentication
+- [ ] Langraph Setup and Working
+- [ ] Various APIs integration
+- [ ] TESTING
 
 ## Frontend — Run locally
 
