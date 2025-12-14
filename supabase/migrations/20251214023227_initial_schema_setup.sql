@@ -69,16 +69,15 @@ alter table "public"."user_liked_posts" add constraint "user_liked_posts_likedpo
 
 alter table "public"."user_liked_posts" validate constraint "user_liked_posts_likedpostid_fkey";
 
-alter table "public"."user_liked_posts" add constraint "user_liked_posts_userid_fkey" FOREIGN KEY (userid) REFERENCES public.users(id) not valid;
+alter table "public"."user_liked_posts" add constraint "user_liked_posts_userid_fkey" FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE not valid;
 
 alter table "public"."user_liked_posts" validate constraint "user_liked_posts_userid_fkey";
 
-alter table "public"."user_saved_posts" add constraint "user_saved_posts_savedpostid_fkey" FOREIGN KEY (savedpostid) REFERENCES public.posts(postid) not valid;
+alter table "public"."user_saved_posts" add constraint "user_saved_posts_savedpostid_fkey" FOREIGN KEY (savedpostid) REFERENCES public.posts(postid) ON DELETE CASCADE not valid;
 
 alter table "public"."user_saved_posts" validate constraint "user_saved_posts_savedpostid_fkey";
 
-alter table "public"."user_saved_posts" add constraint "user_saved_posts_userid_fkey" FOREIGN KEY (userid) REFERENCES public.users(id) not valid;
-
+alter table "public"."user_saved_posts" add constraint "user_saved_posts_userid_fkey" FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE not valid;
 alter table "public"."user_saved_posts" validate constraint "user_saved_posts_userid_fkey";
 
 grant delete on table "public"."post_content" to "anon";
