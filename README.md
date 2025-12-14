@@ -49,3 +49,15 @@ Troubleshooting
 - If the page appears blank, check the browser console and terminal for compile errors.
 - Ensure the SVG/image files exist in `frontend/public/` and paths match exactly.
 - If lint or format rules block a commit, run `pnpm lint` or adjust the staged files and commit only the intended changes.
+
+## DB SETUP
+
+### Install Supabase Locally first - ([supabase-cli-setup](https://github.com/supabase/cli?tab=readme-ov-file#install-the-cli))
+
+#### Take the latest PR pull in local
+
+#### Use Command - `supabase start` will pull all the docker images
+
+#### After the docker container starts running use command `supabase migration up` to apply migrations to local schema
+
+#### Optional Setup: `supabase link` to link the prod db - *For Members only to push new changes to db Schema*
