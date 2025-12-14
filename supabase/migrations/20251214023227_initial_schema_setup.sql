@@ -80,20 +80,6 @@ alter table "public"."user_saved_posts" validate constraint "user_saved_posts_sa
 alter table "public"."user_saved_posts" add constraint "user_saved_posts_userid_fkey" FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE not valid;
 alter table "public"."user_saved_posts" validate constraint "user_saved_posts_userid_fkey";
 
-grant delete on table "public"."post_content" to "anon";
-
-grant insert on table "public"."post_content" to "anon";
-
-grant references on table "public"."post_content" to "anon";
-
-grant select on table "public"."post_content" to "anon";
-
-grant trigger on table "public"."post_content" to "anon";
-
-grant truncate on table "public"."post_content" to "anon";
-
-grant update on table "public"."post_content" to "anon";
-
 grant delete on table "public"."post_content" to "authenticated";
 
 grant insert on table "public"."post_content" to "authenticated";
@@ -121,20 +107,6 @@ grant trigger on table "public"."post_content" to "service_role";
 grant truncate on table "public"."post_content" to "service_role";
 
 grant update on table "public"."post_content" to "service_role";
-
-grant delete on table "public"."posts" to "anon";
-
-grant insert on table "public"."posts" to "anon";
-
-grant references on table "public"."posts" to "anon";
-
-grant select on table "public"."posts" to "anon";
-
-grant trigger on table "public"."posts" to "anon";
-
-grant truncate on table "public"."posts" to "anon";
-
-grant update on table "public"."posts" to "anon";
 
 grant delete on table "public"."posts" to "authenticated";
 
@@ -164,20 +136,6 @@ grant truncate on table "public"."posts" to "service_role";
 
 grant update on table "public"."posts" to "service_role";
 
-grant delete on table "public"."user_liked_posts" to "anon";
-
-grant insert on table "public"."user_liked_posts" to "anon";
-
-grant references on table "public"."user_liked_posts" to "anon";
-
-grant select on table "public"."user_liked_posts" to "anon";
-
-grant trigger on table "public"."user_liked_posts" to "anon";
-
-grant truncate on table "public"."user_liked_posts" to "anon";
-
-grant update on table "public"."user_liked_posts" to "anon";
-
 grant delete on table "public"."user_liked_posts" to "authenticated";
 
 grant insert on table "public"."user_liked_posts" to "authenticated";
@@ -205,20 +163,6 @@ grant trigger on table "public"."user_liked_posts" to "service_role";
 grant truncate on table "public"."user_liked_posts" to "service_role";
 
 grant update on table "public"."user_liked_posts" to "service_role";
-
-grant delete on table "public"."user_saved_posts" to "anon";
-
-grant insert on table "public"."user_saved_posts" to "anon";
-
-grant references on table "public"."user_saved_posts" to "anon";
-
-grant select on table "public"."user_saved_posts" to "anon";
-
-grant trigger on table "public"."user_saved_posts" to "anon";
-
-grant truncate on table "public"."user_saved_posts" to "anon";
-
-grant update on table "public"."user_saved_posts" to "anon";
 
 grant delete on table "public"."user_saved_posts" to "authenticated";
 
@@ -248,20 +192,6 @@ grant truncate on table "public"."user_saved_posts" to "service_role";
 
 grant update on table "public"."user_saved_posts" to "service_role";
 
-grant delete on table "public"."users" to "anon";
-
-grant insert on table "public"."users" to "anon";
-
-grant references on table "public"."users" to "anon";
-
-grant select on table "public"."users" to "anon";
-
-grant trigger on table "public"."users" to "anon";
-
-grant truncate on table "public"."users" to "anon";
-
-grant update on table "public"."users" to "anon";
-
 grant delete on table "public"."users" to "authenticated";
 
 grant insert on table "public"."users" to "authenticated";
@@ -289,5 +219,3 @@ grant trigger on table "public"."users" to "service_role";
 grant truncate on table "public"."users" to "service_role";
 
 grant update on table "public"."users" to "service_role";
-
-
