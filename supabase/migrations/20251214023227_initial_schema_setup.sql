@@ -8,7 +8,7 @@
 
 
   create table "public"."posts" (
-    "postid" uuid not null,
+    "postid" uuid not null default gen_random_uuid(),
     "title" text not null,
     "source" text,
     "upload_date" timestamp without time zone default now(),
@@ -33,7 +33,7 @@
 
 
   create table "public"."users" (
-    "id" uuid not null,
+    "id" uuid not null default gen_random_uuid(),
     "username" text,
     "name" text,
     "email" text,
