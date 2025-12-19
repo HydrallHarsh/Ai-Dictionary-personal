@@ -26,7 +26,7 @@ INSERT INTO post_content (
     COALESCE((post_content_json->>'isoldpost')::boolean, false)
   );
 
-select row_to_json(p) into res from posts p where p.posts = new_post_id;
+select row_to_json(p) into res from posts p where p.postid = new_post_id;
 
 return res;
 
