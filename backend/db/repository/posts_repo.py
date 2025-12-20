@@ -4,7 +4,7 @@ from typing import Dict, List, Any
 # Repository functions for posts and post content
 # Add more functions later as needed, following the same pattern
 
-# Can be broken into two functions further if needed - post addition and post content addition
+# Shifted to use RPC to handle both post and post content insertion atomically
 def add_post(post: Dict[str,Any], post_content: Dict[str,Any]):
     """
     Docstring for add_post
@@ -16,20 +16,10 @@ def add_post(post: Dict[str,Any], post_content: Dict[str,Any]):
     """
     try:
         # Try to add post in posts db table
-        res = supabase.table("posts").insert(post).execute()
+        res = supabase.rpc("create_post_with_content",{"post_json": post, "post_content_json": post_content}).execute()
         
         if res.error:
             raise Exception(f"Error adding post: {res.error.message}")
-    
-    except Exception as e:
-        raise Exception(f"Exception in add_post: {str(e)}")
-    
-    try:
-        # Try to add post content in post_content db table
-        res_content = supabase.table("post_content").insert(post_content).execute()
-        
-        if res_content.error:
-            raise Exception(f"Error adding post content: {res_content.error.message}")
     
     except Exception as e:
         raise Exception(f"Exception in add_post: {str(e)}")
