@@ -1,0 +1,12 @@
+exclude: ^langgraph_bot/ #TODO Will remove this line after fixing in next PR
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff-check
+        # Run ruff-check --fix for fixing some issues automatically
+        types_or: [ python, pyi ]
+      - id: ruff-format
+        # Run ruff-format for formatting code automatically
+        types_or: [ python, pyi ]
