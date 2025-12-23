@@ -11,9 +11,11 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "./auth/AuthContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, loading, logoutAction } = useAuth();
 
   return (
     <nav className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-700">
@@ -57,7 +59,20 @@ export default function Navbar() {
             </NavigationMenuList>
           </NavigationMenu>
           <ThemeToggle />
-          <Button>Contact Us</Button>
+          {!loading && !user && (
+            <>
+              <Link href="/signup">
+                <Button variant="ghost">Register</Button>
+              </Link>
+            </>
+          )}
+          {!loading && user && (
+            <>
+              <Button variant="ghost" onClick={logoutAction}>
+                Logout
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Nav bar - Logic here is - It stays hidden until md breakpoint and then collapses into a menu button which can be clicked to open the nav bar */}
@@ -96,7 +111,20 @@ export default function Navbar() {
             >
               Search
             </Link>
-            <Button className="w-full">Contact Us</Button>
+            {!loading && !user && (
+            <>
+              <Link href="/signup">
+                <Button variant="ghost">Register</Button>
+              </Link>
+            </>
+          )}
+          {!loading && user && (
+            <>
+              <Button variant="ghost" onClick={logoutAction}>
+                Logout
+              </Button>
+            </>
+          )}
           </div>
         </div>
       )}
