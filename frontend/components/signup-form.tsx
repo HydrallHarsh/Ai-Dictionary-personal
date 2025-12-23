@@ -1,23 +1,24 @@
 "use client";
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import {useState} from 'react'
-import { handleSignup } from "@/lib/api"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { handleSignup } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "./auth/AuthContext";
 
 export function SignupForm({
   className,
@@ -26,21 +27,21 @@ export function SignupForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e:React.FormEvent)=>{
-    e.preventDefault(); 
+  const { registerAction } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
     try {
-      const result = await handleSignup({email,password});
-      setSuccess("User Registred Successfuly!");
-      setError("");
-      router.push('/login');
-    }catch (err:unknown){
-      if (err instanceof Error)
-        {setError(err.message);
-          setSuccess("");
-        }
+      await registerAction(email, password);
+      router.push("/");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Signup failed";
+      setError(msg);
+      console.log("Signup failed from signup-form component:", msg);
+      //TODO: Need to add UI notification for error
     }
   };
   return (
@@ -65,7 +66,7 @@ export function SignupForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  onChange={(e)=> setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </Field>
@@ -73,7 +74,12 @@ export function SignupForm({
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input id="password" type="password" onChange={(e)=> setPassword(e.target.value)} required />
+                    <Input
+                      id="password"
+                      type="password"
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="confirm-password">
@@ -101,5 +107,5 @@ export function SignupForm({
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>
-  )
+  );
 }

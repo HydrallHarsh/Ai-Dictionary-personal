@@ -11,9 +11,17 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "./auth/AuthContext";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, loading, logoutAction } = useAuth();
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  if (isAuthPage) {
+    return null;
+  }
 
   return (
     <nav className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-700">
@@ -57,7 +65,31 @@ export default function Navbar() {
             </NavigationMenuList>
           </NavigationMenu>
           <ThemeToggle />
-          <Button>Contact Us</Button>
+          {!loading && !user && (
+            <>
+              <Link href="/login">
+                <Button variant="ghost">Login</Button>
+              </Link>
+            </>
+          )}
+          {!loading && user && (
+            <>
+              <span className="text-sm">Hello, {user.email}</span>
+              <Button 
+                variant="ghost" 
+                onClick={async () => {
+                  try {
+                    await logoutAction();
+                  } catch (error) {
+                    console.error("Logout failed", error);
+                    // TODO: Show toast notification to user
+                  }
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Nav bar - Logic here is - It stays hidden until md breakpoint and then collapses into a menu button which can be clicked to open the nav bar */}
@@ -96,7 +128,31 @@ export default function Navbar() {
             >
               Search
             </Link>
-            <Button className="w-full">Contact Us</Button>
+            {!loading && !user && (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+              </>
+            )}
+            {!loading && user && (
+              <>
+                <span className="text-sm">Hello, {user.email}</span>
+                <Button 
+                  variant="ghost" 
+                  onClick={async () => {
+                    try {
+                      await logoutAction();
+                    } catch (error) {
+                      console.error("Logout failed", error);
+                      // TODO: Show toast notification to user
+                    }
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

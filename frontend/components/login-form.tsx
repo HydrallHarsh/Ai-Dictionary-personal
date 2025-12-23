@@ -20,14 +20,16 @@ import { Input } from "@/components/ui/input";
 import { loginUser } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "./auth/AuthContext";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const [load, setLoad] = useState(false);
-  const [user, setUser] = useState("");
+
   const router = useRouter(); //Simple Router Hook for redirecting after successful login
+  const {loginAction} = useAuth();
 
   async function handleLoginSubmit(e: React.FormEvent) {
     e.preventDefault(); // Prevents Default Reload Behavior
@@ -38,13 +40,12 @@ export function LoginForm({
     const password = form.password.value;
     
     try{
-      const formData = await loginUser({ username, password });
-      localStorage.setItem("access_token", formData.access_token);
-      setUser(formData.access_token);
+      await loginAction(username, password);
       console.log("Login Successful"); // For Debugging
       router.push("/");
     } catch (error) {
       console.log("Login Failed from login-form component");
+      throw error;
     }
     finally {
       setLoad(false);

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth/AuthContext";
+import Navbar from "@/components/Navbar";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -27,9 +29,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <div className="mx-auto max-w-[1440px] min-h-screen bg-background border-x border-border shadow-2xl transition-colors duration-500">
-            {children}
-          </div>
+          <AuthProvider>
+            <div className="mx-auto max-w-[1440px] min-h-screen bg-background border-x border-border shadow-2xl transition-colors duration-500">
+              <Navbar />
+              {children}
+            </div>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
