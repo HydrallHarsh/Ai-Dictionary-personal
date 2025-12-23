@@ -12,10 +12,17 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "./auth/AuthContext";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading, logoutAction } = useAuth();
+  const pathname = usePathname();
+  const isAuthPage =
+    pathname.startsWith("/login") || pathname.startsWith("/signup");
+  if (isAuthPage) {
+    return null;
+  }
 
   return (
     <nav className="sticky top-0 w-full z-50 border-b border-border/40 bg-background/80 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-700">
@@ -61,13 +68,14 @@ export default function Navbar() {
           <ThemeToggle />
           {!loading && !user && (
             <>
-              <Link href="/signup">
-                <Button variant="ghost">Register</Button>
+              <Link href="/login">
+                <Button variant="ghost">Login</Button>
               </Link>
             </>
           )}
           {!loading && user && (
             <>
+              <span className="text-sm">Hello, {user.email}</span>
               <Button variant="ghost" onClick={logoutAction}>
                 Logout
               </Button>
@@ -112,19 +120,20 @@ export default function Navbar() {
               Search
             </Link>
             {!loading && !user && (
-            <>
-              <Link href="/signup">
-                <Button variant="ghost">Register</Button>
-              </Link>
-            </>
-          )}
-          {!loading && user && (
-            <>
-              <Button variant="ghost" onClick={logoutAction}>
-                Logout
-              </Button>
-            </>
-          )}
+              <>
+                <Link href="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+              </>
+            )}
+            {!loading && user && (
+              <>
+                <span className="text-sm">Hello, {user.email}</span>
+                <Button variant="ghost" onClick={logoutAction}>
+                  Logout
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

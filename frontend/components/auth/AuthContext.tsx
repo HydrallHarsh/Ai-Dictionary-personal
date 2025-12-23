@@ -60,13 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function logoutAction() {
     try {
       await logoutUser();
+      setUser(null); 
     } catch (error) {
       console.error("Logout failed in AuthProvider", error);
-      if (typeof window !== "undefined") {
-        window.alert("Logout failed. Please try again.");
-      }
-    } finally {
-      setUser(null);
+      // TODO: Replace with toast notification system
+      throw error; 
     }
   }
 

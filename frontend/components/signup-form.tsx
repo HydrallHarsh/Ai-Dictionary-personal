@@ -27,17 +27,21 @@ export function SignupForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const { registerAction } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       await registerAction(email, password);
       router.push("/");
     } catch (error) {
-      console.log("Signup failed from signup-form component");
-      throw error;
+      const msg = error instanceof Error ? error.message : "Signup failed";
+      setError(msg);
+      console.log("Signup failed from signup-form component:", msg);
+      //TODO: Need to add UI notification for error
     }
   };
   return (
