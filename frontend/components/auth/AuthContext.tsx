@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   loginAction: (email: string, password: string) => Promise<void>;
-  logoutAction: () => void;
+  logoutAction: () => Promise<void>;
   registerAction: (email: string, password: string) => Promise<void>;
 }
 // Creating Auth Context
