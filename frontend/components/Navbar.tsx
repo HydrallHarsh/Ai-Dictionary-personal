@@ -139,7 +139,17 @@ export default function Navbar() {
             {!loading && user && (
               <>
                 <span className="text-sm">Hello, {user.email}</span>
-                <Button variant="ghost" onClick={logoutAction}>
+                <Button 
+                  variant="ghost" 
+                  onClick={async () => {
+                    try {
+                      await logoutAction();
+                    } catch (error) {
+                      console.error("Logout failed", error);
+                      // TODO: Show toast notification to user
+                    }
+                  }}
+                >
                   Logout
                 </Button>
               </>
