@@ -12,27 +12,27 @@ AI Dictionary is an intelligent content platform that combines automated AI news
 
 ### Core Features
 
-**Authentication & User Experience**
+#### **Authentication & User Experience**
 
 - Secure cookie-based authentication with JWT (powered by fastapi-users)
 - Dark/light mode theming for comfortable reading
 - Responsive design that works everywhere
 
-**Intelligent Content Pipeline**
+#### **Intelligent Content Pipeline**
 
 - Automated content generation using LangGraph workflows
 - Multi-LLM support (Google Gemini, OpenAI, Groq)
 - Product Hunt API integration for trending AI tools
 - Smart title and summary generation
 
-**Modern Blog Platform**
+#### **Modern Blog Platform**
 
 - Dynamic routing for blog posts with unique slugs
 - Rich content blocks: code snippets, explanations, examples, images
 - Server-side syntax highlighting with Shiki
 - Type-safe content rendering system
 
-**Robust Backend**
+#### **Robust Backend**
 
 - FastAPI with modular architecture
 - Supabase database with row-level security
@@ -61,8 +61,8 @@ AI Dictionary is an intelligent content platform that combines automated AI news
 
 ### Frontend Development
 
-```powershell
-cd .\frontend
+```bash
+cd frontend
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -75,10 +75,12 @@ The frontend will be available at `http://localhost:3000`.
 
 The backend uses `uv` for fast, reliable Python package management.
 
-```powershell
-cd .\backend
+```bash
+cd backend
 uv sync
-uv run uvicorn main:app --reload or uv run python main.py
+uv run uvicorn main:app --reload
+# Or alternatively:
+# uv run python main.py
 ```
 
 The API will run at `http://127.0.0.1:8000`.
@@ -90,26 +92,26 @@ The API will run at `http://127.0.0.1:8000`.
 1. Install Supabase CLI following the [official guide](https://github.com/supabase/cli?tab=readme-ov-file#install-the-cli)
 2. Start local Supabase instance:
 
-   ```powershell
+   ```bash
    supabase start
    ```
 
 3. Apply migrations:
 
-   ```powershell
+   ```bash
    supabase migration up
    ```
 
 4. **(Team Members Only)** Link to production:
 
-   ```powershell
+   ```bash
    supabase link
    ```
 
 ### Production Build
 
-```powershell
-cd .\frontend
+```bash
+cd frontend
 pnpm build
 pnpm start
 ```
