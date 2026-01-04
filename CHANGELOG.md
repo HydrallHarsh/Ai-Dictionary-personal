@@ -8,6 +8,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### January 4, 2026
+
+#### Added
+- Agents
+  - langgraph_bot/agents/coding_agent.py — coding AI agent configured with python_executor tooling.
+  - langgraph_bot/agents/description_agent.py — description-generation agent for multi-source inputs.
+  - langgraph_bot/agents/summaryagent.py — summary agent exported as `s_agent`.
+- Workflow
+  - langgraph_bot/workflow/description_workflow.py — stateful multi-step graph that gathers ArXiv, Tavily, and PDF data and generates technical descriptions; renders a Mermaid diagram.
+- Tools (langgraph_bot/tools/tools.py)
+  - arxiv_tool(query: str) — fetch and normalize ArXiv paper metadata.
+  - pdfreader_tool(pdf_list: List[Dict]) — download/parse PDFs with per-item error handling, temp-file cleanup, and request timeouts.
+  - scraper_tool(url) — web crawling via FireCrawlLoader.
+  - python_executor(code: str) — sandboxed Python execution with subprocess timeout and structured stdout/stderr capture.
+  - tavily_search_tool — TavilySearch integration for web queries.
+- Tool-node wrappers (langgraph_bot/nodes/tnode/description_tool_node.py)
+  - arxiv_node(), tavily_node(), pdf_parsing_node() — nodes invoking tools and enriching state.
+- Agent node
+  - description_agent_node(state: State) — invokes the description agent and returns description with explicit success flag.
+- Prompts (langgraph_bot/utils/prompts.py)
+  - DESCRIPTION_PROMPT, CODING_PROMPT — new system prompts for description and coding workflows.
+- State schema
+  - langgraph_bot/agentschema/stateschema.py — added fields: description, arxiv_urls, documents, tavily_search_result.
+
+#### Changed
+- Models & config
+  - langgraph_bot/models/generativemodel.py — groqmodel switched to "meta-llama/llama-4-scout-17b-16e-instruct"; new codemodel (ChatGroq) added and retry/format settings adjusted.
+- Agents & nodes
+  - summary agent exported as `s_agent` and now uses SUMMARY_PROMPT.
+  - langgraph_bot/nodes/anode/agentnode.py — summary_agent_node updated to use s_agent and safer response handling; added description_agent_node with structured outputs and improved error handling.
+- Sample/loaders
+  - langgraph_bot/nodes/load_data_node.py — sample loader data updated.
+
+#### Fixed (critical)
+- langgraph_bot/tools/tools.py
+  - arxiv_tool now honors the query parameter (no hardcoded query).
+  - pdfreader_tool: added request timeouts and safer handling.
+  - python_executor: added subprocess timeout, structured stdout/stderr capture, and cleanup.
+  - Removed unused imports and fixed parameter name shadowing.
+- langgraph_bot/nodes/anode/agentnode.py
+  - Defensive checks before indexing messages, ensured explicit fallback returns, and replaced bare Exception handling with narrower handling and clearer fallback messages.
+
+#### Renamed / Misc
+- Fixed import/filename: descrption_tool_node.py → description_tool_node.py.
+- description_workflow.py writes a Mermaid PNG (path configurable in workflow).
+- Minor prompt wording tweaks, formatting adjustments, and generative model retry/config updates.
+
 ### December 31, 2025
 
 #### Fixed - Frontend ESLint Setup and Code Quality Improvements
