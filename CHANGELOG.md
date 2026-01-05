@@ -8,9 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### January 5, 2026
+
+#### Added
+
+- Migrated from ESlint to Biome for frontend linting and formatting
+- Configured Biome with default rules
+
+#### Changed
+
+- Refactored frontend codebase to comply with Biome linting rules
+- Major Changes because tab changefrom 2 spaces to 4 spaces
+
 ### January 4, 2026
 
 #### Added
+
 - Agents
   - langgraph_bot/agents/coding_agent.py — coding AI agent configured with python_executor tooling.
   - langgraph_bot/agents/description_agent.py — description-generation agent for multi-source inputs.
@@ -33,6 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - langgraph_bot/agentschema/stateschema.py — added fields: description, arxiv_urls, documents, tavily_search_result.
 
 #### Changed
+
 - Models & config
   - langgraph_bot/models/generativemodel.py — groqmodel switched to "meta-llama/llama-4-scout-17b-16e-instruct"; new codemodel (ChatGroq) added and retry/format settings adjusted.
 - Agents & nodes
@@ -42,6 +56,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - langgraph_bot/nodes/load_data_node.py — sample loader data updated.
 
 #### Fixed (critical)
+
 - langgraph_bot/tools/tools.py
   - arxiv_tool now honors the query parameter (no hardcoded query).
   - pdfreader_tool: added request timeouts and safer handling.
@@ -51,6 +66,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Defensive checks before indexing messages, ensured explicit fallback returns, and replaced bare Exception handling with narrower handling and clearer fallback messages.
 
 #### Renamed / Misc
+
 - Fixed import/filename: descrption_tool_node.py → description_tool_node.py.
 - description_workflow.py writes a Mermaid PNG (path configurable in workflow).
 - Minor prompt wording tweaks, formatting adjustments, and generative model retry/config updates.

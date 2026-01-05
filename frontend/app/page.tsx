@@ -9,12 +9,12 @@ import { Footer } from "@/components/Footer";
  * @returns The root JSX element containing the homepage sections.
  */
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-foreground selection:text-background">
-      <HeroSection />
-      <LatestInsights />
-      <Newsletter />
-      <Footer />
-    </div>
-  );
+	return (
+		<div className="min-h-screen bg-background text-foreground selection:bg-foreground selection:text-background">
+			<HeroSection />
+			<LatestInsights />
+			<Newsletter />
+			<Footer />
+		</div>
+	);
 }

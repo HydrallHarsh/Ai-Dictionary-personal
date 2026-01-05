@@ -1,0 +1,13 @@
+[project]
+name = "langgraph-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11.4"
+dependencies = [
+    "huggingface-hub>=1.2.3",
+    "langchain-core>=1.2.5",
+    "langchain-google-genai>=4.1.2",
+    "langgraph>=1.0.5",
+    "python-dotenv>=1.2.1",
+]

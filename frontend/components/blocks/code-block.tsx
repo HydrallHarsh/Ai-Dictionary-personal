@@ -5,28 +5,28 @@ import { CodeBlockClient } from "./code-block-client";
 type Props = CodeBlock["data"];
 
 function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
 }
 
 export async function CodeComponent({ content, language, filename }: Props) {
-  let html: string;
-  
-  try {
-    html = await codeToHtml(content, {
-      lang: language || "text",
-      theme: "one-dark-pro",
-    });
-  } catch (e) {
-    console.error("Error generating code block HTML:", e);
-    const escapedContent = escapeHtml(content);
-    // Very rare case when shiki fails, fallback to escaped content
-    html = `<pre><code>${escapedContent}</code></pre>`;
-  }
-  
-  return <CodeBlockClient html={html} filename={filename} />;
+	let html: string;
+
+	try {
+		html = await codeToHtml(content, {
+			lang: language || "text",
+			theme: "one-dark-pro",
+		});
+	} catch (e) {
+		console.error("Error generating code block HTML:", e);
+		const escapedContent = escapeHtml(content);
+		// Very rare case when shiki fails, fallback to escaped content
+		html = `<pre><code>${escapedContent}</code></pre>`;
+	}
+
+	return <CodeBlockClient html={html} filename={filename} />;
 }
