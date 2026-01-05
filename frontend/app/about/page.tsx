@@ -3,7 +3,7 @@
  *
  * @returns A React fragment containing a top-level div with classes `main` and `background` and an absolutely positioned, full-bleed gradient background element.
  */
-export default function aboutPage() {
+export default function AboutPage() {
 	return (
 		<>
 			<div className="main background">
