@@ -94,7 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				"Registration succeeded, but auto-login failed. Please log in manually.",
 			);
 			console.log("Auto-login failed after registration", loginError);
-			throw loginError;
 		}
 	}
 	return (
