@@ -1,7 +1,7 @@
 "use client";
 
 import { getCurrentUser, handleSignup, loginUser, logoutUser } from "@/lib/api";
-
+import { toast } from "sonner";
 import { useState, createContext, useContext, useEffect } from "react";
 
 interface User {
@@ -41,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				const currUser = await getCurrentUser();
 				setUser(currUser);
 			} catch {
+				// Silently fail - this is expected for users without an active session
 				setUser(null);
 			} finally {
 				setLoading(false);
@@ -69,8 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			await logoutUser();
 			setUser(null);
 		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Logout failed");
 			console.error("Logout failed in AuthProvider", error);
-			// TODO: Replace with toast notification system
 			throw error;
 		}
 	}
@@ -79,10 +80,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		try {
 			console.log("registerAction called in AuthProvider");
 			await handleSignup({ email, password });
-			await loginAction(email, password); // Auto-login after successful registration
 		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : "Registration failed",
+			);
 			console.log("Registration failed in AuthProvider", error);
 			throw error;
+		}
+		try {
+			await loginAction(email, password);
+		} catch (loginError) {
+			toast.error(
+				"Registration succeeded, but auto-login failed. Please log in manually.",
+			);
+			console.log("Auto-login failed after registration", loginError);
 		}
 	}
 	return (

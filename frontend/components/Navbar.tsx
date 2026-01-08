@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
 	NavigationMenu,
 	NavigationMenuItem,
@@ -90,8 +91,9 @@ export default function Navbar() {
 									try {
 										await logoutAction();
 									} catch (error) {
-										console.error("Logout failed", error);
-										// TODO: Show toast notification to user
+										toast.error(
+											error instanceof Error ? error.message : "Logout failed",
+										);
 									}
 								}}
 							>
@@ -153,8 +155,11 @@ export default function Navbar() {
 										try {
 											await logoutAction();
 										} catch (error) {
-											console.error("Logout failed", error);
-											// TODO: Show toast notification to user
+											toast.error(
+												error instanceof Error
+													? error.message
+													: "Logout failed",
+											);
 										}
 									}}
 								>

@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
 	Card,
 	CardContent,
@@ -24,7 +25,7 @@ import { useAuth } from "./auth/AuthContext";
  *
  * The form collects name, email, password and confirm-password fields, uses the app authentication
  * context to perform registration, and on successful signup redirects to "/". On registration failure
- * it sets a local error message and logs the failure (UI notification is not provided here).
+ * it displays a toast notification with the error message.	
  *
  * @param props - Standard div element props; `className` may be provided to style the outer container.
  * @returns A JSX element containing the signup form and related descriptions/links.
@@ -36,21 +37,16 @@ export function SignupForm({
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [_error, setError] = useState<string | null>(null);
 
 	const { registerAction } = useAuth();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
 		try {
 			await registerAction(email, password);
 			router.push("/");
 		} catch (error) {
-			const msg = error instanceof Error ? error.message : "Signup failed";
-			setError(msg);
-			console.log("Signup failed from signup-form component:", msg);
-			//TODO: Need to add UI notification for error
+			toast.error(error instanceof Error ? error.message : "Signup failed");
 		}
 	};
 	return (

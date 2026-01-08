@@ -8,6 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
 	Field,
@@ -47,11 +48,9 @@ export function LoginForm({
 
 		try {
 			await loginAction(username, password);
-			console.log("Login Successful"); // For Debugging
 			router.push("/");
 		} catch (error) {
-			console.log("Login Failed from login-form component");
-			throw error;
+			toast.error(error instanceof Error ? error.message : "Login failed");
 		} finally {
 			setLoad(false);
 		}

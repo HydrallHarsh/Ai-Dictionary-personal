@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "@/components/ui/sonner";
 
 const manrope = Manrope({
 	subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
 							{children}
 						</div>
 					</AuthProvider>
+					<Toaster position="top-center" expand={true} richColors />
 				</ThemeProvider>
 			</body>
 		</html>
