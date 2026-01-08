@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
+- backend/services/marktechpost_scraper/mtp_scraper.py
+  - New MarkTechPost scraping module.
+  - ScrapedData Pydantic model (fields: source_name, url, slug, tagline, title, content).
+  - fetching_user_agents(): retrieves user-agent strings for requests.
+  - fetch_blog_urls(url_mtp: str, user_agents: list): scrapes MarkTechPost listing pages with BeautifulSoup to collect blog URLs (date-filtered).
+  - fetch_tech_news_only(blog_links: set, user_agents: list): filters out posts tagged "Tutorial".
+  - run_firecrawl_scrape(url): scrapes full post content via Firecrawl API and returns structured JSON.
+- backend/services/marktechpost_scraper/test_mtp_scraper.py
+  - test_fetch_blog_urls(): manual test for URL fetching and filtering.
+  - test_full_scrape_pipeline(): integration test for full pipeline (concurrent scraping; commented out by default to avoid API usage).
+- backend/pyproject.toml
+  - Added dependencies: beautifulsoup4 >= 4.14.3, firecrawl >= 4.12.0, lxml >= 6.0.2, pre-commit >= 4.5.1.
 - Integrated Sonner toast notification system for user feedback across the frontend
   - New Toaster component: frontend/components/ui/sonner.tsx — theme-aware wrapper around Sonner with custom icons (success, info, warning, error, loading) and CSS variable-based styling.
   - Global Toaster rendered in layout: frontend/app/layout.tsx with position="top-center", expand, and rich color support.

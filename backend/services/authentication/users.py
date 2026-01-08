@@ -35,12 +35,14 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):  # noqa: B008
     """
     Provide a UserManager instance for dependency injection.
-    
+
     Parameters:
-        user_db (SQLAlchemyUserDatabase): The SQLAlchemy-backed user database used to construct the manager.
-    
+        user_db (SQLAlchemyUserDatabase): The SQLAlchemy-backed user database used to
+        construct the manager.
+
     Returns:
-        user_manager (UserManager): A UserManager instance initialized with the given user_db, yielded for use as a FastAPI dependency.
+        user_manager (UserManager): A UserManager instance initialized with the given
+        user_db, yielded for use as a FastAPI dependency.
     """
     yield UserManager(user_db)
 
@@ -52,10 +54,12 @@ cookie_transport = CookieTransport(
 
 def get_jwt_strategy() -> JWTStrategy[models.UP, models.ID]:
     """
-    Create a JWT strategy configured with the module SECRET and a 3600-second token lifetime.
-    
+    Create a JWT strategy configured with the module SECRET
+    and a 3600-second token lifetime.
+
     Returns:
-        JWTStrategy[models.UP, models.ID]: JWT strategy instance that signs tokens with SECRET and sets tokens to expire after 3600 seconds.
+        JWTStrategy[models.UP, models.ID]: JWT strategy instance that signs tokens with
+        SECRET and sets tokens to expire after 3600 seconds.
     """
     return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
 
