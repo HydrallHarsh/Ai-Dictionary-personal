@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### January 13, 2026
+
+#### Changed
+
+- Refactored Product Hunt wrapper (`backend/services/product_hunt_wrapper/ph_wrapper.py`) to consolidate topic-specific methods into a single parameterized `get_top_products_by_topic()` method, removing duplicated code and following DRY principles. Enhanced GraphQL query to include comments data and improved input validation with ValueError for invalid topics or limits.
+- Updated test suite (`backend/services/product_hunt_wrapper/test_ph_wrapper.py`) to use the new parameterized method for AI and developer tools topics.
+- Resolved issue #29 by refactoring methods in ProductHunt class, with minor documentation and example updates.
+
 ### January 7, 2026
 
 #### Added
