@@ -11,8 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowRight, BookOpen } from "lucide-react";
 import Image from "next/image";
 import { AllContentBlock } from "@/types/content";
-import { SignalBackground } from "@/components/ui/signal-background";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 
 // Helper to extract metadata from blocks
 const getPostMetadata = (slug: string, blocks: AllContentBlock[]) => {
@@ -74,6 +72,7 @@ export default function BlogListingPage() {
                         src={post.coverImage}
                         alt={post.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (

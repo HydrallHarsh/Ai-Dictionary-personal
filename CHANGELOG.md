@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### January 14, 2026
+
+#### Added 
+
+- Blog Listing Page: New frontend component for displaying all blog posts in a responsive grid layout
+- Shows blog metadata including title, summary, cover image, tags, author, date, and read time
+- Blog Page Assets - Static svgs for static blog pages.
+
 ### January 13, 2026
 
 #### Added
