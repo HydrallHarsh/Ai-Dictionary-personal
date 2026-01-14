@@ -25,7 +25,7 @@ import { useAuth } from "./auth/AuthContext";
  *
  * The form collects name, email, password and confirm-password fields, uses the app authentication
  * context to perform registration, and on successful signup redirects to "/". On registration failure
- * it displays a toast notification with the error message.	
+ * it displays a toast notification with the error message.
  *
  * @param props - Standard div element props; `className` may be provided to style the outer container.
  * @returns A JSX element containing the signup form and related descriptions/links.

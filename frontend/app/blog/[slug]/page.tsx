@@ -53,7 +53,7 @@ print(model.forward(np.array([1, 0.5, -1])))`,
 			id: "5",
 			type: "image",
 			data: {
-				url: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Multi-Layer_Neural_Network-Vector.svg",
+				url: "/deep_learning.svg",
 				caption: "Figure 1: Typical Neural Network Architecture",
 				alt: "Diagram of a multi-layer neural network",
 			},
@@ -122,7 +122,7 @@ print(model.forward(np.array([1, 0.5, -1])))`,
 			id: "5",
 			type: "image",
 			data: {
-				url: "https://cdn.pixabay.com/photo/2019/06/09/13/45/cloud-4262029_1280.jpg",
+				url: "/cloud.svg",
 				caption: "Figure 1: Cloud Infrastructure Overview",
 				alt: "Illustration of cloud servers and networking",
 			},
@@ -188,7 +188,7 @@ export default Card;`,
 			id: "5",
 			type: "image",
 			data: {
-				url: "https://cdn.pixabay.com/photo/2020/06/12/05/22/javascript-5287663_1280.jpg",
+				url: "/react.svg",
 				caption: "Figure 1: Frontend Code & Performance Concept",
 				alt: "Coding on a laptop, representing frontend development",
 			},
@@ -257,7 +257,7 @@ export default Card;`,
 			id: "5",
 			type: "image",
 			data: {
-				url: "https://cdn.pixabay.com/photo/2017/08/10/03/52/database-2623957_1280.jpg",
+				url: "/sql.svg",
 				caption: "Figure 1: Sample Relational Database Schema Visualization",
 				alt: "Conceptual illustration of database tables and relationships",
 			},
@@ -322,7 +322,7 @@ nmap -sV 192.168.1.0/24`,
 			id: "5",
 			type: "image",
 			data: {
-				url: "https://cdn.pixabay.com/photo/2016/03/22/04/58/cyber-security-1277008_1280.jpg",
+				url: "/cybersecurity.svg",
 				caption: "Figure 1: Cybersecurity Threat and Defense Concept",
 				alt: "Illustration representing cybersecurity, locks, shields, and code",
 			},
@@ -371,7 +371,6 @@ interface PageProps {
 export default async function BlogPostPage({ params }: PageProps) {
 	const { slug } = await params;
 	const MOCK_DATA = BLOG_DATABASE[slug] || [];
-	// If no data found for slug, you might want to handle 404 here
 
 	//Extracting title block for breadcrumbs
 	const titleBlock = MOCK_DATA.find((b) => b.type === "title");
