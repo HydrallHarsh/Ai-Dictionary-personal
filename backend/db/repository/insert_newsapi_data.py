@@ -1,5 +1,5 @@
 from db.client import supabase
-
+from services.newsapi_scrapper.news_api_fetcher import get_newsapi_data
 
 
 def insert_articles(rows: list):

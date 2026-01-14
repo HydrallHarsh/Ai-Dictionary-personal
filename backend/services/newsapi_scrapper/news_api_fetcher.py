@@ -72,7 +72,7 @@ def get_full_article_content(url):
 def get_previous_day(today: date | None = None) -> date:
     """
     Returns a date offset for article queries.
-    
+
     Uses a 2-day offset to ensure sufficient article availability.
     Args:
         today (date, optional): Provide a date for testing.
@@ -118,6 +118,7 @@ def get_newsapi_data():
         else:
             clean_articles.append(
                 {
+                    "source_name": x["source"]["name"],
                     "website": x["url"],
                     "description": x["content"],
                     "title": x["title"],
