@@ -7,6 +7,7 @@ from nodes.tnode.description_tool_node import arxiv_node,pdf_parsing_node,tavily
 from nodes.load_data_node import load_data
 from tools.tools import title_tool
 import pprint
+from pathlib import Path
 
 
 desc = StateGraph(state_schema= State)
@@ -27,5 +28,16 @@ desc.add_edge("description_agent",END)
 g = desc.compile()
 
 
-g.get_graph().draw_mermaid_png(output_file_path='./agent_flow_diagrams/description.png')
+def write_description_graph_png() -> Path:
+    """
+    Write the compiled graph diagram to `langgraph_bot/agent_flow_diagrams/description.png`.
 
+    - Ensures the output directory exists
+    - Avoids filesystem side-effects at import time (caller opts in)
+    """
+    out_dir = Path(__file__).resolve().parents[1] / "agent_flow_diagrams"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "description.png"
+
+    g.get_graph().draw_mermaid_png(output_file_path=str(out_path))
+    return out_path

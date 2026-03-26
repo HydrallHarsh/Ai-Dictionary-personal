@@ -1,0 +1,47 @@
+name: Run Test LangGraph Bot Worflow
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 14 * * *"
+
+jobs:
+  run-langgraph-bot:
+    runs-on: ubuntu-latest
+    environment: production
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Chekout the Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Setup Python 3.12.5
+        run: uv python install 3.12.5
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: uv sync --frozen
+
+      - name: Install LangGraph Bot Dependencies
+        working-directory: ./langgraph_bot
+        run: uv sync --frozen
+
+      - name: Run LangGraph Bot Main Test Workflow
+        # working-directory: ./langgraph_bot
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+        run: |
+          uv run python -m langgraph_bot.main
