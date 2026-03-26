@@ -1,12 +1,14 @@
-from datetime import date, timedelta
+import json
+import os
+import ssl
+from datetime import date
+
+import requests
 from dotenv import load_dotenv
 from newsapi import NewsApiClient
 from newspaper import Article
 from newspaper.article import ArticleException
-import json
-import os
-import requests
-import ssl
+from backend.services.get_previous_days import get_previous_day
 
 load_dotenv()
 # load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
@@ -66,23 +68,6 @@ def get_full_article_content(url):
     except Exception:
         print(f"Unexpected error scraping {url}")
         return None
-
-
-# get the previous date
-def get_previous_day(today: date | None = None) -> date:
-    """
-    Returns a date offset for article queries.
-
-    Uses a 2-day offset to ensure sufficient article availability.
-    Args:
-        today (date, optional): Provide a date for testing.
-                                Defaults to today's local date.
-    Returns:
-        date: The date two days before `today`.
-    """
-    if today is None:
-        today = date.today()
-    return today - timedelta(days=2)
 
 
 # using function api

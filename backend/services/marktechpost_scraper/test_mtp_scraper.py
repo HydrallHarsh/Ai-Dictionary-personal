@@ -27,7 +27,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from dotenv import load_dotenv
 
-from mtp_scraper import (
+from backend.services.marktechpost_scraper.mtp_scraper import (
     fetching_user_agents,
     fetch_blog_urls,
     fetch_tech_news_only,

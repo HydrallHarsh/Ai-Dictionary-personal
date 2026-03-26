@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 
 # IMPORTANT:
 # Update this import path ONLY if your file location is different
-import news_api_fetcher
+import backend.services.newsapi_scrapper.news_api_fetcher as news_api_fetcher
 
 # --------------------------------------------------
 # Test: get_previous_day

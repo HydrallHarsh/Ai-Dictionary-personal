@@ -1,5 +1,4 @@
-from db.client import supabase
-from services.newsapi_scrapper.news_api_fetcher import get_newsapi_data
+from backend.db.client import supabase
 
 
 def insert_articles(rows: list):
@@ -34,5 +33,3 @@ def insert_articles(rows: list):
     except Exception as e:
         print(f"Failed to insert articles: {e}")
         return {"inserted": 0}
-
-

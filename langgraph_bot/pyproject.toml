@@ -16,6 +16,8 @@ dependencies = [
     "langchain-openai>=1.1.6",
     "langchain-tavily>=0.2.16",
     "langgraph>=1.0.5",
+    "langsmith>=0.5.2",
     "pymupdf>=1.26.7",
     "python-dotenv>=1.2.1",
+    "supabase>=2.27.2",
 ]

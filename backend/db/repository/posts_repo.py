@@ -1,6 +1,6 @@
 from typing import Any
 
-from db.client import supabase
+from backend.db.client import supabase
 
 # Repository functions for posts and post content
 # Add more functions later as needed, following the same pattern

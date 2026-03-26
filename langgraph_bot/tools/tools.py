@@ -1,40 +1,46 @@
 from dotenv import load_dotenv
+
 load_dotenv()
-from agentschema.stateschema import State
-from typing import Optional
-from models.generativemodel import groqmodel
-from langchain.tools import  tool,ToolRuntime
-from langchain.messages import ToolMessage
-from langchain_community.document_loaders import ArxivLoader,UnstructuredPDFLoader,FireCrawlLoader
+import os
+import subprocess
+import tempfile
+from typing import Dict, List
+
+import requests
+
+# from langchain.messages import ToolMessage
+from langchain.tools import tool
+from langchain_community.document_loaders import (
+    ArxivLoader,
+    FireCrawlLoader,
+    UnstructuredPDFLoader,
+)
 from langchain_tavily import TavilySearch
 from langgraph.types import Command
-import requests
-import tempfile
-from typing import List,Dict
-from utils.prompts import TITLE_PROMPT
-import subprocess
-import os
+from langgraph_bot.models.generativemodel import groqmodel
+from langgraph_bot.utils.prompts import TITLE_PROMPT
 
 
 ## SUMMMARY AGENT TOOLS
 @tool
-def title_tool(posttitle:str,postdata:str):
+def title_tool(posttitle: str, postdata: str):
     """
     name :title_tool
     work : generates title from the given data, or the existing title.
-    
+
     - if no title is given then generate the title around 5 words
     - if the length of  the original title exceeds 8 words or doesn't contain minimum 4 words.
     -      for large title more than 8
     -        make it to nearly 8 or 7 with professional flow
-    -      for small title less than 4 
+    -      for small title less than 4
     -        make it large to around 7 words with professional flow
 
     after doing all the process return only new title in string format.without anything extra.
     """
-    final_prompt = TITLE_PROMPT.format(postdata = postdata,posttitle=posttitle )
+    final_prompt = TITLE_PROMPT.format(postdata=postdata, posttitle=posttitle)
     response = groqmodel.invoke(final_prompt)
     return response.content.strip()
+
 
 ## DESCRIPTION AGENT TOOLS
 
@@ -64,8 +70,8 @@ tavily_search_tool = TavilySearch(
 #            it will be mostly used to read some newly published articals or the existing ones from gathering necessory infromation for post generation.
 
 #     """
-#     all_docs = [] 
-    
+#     all_docs = []
+
 #     for values in list:
 #         pdf_url = values.get("pdf_url")
 #         if "/abs/" in pdf_url:
@@ -79,9 +85,10 @@ tavily_search_tool = TavilySearch(
 
 #         loader = UnstructuredPDFLoader(pdf_path)
 #         docs = loader.load()
-#         all_docs.extend(docs)  
-    
-#     return all_docs 
+#         all_docs.extend(docs)
+
+
+#     return all_docs
 @tool
 def pdfreader_tool(pdf_list: List[Dict]) -> List:
     """
@@ -89,15 +96,15 @@ def pdfreader_tool(pdf_list: List[Dict]) -> List:
     WORK : It is used to read from the pdfs. it loads the data from the pdfs and you can read from it for better understanding.
            it will be mostly used to read some newly published articals or the existing ones from gathering necessory infromation for post generation.
     """
-    all_docs = [] 
-    
+    all_docs = []
+
     for values in pdf_list:
         pdf_url = values.get("pdf_url")
         if not pdf_url:
             continue
         if "/abs/" in pdf_url:
             pdf_url = pdf_url.replace("/abs/", "/pdf/") + ".pdf"
-        
+
         pdf_path = None
         try:
             response = requests.get(pdf_url, timeout=30)
@@ -116,38 +123,45 @@ def pdfreader_tool(pdf_list: List[Dict]) -> List:
         finally:
             if pdf_path and os.path.exists(pdf_path):
                 os.remove(pdf_path)
-    
+
     return all_docs
+
+
 @tool
-def arxiv_tool(query:str)->List[Dict]:
+def arxiv_tool(query: str) -> List[Dict]:
     """
     NAME : ARXIV_TOOL
     WORK : It is used to fetch the pdfs from the arxiv platform. it will be userful to load the pdfs from the arxiv website.
-            the newly published researches will be found using this tool.to find new topics  or if some topic require prior konwledge which llm or agent doesn't have 
+            the newly published researches will be found using this tool.to find new topics  or if some topic require prior konwledge which llm or agent doesn't have
             and it's research paper if available you can make a query or search to find those document and read from it to understand and generate better understanding post.
             so the new person in ai domain can understand better.
     """
     loader = ArxivLoader(
-    query=query,
-    doc_content_chars_max = None,
-    sort_by = 'relevance',
+        query=query,
+        doc_content_chars_max=None,
+        sort_by="relevance",
     )
 
     docs = loader.load()
     papers = []
     for d in docs:
-        papers.append({
-            "title": d.metadata.get("title"),
-            "authors": d.metadata.get("authors"),
-            "published": d.metadata.get("published"),
-            "abstract": d.page_content,
-            "pdf_url": d.metadata.get("source"),
-        })
+        papers.append(
+            {
+                "title": d.metadata.get("title"),
+                "authors": d.metadata.get("authors"),
+                "published": d.metadata.get("published"),
+                "abstract": d.page_content,
+                "pdf_url": d.metadata.get("source"),
+            }
+        )
 
     return papers
 
+
 @tool
-def scraper_tool(url)-> List:   # for static html rich content scrapping or page loading. 
+def scraper_tool(
+    url,
+) -> List:  # for static html rich content scrapping or page loading.
     """
     NAME : SCAPER_TOOL
     WORK : It is used to scarp from the web.
@@ -156,8 +170,7 @@ def scraper_tool(url)-> List:   # for static html rich content scrapping or page
     """
     if not url:
         url = "https://techcrunch.com/latest/"
-    loader = FireCrawlLoader(
-     url=url, mode="crawl")
+    loader = FireCrawlLoader(url=url, mode="crawl")
     pages = []
     for doc in loader.lazy_load():
         pages.append(doc)
@@ -165,32 +178,26 @@ def scraper_tool(url)-> List:   # for static html rich content scrapping or page
     return pages
 
 
-
-#CODING AGENT TOOLS
+# CODING AGENT TOOLS
 @tool
 def python_executor(code: str) -> Dict:
     """
     Securely execute Python code and return structured output.
     """
-    with tempfile.NamedTemporaryFile(
-        suffix=".py", mode="w", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
         f.write(code)
         file_path = f.name
 
     try:
         process = subprocess.run(
-            ["python", file_path],
-            capture_output=True,
-            text=True,
-            timeout=8
+            ["python", file_path], capture_output=True, text=True, timeout=8
         )
 
         return {
             "success": process.returncode == 0,
             "stdout": process.stdout.strip(),
             "stderr": process.stderr.strip(),
-            "exit_code": process.returncode
+            "exit_code": process.returncode,
         }
 
     except subprocess.TimeoutExpired:
@@ -198,7 +205,7 @@ def python_executor(code: str) -> Dict:
             "success": False,
             "stdout": "",
             "stderr": "Execution timed out",
-            "exit_code": -1
+            "exit_code": -1,
         }
 
     finally:

@@ -26,7 +26,7 @@ import os
 
 from dotenv import load_dotenv
 
-from .ph_wrapper import ProductHuntWrapper
+from backend.services.product_hunt_wrapper.ph_wrapper import ProductHuntWrapper
 
 # Testing Product Hunt Wrapper Functions
 # Ensure you have set the environment variable "product_hunt_access_token" with your

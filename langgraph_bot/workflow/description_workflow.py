@@ -1,6 +1,7 @@
-from agentschema.stateschema import State
+import pprint
+
 from langchain_core.messages import HumanMessage
-from langgraph.graph import START,StateGraph,END
+from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 from nodes.anode.agentnode import description_agent_node
 from nodes.tnode.description_tool_node import arxiv_node,pdf_parsing_node,tavily_node
@@ -9,22 +10,31 @@ from tools.tools import title_tool
 import pprint
 from pathlib import Path
 
+from langgraph_bot.agentschema.stateschema import State
+from langgraph_bot.nodes.anode.agentnode import description_agent_node
+from langgraph_bot.nodes.load_data_node import load_data
+from langgraph_bot.nodes.tnode.description_tool_node import (
+    arxiv_node,
+    pdf_parsing_node,
+    tavily_node,
+)
+from langgraph_bot.tools.tools import title_tool
 
-desc = StateGraph(state_schema= State)
-desc.add_node("load_data",load_data)
-desc.add_node("description_agent",description_agent_node)
-desc.add_node("arxiv_node",arxiv_node)
-desc.add_node("parser_tool",pdf_parsing_node)
-desc.add_node("tavily_tool",tavily_node)
+desc = StateGraph(state_schema=State)
+# desc.set_entry_point(START)
+desc.add_node("description_agent", description_agent_node)
+desc.add_node("arxiv_node", arxiv_node)
+desc.add_node("parser_tool", pdf_parsing_node)
+desc.add_node("tavily_tool", tavily_node)
 
 
-desc.set_entry_point("load_data")
-desc.add_edge("load_data","arxiv_node")
-desc.add_edge("arxiv_node","parser_tool")
-desc.add_edge("load_data","tavily_tool")
-desc.add_edge("tavily_tool","description_agent")
-desc.add_edge("parser_tool","description_agent")
-desc.add_edge("description_agent",END)
+# desc.set_entry_point(START)
+desc.add_edge(START, "arxiv_node")
+desc.add_edge("arxiv_node", "parser_tool")
+desc.add_edge("parser_tool", "tavily_tool")
+desc.add_edge("tavily_tool", "description_agent")
+# desc.add_edge("parser_tool", "description_agent")
+desc.add_edge("description_agent", END)
 g = desc.compile()
 
 
