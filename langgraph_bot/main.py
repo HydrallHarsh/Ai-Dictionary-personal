@@ -1,6 +1,6 @@
 from backend.db.repository.fetch_raw_data import fetch_last_days_posts
 
-from .workflow.description_workflow import g, write_description_graph_png
+from .workflow.description_workflow import g
 
 
 def run_entire_flow():
@@ -30,9 +30,9 @@ def run_entire_flow():
 
 
 if __name__ == "__main__":
-    # Generate the workflow graph PNG on startup (and ensure output directory exists).
-    graph_path = write_description_graph_png()
-    print(f"Workflow graph written to: {graph_path}")
+    # # Generate the workflow graph PNG on startup (and ensure output directory exists).
+    # graph_path = write_description_graph_png()
+    # print(f"Workflow graph written to: {graph_path}")
 
     final_ans = run_entire_flow()
     for x in final_ans:

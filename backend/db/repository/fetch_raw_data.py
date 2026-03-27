@@ -17,6 +17,8 @@ def fetch_last_days_posts() -> Generator[Dict, None, None]:
         .execute()
     )
     # print(response)
+    print("Fetched some posts from the database.")
+    print(f"Number of posts fetched: {len(response.data)}")
     for row in response.data:
         # print(row)
         yield row
