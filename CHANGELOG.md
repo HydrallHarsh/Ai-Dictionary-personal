@@ -5,16 +5,45 @@ All notable changes to the AI-Dictionary project will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+### March 26, 2026
 
+#### Added
+
+- **GitHub Actions workflow** (.github/workflows/run_workflow.yml)
+  - Workflow name: "Run Test LangGraph Bot Workflow"
+  - Triggers: manual (workflow_dispatch) and daily cron at 14:00 UTC
+  - Job: `run-langgraph-bot` on `ubuntu-latest` (environment: backend), 30-minute timeout
+  - Steps: checkout, install `uv` (with cache), install Python 3.12.5, sync dependencies for `./backend` and `./langgraph_bot` (`uv sync --frozen`), run LangGraph bot (`uv run python -m langgraph_bot.main`)
+  - Runtime env/secrets provided: PYTHONPATH, SUPABASE_URL, SUPABASE_KEY, GROQ_API_KEY, TAVILY_API_KEY
+
+- **Graph PNG writer** (langgraph_bot/workflow/description_workflow.py)
+  - Added `write_description_graph_png() -> pathlib.Path` which ensures `langgraph_bot/agent_flow_diagrams/` exists, writes `description.png` via `g.get_graph().draw_mermaid_png(...)`, and returns the output path
+  - Makes PNG generation opt-in to avoid filesystem side-effects at import time
+
+#### Changed
+
+- **Data fetching** (backend/db/repository/fetch_raw_data.py)
+  - `fetch_last_days_posts()` temporarily uses a fixed start date `2026-01-13` for the `created_at >=` filter (replaces previous dynamic `get_previous_day()` logic)
+  - Added runtime prints for debugging:
+    - "Fetched some posts from the database."
+    - "Number of posts fetched: <n>"
+
+- **LangGraph bot entrypoint** (langgraph_bot/main.py)
+  - Commented out startup PNG generation and its print (graph generation disabled at startup); `run_entire_flow()` and subsequent printing of results remain unchanged
+
+- **Workflow graph** (langgraph_bot/workflow/description_workflow.py)
+  - Temporarily disabled the `arxiv_node` in the graph (node registration and edges commented out) and rewired control flow to start at `parser_tool`, skipping `arxiv_node` due to API issues
 
 ### January 14, 2026
 
 #### Fixed
+
 - Database Column Population: Inserted source name field in API response to populate the `source_name` column in the database.
   - `services/newsapi_scrapper/news_api_fetcher.py`: Added `source_name` to each article dictionary (populated from `x["source"]["name"]`) returned by `get_newsapi_data`.
   - `db/repository/insert_newsapi_data.py`: Uses the enhanced article objects when upserting into `raw_api_data` (imported `get_newsapi_data`).
 
 #### Changed
+
 - Article structure: `get_newsapi_data()` now returns articles with fields: `source_name`, `website`, `description` (full scraped content), `title`, and `created_at`.
 - Data fetching: Full article content is populated via `get_full_article_content()` before articles are added to the cleaned list.
 - Minor docstring cleanup: whitespace-only edit in `get_previous_day()`.
@@ -27,6 +56,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Blog Page Assets - Static svgs for static blog pages.  
 
 #### Other
+
 - Cleanup commit: removed a test script to tidy the module.
 
 ### January 13, 2026

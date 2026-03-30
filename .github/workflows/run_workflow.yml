@@ -8,6 +8,7 @@ on:
 
 jobs:
   run-langgraph-bot:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'recent-ai/Ai-Dictionary' }}
     runs-on: ubuntu-latest
     environment: Workflow
 
