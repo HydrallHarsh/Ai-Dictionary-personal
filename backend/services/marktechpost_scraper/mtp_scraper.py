@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import requests
@@ -20,6 +21,7 @@ class ScrapedData(BaseModel):
     tagline: Optional[str] = None
     title: Optional[str] = None
     content: Optional[str] = None
+    created_at: Optional[str] = None
 
 
 # We also need to fetch latest User-agent to avoid 520 Errors
@@ -54,7 +56,7 @@ def fetch_blog_urls(url_mtp: str, user_agents: list) -> set:
             curr_month = date.today().strftime("%m")
             # Fetch blogs from last 4 days, excluding todays day
             # because we have 1 day delay for extra leverage for safety
-            for day in range(4, 0, -1):
+            for day in range(2, 0, -1):
                 curr_day = (date.today() - timedelta(day)).strftime("%d")
                 blogs = soup.find_all(
                     href=re.compile(
@@ -106,13 +108,32 @@ def run_firecrawl_scrape(url) -> str:
                         "as it is in the website of the website/blog in "
                         "text. Strictly copy paste the content explaination "
                         'as it is and dont shorten or summarize it "DONT"'
+                        "Content is the most important key here and it should"
+                        "have the whole content of the website/blog."
+                        "Dont miss any part of the content and strictly follow the JSON schema."  # noqa: E501
+                        "Dont try to summarize or shorten the content"
+                        "Copy paste the content as it is from the website/blog"
+                        "created_at should add the post created at in json"
                     ),
                 }
             ],
-            only_main_content=False,
-            timeout=180000,
+            only_main_content=True,
+            timeout=150000,
+            wait_for=2000,
+            proxy="auto",
         )
-        return result.model_dump_json(include="json")
+
+        unprocessed_result = result.model_dump_json(include="json")
+        unprocessed_result = json.loads(unprocessed_result)
+        # Debugging line to see the raw result
+        # print("Raw FireCrawl Result:", unprocessed_result)
+        for key, val in unprocessed_result.items():
+            if key == "json":
+                json_content = val
+                # Debugging line to see the extracted JSON content
+                # print("Extracted JSON Content:", json_content)
+
+                return json_content
         # print(result.model_dump_json(include="json"))
     except requests.exceptions.RequestException as e:
         print(f"Error in Scraping website {e}")

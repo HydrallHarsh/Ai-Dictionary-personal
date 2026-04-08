@@ -1,3 +1,5 @@
+# NOT BEING USED ANYWHERE CURRENTLY
+
 from backend.db.client import supabase
 
 

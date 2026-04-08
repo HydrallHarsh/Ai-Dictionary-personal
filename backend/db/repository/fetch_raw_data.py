@@ -1,14 +1,15 @@
 # import datetime
-from datetime import date
+# from datetime import date
 from typing import Dict, Generator
 
 from backend.db.client import supabase
+from backend.services.get_previous_days import get_previous_day
 
 # from backend.services.get_previous_days import get_previous_day
 
 
 def fetch_last_days_posts() -> Generator[Dict, None, None]:
-    start = date(2026, 1, 13)
+    start = get_previous_day()
     response = (
         supabase.table("raw_api_data")
         .select("*")
