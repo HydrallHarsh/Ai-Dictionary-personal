@@ -26,6 +26,8 @@ product_hunt_token = os.getenv("product_hunt_access_token")
 
 
 def fetch_all_data():
+    all_data = []
+    errors = []
     if not firecrawl_api_key:
         raise ValueError(
             "Environment variable 'FIRECRAWL_API_KEY' is not set. "
@@ -39,13 +41,10 @@ def fetch_all_data():
         )
 
     if not product_hunt_token:
-        raise ValueError(
+        errors.append(
             "Environment variable 'product_hunt_access_token' is not set. "
-            "Please create a .env file in the backend/ directory with your token."
+            "Please create a .env file in the backend/ directory with your API key."
         )
-
-    all_data = []
-    errors = []
 
     try:
         news_api_result = get_newsapi_data()
@@ -63,20 +62,21 @@ def fetch_all_data():
         errors.append(f"Error fetching MTP data: {str(e)}")
         print(f"[WARN] MTP failed: {e}")
 
-    try:
-        product_hunt_result_ai = ProductHuntWrapper(
-            product_hunt_token
-        ).get_top_products_by_topic("artificial-intelligence")
+    if product_hunt_token:
+        try:
+            product_hunt_result_ai = ProductHuntWrapper(
+                product_hunt_token
+            ).get_top_products_by_topic("artificial-intelligence")
 
-        product_hunt_result_devtools = ProductHuntWrapper(
-            product_hunt_token
-        ).get_top_products_by_topic("developer-tools")
-        print(
-            f"Product Hunt data fetched successfully: {len(product_hunt_result_ai) + len(product_hunt_result_devtools)} products"  # noqa: E501
-        )
-    except Exception as e:
-        errors.append(f"Error fetching Product Hunt data: {str(e)}")
-        print(f"[WARN] Product Hunt failed: {e}")  # noqa: E501
+            product_hunt_result_devtools = ProductHuntWrapper(
+                product_hunt_token
+            ).get_top_products_by_topic("developer-tools")
+            print(
+                f"Product Hunt data fetched successfully: {len(product_hunt_result_ai) + len(product_hunt_result_devtools)} products"  # noqa: E501
+            )
+        except Exception as e:
+            errors.append(f"Error fetching Product Hunt data: {str(e)}")
+            print(f"[WARN] Product Hunt failed: {e}")  # noqa: E501
 
     if not all_data:
         raise RuntimeError("Failed to fetch any data from all sources.")

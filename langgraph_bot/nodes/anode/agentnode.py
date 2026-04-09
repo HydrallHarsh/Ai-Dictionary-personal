@@ -31,7 +31,6 @@ def description_agent_node(state: State):
     Provide a detailed, well-structured description that combines insights from both sources.
     """
 
-
     try:
         response = agent.invoke({"messages": [HumanMessage(content=last_message)]})
         if response:

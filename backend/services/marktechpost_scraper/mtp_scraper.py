@@ -1,4 +1,3 @@
-import json
 import os
 import re
 import requests
@@ -117,23 +116,19 @@ def run_firecrawl_scrape(url) -> str:
                     ),
                 }
             ],
-            only_main_content=True,
+            only_main_content=False,
             timeout=150000,
             wait_for=2000,
+            block_ads=True,
+            store_in_cache=False,
             proxy="auto",
+            profile={"name": "MarkTechPost Scraper", "saveChanges": True},
         )
 
-        unprocessed_result = result.model_dump_json(include="json")
-        unprocessed_result = json.loads(unprocessed_result)
-        # Debugging line to see the raw result
-        # print("Raw FireCrawl Result:", unprocessed_result)
-        for key, val in unprocessed_result.items():
-            if key == "json":
-                json_content = val
-                # Debugging line to see the extracted JSON content
-                # print("Extracted JSON Content:", json_content)
+        json_result = result.json
+        if not json_result:
+            raise ValueError("Firecrawl response did not include a `json` payload")
+        return json_result
 
-                return json_content
-        # print(result.model_dump_json(include="json"))
     except requests.exceptions.RequestException as e:
         print(f"Error in Scraping website {e}")

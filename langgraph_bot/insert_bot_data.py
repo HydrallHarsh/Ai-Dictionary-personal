@@ -14,7 +14,7 @@ def insert_cleaned_data(posts: list):
                 "source": post.get("source"),
                 "upload_date": datetime.utcnow().isoformat(),
                 "approveddate": datetime.utcnow().isoformat(),
-                "likescount": 0
+                "likescount": 0,
             }
 
             supabase.table("posts").insert(post_data).execute()
@@ -23,9 +23,9 @@ def insert_cleaned_data(posts: list):
                 "postid": post_id,
                 "content": {
                     "summary": post.get("summary"),
-                    "description": post.get("description")
+                    "description": post.get("description"),
                 },
-                "isoldpost": False
+                "isoldpost": False,
             }
 
             try:

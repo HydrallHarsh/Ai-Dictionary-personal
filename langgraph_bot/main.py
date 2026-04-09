@@ -55,7 +55,9 @@ if __name__ == "__main__":
     print("Final Answer:" + "=" * 60 + "\n" + "=" * 60)
     print(final_ans)
     print("Final Answer:" + "=" * 60 + "\n" + "=" * 60)
-    
-    insert_cleaned_data(final_ans)
-    
-    print("Data inserted successfully!! BOOM!!")
+
+    output = insert_cleaned_data(final_ans)
+    if output.get("failed", 0) > 0:
+        print(f"Insertion completed with {output['failed']}/{output['total']} failures")
+    else:
+        print("Data inserted successfully!! BOOM!!")
