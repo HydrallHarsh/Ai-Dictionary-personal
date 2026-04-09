@@ -4,7 +4,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from typing import Optional
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from firecrawl import Firecrawl
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -21,7 +21,7 @@ class ScrapedData(BaseModel):
     tagline: Optional[str] = None
     title: Optional[str] = None
     content: Optional[str] = None
-    created_at: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 
 # We also need to fetch latest User-agent to avoid 520 Errors
@@ -113,7 +113,7 @@ def run_firecrawl_scrape(url) -> str:
                         "Dont miss any part of the content and strictly follow the JSON schema."  # noqa: E501
                         "Dont try to summarize or shorten the content"
                         "Copy paste the content as it is from the website/blog"
-                        "created_at should add the post created at in json"
+                        "created_at should be the post timestamp in ISO-8601 UTC format (example: 2026-01-01T12:34:56Z)."  # noqa: E501
                     ),
                 }
             ],

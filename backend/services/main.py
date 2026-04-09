@@ -44,16 +44,26 @@ def fetch_all_data():
             "Please create a .env file in the backend/ directory with your token."
         )
 
+    all_data = []
+    errors = []
+
     try:
-        # Start with MTP Scraper
-        # Then fetch news from NewsAPI
-        all_data = []
         news_api_result = get_newsapi_data()
         all_data.extend(news_api_result)
+        print(f"NewsApI data fetched successfully: {len(news_api_result)} articles")
+    except Exception as e:
+        errors.append(f"Error fetching NewsAPI data: {str(e)}")
+        print(f"[WARN] NewsAPI failed: {e}")
+
+    try:
         mtp_result = test_full_scrape_pipeline()
         all_data.extend(mtp_result)
+        print(f"MTP data fetched successfully: {len(mtp_result)} articles")
+    except Exception as e:
+        errors.append(f"Error fetching MTP data: {str(e)}")
+        print(f"[WARN] MTP failed: {e}")
 
-        # Finally fetch top products from Product Hunt
+    try:
         product_hunt_result_ai = ProductHuntWrapper(
             product_hunt_token
         ).get_top_products_by_topic("artificial-intelligence")
@@ -61,26 +71,20 @@ def fetch_all_data():
         product_hunt_result_devtools = ProductHuntWrapper(
             product_hunt_token
         ).get_top_products_by_topic("developer-tools")
-
-        print("Fetched data from all sources successfully!")
         print(
-            type(mtp_result),
-            type(news_api_result),
-            type(product_hunt_result_ai),
-            type(product_hunt_result_devtools),
+            f"Product Hunt data fetched successfully: {len(product_hunt_result_ai) + len(product_hunt_result_devtools)} products"  # noqa: E501
         )
-
-        print("Sample MTP Result:", mtp_result[:1])  # Print first item for brevity
-        print("Sample NewsAPI Result:", news_api_result[:1])  # Print first item
-        # Print first item
-        # print("Sample Product Hunt AI Result:", product_hunt_result_ai[:1])
-        # Print first item
-        # print("Sample Product Hunt DevTools Result:", product_hunt_result_devtools[:1]
-
-        return all_data
-
     except Exception as e:
-        print(f"An error occurred while fetching data: {e}")
+        errors.append(f"Error fetching Product Hunt data: {str(e)}")
+        print(f"[WARN] Product Hunt failed: {e}")  # noqa: E501
+
+    if not all_data:
+        raise RuntimeError("Failed to fetch any data from all sources.")
+
+    if errors:
+        print(f"[WARN] Completed with some failures: {errors}")
+
+    return all_data
 
 
 if __name__ == "__main__":
