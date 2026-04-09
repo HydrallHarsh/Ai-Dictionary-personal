@@ -28,7 +28,12 @@ def insert_cleaned_data(posts: list):
                 "isoldpost": False
             }
 
-            supabase.table("post_content").insert(content_data).execute()
+            try:
+                supabase.table("post_content").insert(content_data).execute()
+            except Exception:
+                # compensate to keep consistency if content insert fails
+                supabase.table("posts").delete().eq("postid", post_id).execute()
+                raise
 
             print(f"Inserted: {post['title']}")
 

@@ -22,7 +22,11 @@ def run_entire_flow():
             # "name":post['source_name'],     #   yet to be discussed
         }
 
-        result = g.invoke(initial_state)
+        try:
+            result = g.invoke(initial_state)
+        except Exception as e:
+            print(f"Graph invocation failed for post {post.get('title')}: {e}")
+            continue
 
         # Return clean structured output with only relevant fields
         clean_post = {
