@@ -91,7 +91,7 @@ def fetch_tech_news_only(blog_links: set, user_agents: list) -> set:
 
 
 # Extract/ Scrape content using FireCrawl API
-def run_firecrawl_scrape(url) -> str:
+def run_firecrawl_scrape(url) -> dict:
     try:
         app = Firecrawl(api_key=firecrawl_api_key)
         result = app.scrape(
@@ -128,7 +128,9 @@ def run_firecrawl_scrape(url) -> str:
         json_result = result.json
         if not json_result:
             raise ValueError("Firecrawl response did not include a `json` payload")
-        return json_result
 
+        # validate the json result with the schema
+        validated_result = ScrapedData.model_validate(json_result)
+        return validated_result.model_dump(mode="json", exclude_none=True)
     except requests.exceptions.RequestException as e:
         print(f"Error in Scraping website {e}")

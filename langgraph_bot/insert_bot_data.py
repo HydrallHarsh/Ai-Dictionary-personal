@@ -4,6 +4,10 @@ import uuid
 
 
 def insert_cleaned_data(posts: list):
+    total = len(posts)
+    failed = 0
+    inserted = 0
+
     for post in posts:
         try:
             post_id = str(uuid.uuid4())
@@ -36,6 +40,16 @@ def insert_cleaned_data(posts: list):
                 raise
 
             print(f"Inserted: {post['title']}")
+            inserted += 1
 
         except Exception as e:
-            print(f"Error: {e}")
+            failed += 1
+            print(f"Error inserting '{post.get('title', '<unknown>')}': {e}")
+
+    status = "completed_with_errors" if failed else "completed"
+    return {
+        "status": status,
+        "total": total,
+        "inserted": inserted,
+        "failed": failed,
+    }
