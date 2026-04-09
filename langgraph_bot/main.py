@@ -24,17 +24,17 @@ def run_entire_flow():
 
         try:
             result = g.invoke(initial_state)
-        except Exception as e:
-            print(f"Graph invocation failed for post {post.get('title')}: {e}")
-            continue
 
-        # Return clean structured output with only relevant fields
-        clean_post = {
-            "title": result["title"],
-            "summary": result["summary"],
-            "description": result["description"],
-            "source": post["source_name"],
-        }
+            # Return clean structured output with only relevant fields
+            clean_post = {
+                "title": result.get("title") or post.get("title"),
+                "summary": result.get("summary"),
+                "description": result.get("description"),
+                "source": post.get("source_name"),
+            }
+        except Exception as e:
+            print(f"Graph/mapping failed for post {post.get('title')}: {e}")
+            continue
 
         all_posts.append(clean_post)
         if c == 3:
