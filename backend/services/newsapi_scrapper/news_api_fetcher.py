@@ -5,7 +5,7 @@ from datetime import date
 
 import requests
 from dotenv import load_dotenv
-from newsapi import NewsApiClient
+from newsapi.newsapi_client import NewsApiClient
 from newspaper import Article
 from newspaper.article import ArticleException
 from backend.services.get_previous_days import get_previous_day

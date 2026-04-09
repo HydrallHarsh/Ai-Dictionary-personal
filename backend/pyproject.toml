@@ -8,6 +8,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "beautifulsoup4>=4.14.3",
     "dotenv>=0.9.9",
+    "fake-useragent>=2.2.0",
     "fastapi-users>=15.0.1",
     "fastapi-users-db-sqlalchemy>=7.0.0",
     "firecrawl>=4.12.0",

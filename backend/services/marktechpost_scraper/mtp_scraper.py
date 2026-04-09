@@ -3,7 +3,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from typing import Optional
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from firecrawl import Firecrawl
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -20,6 +20,7 @@ class ScrapedData(BaseModel):
     tagline: Optional[str] = None
     title: Optional[str] = None
     content: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 
 # We also need to fetch latest User-agent to avoid 520 Errors
@@ -54,7 +55,7 @@ def fetch_blog_urls(url_mtp: str, user_agents: list) -> set:
             curr_month = date.today().strftime("%m")
             # Fetch blogs from last 4 days, excluding todays day
             # because we have 1 day delay for extra leverage for safety
-            for day in range(4, 0, -1):
+            for day in range(2, 0, -1):
                 curr_day = (date.today() - timedelta(day)).strftime("%d")
                 blogs = soup.find_all(
                     href=re.compile(
@@ -90,7 +91,7 @@ def fetch_tech_news_only(blog_links: set, user_agents: list) -> set:
 
 
 # Extract/ Scrape content using FireCrawl API
-def run_firecrawl_scrape(url) -> str:
+def run_firecrawl_scrape(url) -> dict:
     try:
         app = Firecrawl(api_key=firecrawl_api_key)
         result = app.scrape(
@@ -106,13 +107,30 @@ def run_firecrawl_scrape(url) -> str:
                         "as it is in the website of the website/blog in "
                         "text. Strictly copy paste the content explaination "
                         'as it is and dont shorten or summarize it "DONT"'
+                        "Content is the most important key here and it should"
+                        "have the whole content of the website/blog."
+                        "Dont miss any part of the content and strictly follow the JSON schema."  # noqa: E501
+                        "Dont try to summarize or shorten the content"
+                        "Copy paste the content as it is from the website/blog"
+                        "created_at should be the post timestamp in ISO-8601 UTC format (example: 2026-01-01T12:34:56Z)."  # noqa: E501
                     ),
                 }
             ],
             only_main_content=False,
-            timeout=180000,
+            timeout=150000,
+            wait_for=2000,
+            block_ads=True,
+            store_in_cache=False,
+            proxy="auto",
+            profile={"name": "MarkTechPost Scraper", "saveChanges": True},
         )
-        return result.model_dump_json(include="json")
-        # print(result.model_dump_json(include="json"))
+
+        json_result = result.json
+        if not json_result:
+            raise ValueError("Firecrawl response did not include a `json` payload")
+
+        # validate the json result with the schema
+        validated_result = ScrapedData.model_validate(json_result)
+        return validated_result.model_dump(mode="json", exclude_none=True)
     except requests.exceptions.RequestException as e:
         print(f"Error in Scraping website {e}")

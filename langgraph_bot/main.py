@@ -1,5 +1,5 @@
 from backend.db.repository.fetch_raw_data import fetch_last_days_posts
-
+from langgraph_bot.insert_bot_data import insert_cleaned_data
 from .workflow.description_workflow import g
 
 
@@ -22,7 +22,21 @@ def run_entire_flow():
             # "name":post['source_name'],     #   yet to be discussed
         }
 
-        all_posts.append(g.invoke(initial_state))
+        try:
+            result = g.invoke(initial_state)
+
+            # Return clean structured output with only relevant fields
+            clean_post = {
+                "title": result.get("title") or post.get("title"),
+                "summary": result.get("summary"),
+                "description": result.get("description"),
+                "source": post.get("source_name"),
+            }
+        except Exception as e:
+            print(f"Graph/mapping failed for post {post.get('title')}: {e}")
+            continue
+
+        all_posts.append(clean_post)
         if c == 3:
             break
 
@@ -35,8 +49,15 @@ if __name__ == "__main__":
     # print(f"Workflow graph written to: {graph_path}")
 
     final_ans = run_entire_flow()
-    for x in final_ans:
-        for i in x:
-            print("-" * 60)
-            print(x[i])
-            print("-" * 60)
+
+    print(type(final_ans), len(final_ans))
+
+    print("Final Answer:" + "=" * 60 + "\n" + "=" * 60)
+    print(final_ans)
+    print("Final Answer:" + "=" * 60 + "\n" + "=" * 60)
+
+    output = insert_cleaned_data(final_ans)
+    if output.get("failed", 0) > 0:
+        print(f"Insertion completed with {output['failed']}/{output['total']} failures")
+    else:
+        print("Data inserted successfully!! BOOM!!")
