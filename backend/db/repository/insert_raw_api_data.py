@@ -19,6 +19,8 @@ def insert_raw_api_data(data: list[dict] | None = None):
         from backend.services.main import fetch_all_data
 
         data = fetch_all_data()
+    elif not isinstance(data, list) or any(not isinstance(item, dict) for item in data):
+        raise TypeError("data must be a list[dict]")
 
     if not data:
         print("No data fetched to insert.")

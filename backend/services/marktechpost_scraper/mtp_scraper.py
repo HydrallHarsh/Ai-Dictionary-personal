@@ -62,8 +62,6 @@ def fetch_blog_urls(url_mtp: str, user_agent: str) -> set:
                     f"https://www.marktechpost.com/{curr_year}/{curr_month}/{curr_day}/[^/]+/$"
                 )
             )
-                )
-            )
             for blog in blogs:
                 blog_links.add(blog["href"])
         return blog_links
@@ -87,6 +85,7 @@ def fetch_tech_news_only(blog_links: set, user_agent: str) -> set:
         return tutorial_links_set
     except requests.exceptions.RequestException as e:
         print(f"Error filtering tutorials {e}")
+        return set()
 
 
 # Extract/ Scrape content using FireCrawl API
