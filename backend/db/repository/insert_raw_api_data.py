@@ -15,8 +15,9 @@ def normalize(item):
     return {k: v for k, v in clean.items() if v is not None}
 
 
-def insert_raw_api_data():
-    data = fetch_all_data()
+def insert_raw_api_data(data: list[dict] | None = None):
+    if data is None:
+        data = fetch_all_data()
 
     if not data:
         print("No data fetched to insert.")
