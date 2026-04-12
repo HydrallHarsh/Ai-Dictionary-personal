@@ -54,7 +54,7 @@ def fetch_blog_urls(url_mtp: str, user_agent: str) -> set:
         curr_month = date.today().strftime("%m")
         # Fetch blogs from last 4 days, excluding todays day
         # because we have 1 day delay for extra leverage for safety
-        for day in range(2, 0, -1):
+        for day in range(3, 0, -1):
             curr_day = (date.today() - timedelta(day)).strftime("%d")
             blogs = soup.find_all(
                 href=re.compile(
@@ -63,8 +63,6 @@ def fetch_blog_urls(url_mtp: str, user_agent: str) -> set:
             )
             for blog in blogs:
                 blog_links.add(blog["href"])
-            if response.status_code == 200:
-                break
         return blog_links
     except requests.exceptions.RequestException as e:
         print(f"Error fetching the data from url {e}")
