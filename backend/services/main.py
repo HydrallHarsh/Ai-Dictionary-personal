@@ -92,6 +92,8 @@ def run_fetch_and_store():
 
     data = fetch_all_data()
     result = insert_raw_api_data(data)
+    if result.get("inserted", 0) == 0:
+        raise RuntimeError("Fetch succeeded but no records were inserted into raw_api_data")
     print(f"Inserted {result['inserted']} items into raw_api_data")
     return result
 
