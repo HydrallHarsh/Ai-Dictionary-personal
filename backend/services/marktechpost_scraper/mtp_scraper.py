@@ -50,15 +50,18 @@ def fetch_blog_urls(url_mtp: str, user_agent: str) -> set:
         response.raise_for_status()
 
         soup = BeautifulSoup(response.content, "lxml")
-        curr_year = date.today().strftime("%Y")
-        curr_month = date.today().strftime("%m")
         # Fetch blogs from last 4 days, excluding todays day
         # because we have 1 day delay for extra leverage for safety
-        for day in range(3, 0, -1):
-            curr_day = (date.today() - timedelta(day)).strftime("%d")
+        for day_offset in range(3, 0, -1):
+            target_date = date.today() - timedelta(days=day_offset)
+            curr_year = target_date.strftime("%Y")
+            curr_month = target_date.strftime("%m")
+            curr_day = target_date.strftime("%d")
             blogs = soup.find_all(
                 href=re.compile(
                     f"https://www.marktechpost.com/{curr_year}/{curr_month}/{curr_day}/[^/]+/$"
+                )
+            )
                 )
             )
             for blog in blogs:
