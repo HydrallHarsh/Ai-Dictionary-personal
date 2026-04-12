@@ -62,7 +62,7 @@ def test_fetch_blog_urls():
     """Test fetching blog URLs and filtering tutorials."""
     print("Fetching user agents...")
     user_agents = ua.random
-    print(f"Found {len(user_agents)} user agents\n")
+    # print(f"Found {len(user_agents)} user agents\n")
 
     print("Fetching blog URLs from MarkTechPost...")
     blog_links = fetch_blog_urls(url_mtp, user_agents)
