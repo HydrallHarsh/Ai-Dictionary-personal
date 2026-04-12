@@ -13,7 +13,6 @@ from backend.services.marktechpost_scraper.test_mtp_scraper import (
 from backend.services.newsapi_scrapper.news_api_fetcher import get_newsapi_data
 
 from backend.services.product_hunt_wrapper.ph_wrapper import ProductHuntWrapper
-from backend.db.repository.insert_raw_api_data import insert_raw_api_data
 
 # MTP Scraper
 firecrawl_api_key = os.getenv("FIRECRAWL_API_KEY")
@@ -89,6 +88,8 @@ def fetch_all_data():
 
 
 def run_fetch_and_store():
+    from backend.db.repository.insert_raw_api_data import insert_raw_api_data
+
     data = fetch_all_data()
     result = insert_raw_api_data(data)
     print(f"Inserted {result['inserted']} items into raw_api_data")

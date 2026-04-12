@@ -1,5 +1,4 @@
 from backend.db.client import supabase
-from backend.services.main import fetch_all_data
 
 
 def normalize(item):
@@ -17,6 +16,8 @@ def normalize(item):
 
 def insert_raw_api_data(data: list[dict] | None = None):
     if data is None:
+        from backend.services.main import fetch_all_data
+
         data = fetch_all_data()
 
     if not data:
