@@ -62,7 +62,7 @@ def test_fetch_blog_urls():
     """Test fetching blog URLs and filtering tutorials."""
     print("Fetching user agents...")
     user_agents = ua.random
-    print(f"Found {len(user_agents)} user agents\n")
+    # print(f"Found {len(user_agents)} user agents\n")
 
     print("Fetching blog URLs from MarkTechPost...")
     blog_links = fetch_blog_urls(url_mtp, user_agents)
@@ -88,13 +88,13 @@ def test_full_scrape_pipeline():
 
     # Fetch blog URLs
     print("Fetching user agents...")
-    user_agents = ua.random
+    user_agent = ua.random
 
     print("Fetching blog URLs...")
-    blog_links = fetch_blog_urls(url_mtp, user_agents)
+    blog_links = fetch_blog_urls(url_mtp, user_agent)
 
     print("Filtering tutorial links...")
-    tutorial_urls = fetch_tech_news_only(blog_links, user_agents)
+    tutorial_urls = fetch_tech_news_only(blog_links, user_agent)
     blog_links = blog_links - tutorial_urls
     blog_links_list = list(blog_links)
     total_urls = len(blog_links)

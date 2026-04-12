@@ -41,44 +41,41 @@ def fetching_user_agents() -> list:
         raise
 
 
-def fetch_blog_urls(url_mtp: str, user_agents: list) -> set:
+def fetch_blog_urls(url_mtp: str, user_agent: str) -> set:
     blog_links = set()
     try:
-        for _headers in user_agents:
-            header = {"User-Agent": f"{_headers}"}
-            response = requests.get(url=url_mtp, headers=header, timeout=10)
-            # check for connection_errors if any
-            response.raise_for_status()
+        header = {"User-Agent": f"{user_agent}"}
+        response = requests.get(url=url_mtp, headers=header, timeout=10)
+        # check for connection_errors if any
+        response.raise_for_status()
 
-            soup = BeautifulSoup(response.content, "lxml")
-            curr_year = date.today().strftime("%Y")
-            curr_month = date.today().strftime("%m")
-            # Fetch blogs from last 4 days, excluding todays day
-            # because we have 1 day delay for extra leverage for safety
-            for day in range(2, 0, -1):
-                curr_day = (date.today() - timedelta(day)).strftime("%d")
-                blogs = soup.find_all(
-                    href=re.compile(
-                        f"https://www.marktechpost.com/{curr_year}/{curr_month}/{curr_day}/[^/]+/$"
-                    )
+        soup = BeautifulSoup(response.content, "lxml")
+        # Fetch blogs from last 4 days, excluding todays day
+        # because we have 1 day delay for extra leverage for safety
+        for day_offset in range(3, 0, -1):
+            target_date = date.today() - timedelta(days=day_offset)
+            curr_year = target_date.strftime("%Y")
+            curr_month = target_date.strftime("%m")
+            curr_day = target_date.strftime("%d")
+            blogs = soup.find_all(
+                href=re.compile(
+                    f"https://www.marktechpost.com/{curr_year}/{curr_month}/{curr_day}/[^/]+/$"
                 )
-                for blog in blogs:
-                    blog_links.add(blog["href"])
-            if response.status_code == 200:
-                break
+            )
+            for blog in blogs:
+                blog_links.add(blog["href"])
         return blog_links
     except requests.exceptions.RequestException as e:
         print(f"Error fetching the data from url {e}")
-        raise
 
 
-def fetch_tech_news_only(blog_links: set, user_agents: list) -> set:
+def fetch_tech_news_only(blog_links: set, user_agent: str) -> set:
     tutorial_links_set = set()
     try:
         for url in blog_links:
-            if not user_agents:
+            if not user_agent:
                 raise Exception("User Agent Empty")
-            header = {"User-Agent": f"{user_agents[0]}"}
+            header = {"User-Agent": f"{user_agent}"}
             blog_res = requests.get(url, headers=header)
             blog_soup = BeautifulSoup(blog_res.text, "lxml")
             block = blog_soup.find("div", class_="td-post-header")
@@ -88,6 +85,7 @@ def fetch_tech_news_only(blog_links: set, user_agents: list) -> set:
         return tutorial_links_set
     except requests.exceptions.RequestException as e:
         print(f"Error filtering tutorials {e}")
+        return set()
 
 
 # Extract/ Scrape content using FireCrawl API

@@ -1,14 +1,15 @@
 name: Run Test LangGraph Bot Workflow
 
 on:
-  workflow_dispatch:
-
-  schedule:
-    - cron: "35 4 * * *" #Works at 4:35 AM every day UTC 
+  workflow_run:
+    workflows:
+      - Run Backend Main Workflow
+    types:
+      - completed
 
 jobs:
   run-langgraph-bot:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'recent-ai/Ai-Dictionary' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: Workflow
 
