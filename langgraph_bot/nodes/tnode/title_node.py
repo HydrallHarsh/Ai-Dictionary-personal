@@ -1,6 +1,6 @@
 from langchain_core.messages import ToolMessage
 from langgraph_bot.agentschema.stateschema import State
-from langgraph_bot.tools.tools import title_tool
+from langgraph_bot.tools.tools import title_tool,slug_tool
 
 
 def update_title_node(state: State):
@@ -8,3 +8,5 @@ def update_title_node(state: State):
         if isinstance(msg, ToolMessage) and msg.name == "title_tool":
             return {"title": msg.content}
     return {}
+
+

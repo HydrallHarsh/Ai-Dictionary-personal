@@ -1,13 +1,10 @@
 from dotenv import load_dotenv
-
 load_dotenv()
 import os
 import subprocess
 import tempfile
 from typing import Dict, List
-
 import requests
-
 # from langchain.messages import ToolMessage
 from langchain.tools import tool
 from langchain_community.document_loaders import (
@@ -18,7 +15,7 @@ from langchain_community.document_loaders import (
 from langchain_tavily import TavilySearch
 from langgraph.types import Command
 from langgraph_bot.models.generativemodel import groqmodel
-from langgraph_bot.utils.prompts import TITLE_PROMPT
+from langgraph_bot.utils.prompts import TITLE_PROMPT,SLUG_PROMPT
 
 
 ## SUMMMARY AGENT TOOLS
@@ -41,7 +38,15 @@ def title_tool(posttitle: str, postdata: str):
     response = groqmodel.invoke(final_prompt)
     return response.content.strip()
 
-
+@tool
+def slug_tool(posttitle:str):
+    """
+    name :slug_tool
+    work :generate slug for for a page to show in the url path.
+    """
+    response = groqmodel.invoke(SLUG_PROMPT.format(posttitle = posttitle))
+    return response.content.strip()
+    
 ## DESCRIPTION AGENT TOOLS
 
 
