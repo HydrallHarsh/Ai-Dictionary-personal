@@ -1,6 +1,12 @@
 name: Run Test LangGraph Bot Workflow
 
 on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or tag to run against
+        required: true
+        type: string
   workflow_run:
     workflows:
       - Run Backend Main Workflow
@@ -9,15 +15,23 @@ on:
 
 jobs:
   run-langgraph-bot:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: Workflow
-
     timeout-minutes: 30
 
     steps:
-      - name: Checkout the Repository
+      - name: Checkout workflow_dispatch ref
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Checkout workflow_run ref
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -37,10 +51,8 @@ jobs:
         run: uv sync --frozen
 
       - name: Run LangGraph Bot Main Test Workflow
-        # working-directory: ./langgraph_bot
         env:
           PYTHONPATH: ${{ github.workspace }}
-
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
