@@ -1,15 +1,53 @@
-name: Run Test LangGraph Bot Workflow
+name: Run Main Workflow
 
 on:
-  workflow_run:
-    workflows:
-      - Run Backend Main Workflow
-    types:
-      - completed
+  workflow_dispatch:
+
+  schedule:
+    - cron: "35 4 * * *" # Works at 4:35 AM every day UTC
 
 jobs:
+  run-backend-main:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'recent-ai/Ai-Dictionary' }}
+    runs-on: ubuntu-latest
+    environment: Workflow
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Setup Python 3.12.5
+        run: uv python install 3.12.5
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: uv sync --frozen
+
+      - name: Run Backend Main Workflow
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          NEWSAPI_ORG_KEY: ${{ secrets.NEWSAPI_ORG_KEY }}
+          product_hunt_access_token: ${{ secrets.PRODUCT_HUNT_ACCESS_TOKEN || secrets.product_hunt_access_token }}
+        run: |
+          cd backend
+          source .venv/bin/activate
+          cd ..
+          uv run python -m backend.services.main
+    
   run-langgraph-bot:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: run-backend-main
     runs-on: ubuntu-latest
     environment: Workflow
 
