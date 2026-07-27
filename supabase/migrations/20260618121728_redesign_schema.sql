@@ -7,7 +7,22 @@ ALTER Table raw_api_data
     Add Column retry_count int Default 0,
     Add Column last_error text,
     Add Column source_type text
-        Check (source_type in ('rss', 'api', 'scraper', 'other'));
+        Check (source_type in ('rss', 'api', 'scraper', 'other')),
+    -- generic per-source signal bag (HN points/comments, GitHub stars, etc.).
+    -- jsonb (not fixed columns) so a new source's signals need no schema change.
+    -- Backs RawData.engagement_meta.
+    Add Column IF NOT EXISTS metadata jsonb Default '{}'::jsonb,
+    -- full article body when a feed ships it (RSS content:encoded), else NULL.
+    -- Backs RawData.content. Persisted (not in-process) because ingestion and
+    -- generation are decoupled through the DB — see the note in Step 2.4.
+    Add Column IF NOT EXISTS content text;
+
+-- Drop the UNIQUE(title) constraint. `website` is the real identity key for a raw
+-- item; titles are LLM-rewritten downstream and are NOT a reliable unique key
+-- (two sources can carry the same headline). Keeping it would make the ingestion
+-- upsert-on-website fail whenever a new URL happened to collide with an existing
+-- title. Website uniqueness is kept.
+Alter Table raw_api_data Drop Constraint If Exists raw_api_data_title_key;
 
 
 Create table posts_v2(
