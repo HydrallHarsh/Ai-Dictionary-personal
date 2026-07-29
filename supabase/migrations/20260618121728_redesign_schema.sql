@@ -38,7 +38,7 @@ Create table posts_v2(
     difficulty text Check( difficulty in ('beginner', 'intermediate','advanced')),
     -- Could be a number for read time in minutes(maybe)
     read_time text,
-    embedding vector(768),        -- Gemini text-embedding-004 (768 dims); powers dedup + related posts
+    embedding vector(768),        -- Gemini gemini-embedding-001 truncated to 768 dims; powers dedup + related posts
     raw_item_id uuid references raw_api_data(id),
     likes_count int Default 0,
     created_at timestamptz Default now(),
@@ -117,3 +117,8 @@ Create index on raw_api_data(status) where status = 'pending';
 
 -- Removing the RPC fundtion
 Drop function if exists public.create_post_with_content;
+
+
+Grant Select on table posts to anon;
+Grant Select on table posts to authenticated;
+Grant Select, Insert, Update, Delete on table posts to service_role;

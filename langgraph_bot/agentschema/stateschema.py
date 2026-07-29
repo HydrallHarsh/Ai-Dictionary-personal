@@ -40,6 +40,32 @@ def replace_bytes_or_none_reducer(
     return None
 
 
+def replace_any_reducer(current, new):
+    """Same last-write-wins semantics as `replace_reducer`, but for values where
+    an empty string is the wrong default (bools, lists, floats, None-able dicts).
+
+    `replace_reducer` returns `""` when both sides are None, which is fine for text
+    but wrong for e.g. `should_process` (a bool) or `embedding` (a list of floats).
+    """
+    if new is not None:
+        return new
+    return current
+
+
+def and_reducer(current: Optional[bool], new: Optional[bool]) -> bool:
+    """Gate reducer for `should_process`: any node that says "stop" wins.
+
+    Triage and dedup both write this key. With plain last-write-wins, a node that
+    returns `should_process=True` after another returned `False` would silently
+    re-open a gate that was already closed. AND-ing is the safe merge.
+    """
+    if current is None:
+        return bool(new)
+    if new is None:
+        return bool(current)
+    return bool(current) and bool(new)
+
+
 class State(TypedDict):
     # If you want to keep history of strings, use operator.add
     # If you just want the current value, use 'overwrite'
@@ -61,3 +87,27 @@ class State(TypedDict):
     tavily_search_result: Annotated[Optional[str], replace_reducer]
     code: Annotated[Optional[str], replace_reducer]
     generated_image: Annotated[Optional[bytes], replace_bytes_or_none_reducer]
+
+    # --- Source provenance (plumbed in from raw_api_data by build_initial_state) ---
+    # `name` was already being passed by main.py but was never declared here.
+    name: Annotated[Optional[str], replace_reducer]
+    source_url: Annotated[Optional[str], replace_reducer]
+    raw_id: Annotated[Optional[str], replace_reducer]
+    # Full article body when the feed shipped it (raw_api_data.content), else None.
+    # The description node prefers this over the thin RSS blurb in `data`.
+    content: Annotated[Optional[str], replace_reducer]
+
+    # --- Triage gate (nodes/triage_node.py) ---
+    triage: Annotated[Optional[dict], replace_dict_reducer]
+    # AND-reduced: triage and dedup both write it, and "stop" must win. See and_reducer.
+    should_process: Annotated[Optional[bool], and_reducer]
+
+    # --- Semantic dedup (nodes/dedup_node.py) ---
+    embedding: Annotated[Optional[list[float]], replace_any_reducer]
+    is_duplicate: Annotated[Optional[bool], replace_any_reducer]
+    duplicate_of: Annotated[Optional[dict], replace_dict_reducer]
+
+    # --- Enrichment (nodes/enrich_node.py) — fills the flat posts columns ---
+    difficulty: Annotated[Optional[str], replace_reducer]
+    read_time: Annotated[Optional[str], replace_reducer]
+    tags: Annotated[Optional[list[str]], replace_any_reducer]
