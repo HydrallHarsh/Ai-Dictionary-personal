@@ -1,0 +1,1762 @@
+<title>Frontend Rebuild — Field Manual</title>
+
+<style>
+:root {
+  --paper:#eef1f6; --surface:#ffffff; --sunk:#e4e9f1;
+  --ink:#131c2c; --ink-2:#41506a; --ink-3:#6e7c95;
+  --rule:#cfd7e4; --rule-soft:#dfe5ee;
+  --blue:#2c4ea0; --blue-wash:#e2e8f8;
+  --verd:#14776a; --verd-wash:#dcefeb;
+  --rust:#a8502a; --rust-wash:#f6e4dc;
+  --amber:#8a6410; --amber-wash:#f5ecd8;
+  --grid:rgba(44,78,160,.055);
+  --shadow:0 1px 2px rgba(19,28,44,.05),0 8px 24px -16px rgba(19,28,44,.18);
+  --serif:"Iowan Old Style","Sitka Text",Cambria,Charter,"Bitstream Charter",Georgia,serif;
+  --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b1220; --surface:#121b2a; --sunk:#0e1624;
+    --ink:#e3e9f3; --ink-2:#a6b2c6; --ink-3:#7c8aa0;
+    --rule:#233047; --rule-soft:#1b2537;
+    --blue:#8fa8f6; --blue-wash:#16203a;
+    --verd:#3fb6a0; --verd-wash:#0f2420;
+    --rust:#e08a63; --rust-wash:#2a1a13;
+    --amber:#d3a64e; --amber-wash:#241d0f;
+    --grid:rgba(143,168,246,.05);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b1220; --surface:#121b2a; --sunk:#0e1624;
+  --ink:#e3e9f3; --ink-2:#a6b2c6; --ink-3:#7c8aa0;
+  --rule:#233047; --rule-soft:#1b2537;
+  --blue:#8fa8f6; --blue-wash:#16203a;
+  --verd:#3fb6a0; --verd-wash:#0f2420;
+  --rust:#e08a63; --rust-wash:#2a1a13;
+  --amber:#d3a64e; --amber-wash:#241d0f;
+  --grid:rgba(143,168,246,.05);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17.5px; line-height:1.68;
+  -webkit-font-smoothing:antialiased;
+}
+*{box-sizing:border-box;}
+::selection{background:var(--blue-wash);}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:2px;}
+
+/* ---- shell ---- */
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px 96px;}
+.cols{display:grid;grid-template-columns:1fr;gap:0;}
+@media(min-width:1040px){
+  .cols{grid-template-columns:15rem minmax(0,1fr);gap:64px;align-items:start;}
+}
+main{max-width:70ch;min-width:0;}
+
+/* ---- masthead ---- */
+.mast{border-bottom:2px solid var(--ink);padding:56px 0 22px;margin-bottom:0;}
+.mast .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+.mast h1{font-size:clamp(2.5rem,6.2vw,4.1rem);line-height:1.02;letter-spacing:-.022em;font-weight:700;margin:20px 0 0;text-wrap:balance;}
+.mast .sub{color:var(--ink-2);font-size:1.14rem;margin:18px 0 0;max-width:56ch;}
+.stamp{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;}
+.stamp span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--rule);border-radius:2px;padding:4px 9px;color:var(--ink-2);background:var(--surface);}
+
+/* ---- contents rail ---- */
+.rail{font-family:var(--mono);font-size:12.5px;line-height:1.45;padding-top:40px;}
+@media(min-width:1040px){.rail{position:sticky;top:24px;max-height:calc(100vh - 48px);overflow-y:auto;padding-top:56px;}}
+.rail h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px;font-weight:400;}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;}
+.rail li{border-top:1px solid var(--rule-soft);}
+.rail li:last-child{border-bottom:1px solid var(--rule-soft);}
+.rail a{display:grid;grid-template-columns:2.1rem 1fr;gap:6px;padding:7px 0;color:var(--ink-2);text-decoration:none;}
+.rail a:hover{color:var(--ink);}
+.rail a b{color:var(--blue);font-weight:400;font-variant-numeric:tabular-nums;}
+
+/* ---- sections ---- */
+section{padding-top:64px;scroll-margin-top:20px;}
+.snum{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:10px;}
+h2.sh{font-size:clamp(1.6rem,3.6vw,2.15rem);line-height:1.12;letter-spacing:-.017em;margin:0 0 6px;font-weight:700;text-wrap:balance;}
+.deck{color:var(--ink-3);font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 26px;padding-bottom:18px;border-bottom:1px solid var(--rule);}
+h3{font-size:1.24rem;line-height:1.3;letter-spacing:-.01em;margin:38px 0 10px;font-weight:700;text-wrap:balance;}
+h4{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2);margin:30px 0 8px;font-weight:400;}
+p{margin:0 0 17px;}
+main a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+strong{font-weight:700;}
+em{font-style:italic;}
+ul,ol{margin:0 0 18px;padding-left:1.3em;}
+li{margin-bottom:9px;}
+li::marker{color:var(--ink-3);}
+hr{border:0;border-top:1px solid var(--rule);margin:40px 0;}
+
+/* ---- code specimens ---- */
+.spec{margin:26px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden;}
+.spec .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding:8px 14px;border-bottom:1px solid var(--rule-soft);background:var(--sunk);display:flex;justify-content:space-between;gap:12px;}
+.spec .tag em{font-style:normal;color:var(--blue);letter-spacing:.1em;}
+.spec pre{margin:0;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:12.6px;line-height:1.62;color:var(--ink);}
+code{font-family:var(--mono);font-size:.855em;background:var(--sunk);border:1px solid var(--rule-soft);border-radius:2px;padding:1px 4px;}
+pre code{background:none;border:0;padding:0;font-size:inherit;}
+.c-com{color:var(--ink-3);font-style:italic;}
+.c-key{color:var(--blue);}
+.c-str{color:var(--verd);}
+.c-del{color:var(--rust);}
+
+/* ---- annotation callouts ---- */
+.note{margin:26px 0;padding:16px 18px 14px;border-left:3px solid var(--blue);background:var(--blue-wash);border-radius:0 3px 3px 0;}
+.note>.lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:7px;}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0;}
+.note.bug{border-color:var(--rust);background:var(--rust-wash);}
+.note.bug>.lab{color:var(--rust);}
+.note.win{border-color:var(--verd);background:var(--verd-wash);}
+.note.win>.lab{color:var(--verd);}
+.note.warn{border-color:var(--amber);background:var(--amber-wash);}
+.note.warn>.lab{color:var(--amber);}
+
+/* ---- comparison / data tables ---- */
+.tbl{margin:26px 0;overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--surface);}
+table{width:100%;min-width:480px;border-collapse:collapse;font-size:14.5px;}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);font-weight:400;background:var(--sunk);border-bottom:1px solid var(--rule);}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0;}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+tbody th{font-weight:700;}
+
+/* ---- swatches ---- */
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:10px;margin:24px 0;}
+.sw{border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--surface);}
+.sw .chip{height:52px;}
+.sw .meta{padding:8px 10px;font-family:var(--mono);font-size:11px;line-height:1.5;color:var(--ink-2);}
+.sw .meta b{display:block;color:var(--ink);font-weight:400;letter-spacing:.04em;}
+
+/* ---- key/value spec list ---- */
+.kv{margin:24px 0;border-top:1px solid var(--rule);}
+.kv div{display:grid;grid-template-columns:1fr auto;gap:16px;padding:9px 0;border-bottom:1px solid var(--rule-soft);align-items:baseline;}
+.kv dt{color:var(--ink-2);font-size:15px;}
+.kv dd{margin:0;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right;}
+
+/* ---- before/after ---- */
+.ba{display:grid;gap:14px;margin:26px 0;}
+@media(min-width:720px){.ba{grid-template-columns:1fr 1fr;}}
+.ba>div{border:1px solid var(--rule);border-radius:3px;padding:14px 16px;background:var(--surface);}
+.ba>div.before{border-left:3px solid var(--rust);}
+.ba>div.after{border-left:3px solid var(--verd);}
+.ba .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;display:block;margin-bottom:8px;}
+.ba .before .lab{color:var(--rust);}
+.ba .after .lab{color:var(--verd);}
+.ba p{font-size:15px;margin-bottom:10px;}
+.ba p:last-child{margin-bottom:0;}
+
+/* ---- glossary ---- */
+.gloss{margin:24px 0;border-top:1px solid var(--rule);}
+.gloss>div{padding:13px 0;border-bottom:1px solid var(--rule-soft);}
+.gloss dt{font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--blue);margin-bottom:4px;}
+.gloss dd{margin:0;font-size:15.5px;color:var(--ink-2);}
+
+/* ---- footer ---- */
+.end{margin-top:80px;padding-top:22px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;}
+.tocjump{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
+html{scroll-behavior:smooth;}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker"><span>AI Dictionary</span><span>&mdash;</span><span>Frontend rebuild</span><span>&mdash;</span><span>branch redesign/frontend</span></p>
+  <h1>How this frontend was rebuilt, and why every piece is the way it is.</h1>
+  <p class="sub">A field manual written for someone who has never used React or Next.js. Every decision, the reasoning behind it, and the beginner explanation of the concept it rests on.</p>
+  <div class="stamp">
+    <span>Next.js 16.0.10</span><span>React 19.2</span><span>Tailwind CSS v4</span><span>TypeScript</span><span>Supabase</span><span>18 parts</span>
+  </div>
+</header>
+
+  <div class="cols">
+
+<nav class="rail" aria-label="Contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#p1"><b>01</b><span>Read this first</span></a></li>
+    <li><a href="#p2"><b>02</b><span>The words you need</span></a></li>
+    <li><a href="#p3"><b>03</b><span>Where pages come from</span></a></li>
+    <li><a href="#p4"><b>04</b><span>Where data comes from</span></a></li>
+    <li><a href="#p5"><b>05</b><span>The block teardown</span></a></li>
+    <li><a href="#p6"><b>06</b><span>Derive, never store</span></a></li>
+    <li><a href="#p7"><b>07</b><span>The archive filter</span></a></li>
+    <li><a href="#p8"><b>08</b><span>Never render a lie</span></a></li>
+    <li><a href="#p9"><b>09</b><span>The token layer</span></a></li>
+    <li><a href="#p10"><b>10</b><span>Colour with a job</span></a></li>
+    <li><a href="#p11"><b>11</b><span>The page grammar</span></a></li>
+    <li><a href="#p12"><b>12</b><span>The chart</span></a></li>
+    <li><a href="#p13"><b>13</b><span>Access as a constraint</span></a></li>
+    <li><a href="#p14"><b>14</b><span>Performance</span></a></li>
+    <li><a href="#p15"><b>15</b><span>Bugs found &amp; fixed</span></a></li>
+    <li><a href="#p16"><b>16</b><span>Practices that paid</span></a></li>
+    <li><a href="#p17"><b>17</b><span>Still open</span></a></li>
+    <li><a href="#p18"><b>18</b><span>Glossary</span></a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="p1">
+  <span class="snum">Part 01</span>
+  <h2 class="sh">Read this first</h2>
+  <p class="deck">What this document is, who it is for, and the one idea that explains most of the choices in it.</p>
+
+  <p>This is not a changelog. It is an explanation. Everything here answers the same two questions in a loop: <strong>what did the code do before, and why is the new version better?</strong> Where a concept is needed to follow the answer &mdash; what a component is, what &ldquo;server-rendered&rdquo; means, why a colour needs two versions &mdash; the concept is explained in the same breath, from zero.</p>
+
+  <p>The parts are numbered because they build. Part 02 defines vocabulary the rest of the document uses without apology. Parts 03&ndash;08 are the logic: routing, data, architecture. Parts 09&ndash;12 are the design system. Parts 13&ndash;17 are the constraints, the bugs, and the honest list of what is still broken.</p>
+
+  <h3>The one idea</h3>
+  <p>If you remember a single sentence from this whole document, make it this one:</p>
+
+  <div class="note">
+    <span class="lab">The governing rule</span>
+    <p><strong>The interface must never show a number, a badge, or a label that the data does not actually support.</strong></p>
+    <p>Not &ldquo;should try not to&rdquo;. Never. If the reading time was never measured, the page does not print a reading time. If the difficulty was never graded, no difficulty badge appears. If a count fails to load, the row disappears rather than showing a zero.</p>
+  </div>
+
+  <p>That rule sounds like an ethics statement, but in practice it is an <em>engineering</em> rule, and it is the reason for at least a third of the code described here. A default value like <code>"5 min read"</code> is a lie with a nice UI. Once you refuse to ship lies, you are forced to either measure the thing yourself or drop it &mdash; and &ldquo;measure it yourself&rdquo; is where a surprising amount of the new logic came from.</p>
+
+  <h3>How to read the code samples</h3>
+  <p>Every code sample is real code from this repository, not a simplification. The label above each one tells you the file it came from. If a sample is annotated, the grey italic lines are comments &mdash; notes for humans that the computer ignores.</p>
+</section>
+
+<section id="p2">
+  <span class="snum">Part 02</span>
+  <h2 class="sh">The words you need</h2>
+  <p class="deck">React, Next.js, TypeScript and Tailwind explained from nothing, in the order they stack on top of each other.</p>
+
+  <h3>The bottom layer: HTML, CSS, JavaScript</h3>
+  <p>A web page is three things. <strong>HTML</strong> is the content and its structure &mdash; this is a heading, this is a paragraph, this is a link. <strong>CSS</strong> is the appearance &mdash; headings are 40 pixels and bold, links are blue. <strong>JavaScript</strong> is the behaviour &mdash; when you click this, open that.</p>
+  <p>Everything below is a tool for producing those three things. None of them replace the trio; they just stop you writing it by hand.</p>
+
+  <h3>React: the page as a set of functions</h3>
+  <p>Writing HTML by hand means copying the same navigation bar into every file. React's idea is that a chunk of interface should be a <strong>function that returns HTML</strong>. That function is called a <strong>component</strong>.</p>
+
+  <div class="spec">
+    <div class="tag"><span>A component, at its simplest</span><em>concept</em></div>
+    <pre><code><span class="c-key">function</span> Greeting() {
+  <span class="c-key">return</span> &lt;p&gt;Hello.&lt;/p&gt;;
+}</code></pre>
+  </div>
+
+  <p>The HTML-looking syntax inside a JavaScript file is called <strong>JSX</strong>. It is not really HTML &mdash; a build step converts it to real JavaScript before the browser sees it &mdash; but you can read it as HTML and be right about what it produces.</p>
+
+  <p>Components take inputs, called <strong>props</strong>. A prop is just a function argument with an HTML-ish spelling at the call site:</p>
+
+  <div class="spec">
+    <div class="tag"><span>Props are arguments</span><em>concept</em></div>
+    <pre><code><span class="c-key">function</span> Greeting({ name }) {
+  <span class="c-key">return</span> &lt;p&gt;Hello, {name}.&lt;/p&gt;;
+}
+
+<span class="c-com">// used as:</span>
+&lt;Greeting name=<span class="c-str">"Harsh"</span> /&gt;</code></pre>
+  </div>
+
+  <p>That is the entire core of React. Components call other components, props flow downward, and the top-level component eventually describes the whole page. In this project, <code>ArchiveIndex</code> renders many <code>EntryRow</code> components, each handed one entry as a prop.</p>
+
+  <p>The other React concept you will meet here is <strong>state</strong>: a value a component remembers between clicks. When state changes, React re-runs the component function and updates only the parts of the page whose output changed. The archive's search box is state; so is whether the mobile menu is open.</p>
+
+  <h3>Next.js: React plus everything React deliberately left out</h3>
+  <p>React only knows how to turn components into HTML. It has no opinion about URLs, no way to fetch data on a server, no build system. <strong>Next.js</strong> is the framework that supplies all of it.</p>
+  <p>The two Next.js facts that shape this codebase most:</p>
+  <ul>
+    <li><strong>The folder structure is the URL structure.</strong> A file at <code>app/about/page.tsx</code> <em>is</em> the page at <code>/about</code>. No routing configuration exists anywhere in this project because there is nothing to configure.</li>
+    <li><strong>Components can run on the server.</strong> This is the big one, and Part 03 is mostly about its consequences.</li>
+  </ul>
+
+  <h3>Server components vs. client components</h3>
+  <p>In old React, every component ran in the visitor's browser. The browser downloaded an empty page plus a large JavaScript bundle, then built the page from scratch on the visitor's machine.</p>
+  <p>In modern Next.js, a component runs <strong>on the server</strong> by default. It executes on your machine (or your host), talks to the database directly, produces finished HTML, and sends that. The visitor's browser receives a real page. The component's code is never shipped to them at all.</p>
+  <p>A component only runs in the browser if it says so, with a line at the top of the file:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/Navbar.tsx &mdash; line 1</span><em>opt-in</em></div>
+    <pre><code><span class="c-str">"use client"</span>;</code></pre>
+  </div>
+
+  <p>You need that line when a component uses interactivity: state, clicks, keyboard input, or anything that reads the browser's own environment. The navbar needs it (the mobile menu toggles). The article page does not (it is text).</p>
+
+  <div class="note">
+    <span class="lab">Why this matters constantly</span>
+    <p>Every <code>"use client"</code> is a cost. That component's code, plus every library it imports, gets bundled and downloaded by every visitor. So the recurring question in this codebase is <em>&ldquo;can this stay on the server?&rdquo;</em>, and the answer is yes far more often than it looks.</p>
+  </div>
+
+  <p><strong>Hydration</strong> is the word for what happens after: the server HTML arrives and renders instantly, then React's JavaScript loads and &ldquo;attaches&rdquo; to the existing HTML so the interactive bits start working. Text is readable before hydration. Buttons are not. That distinction decides several things later in this document.</p>
+
+  <h3>TypeScript</h3>
+  <p>TypeScript is JavaScript with labels on the values. Writing <code>function readingTime(markdown: string): string | null</code> declares that this function takes text and returns either text or nothing. If you later call it with a number, or forget to handle the &ldquo;nothing&rdquo; case, the compiler stops you <em>before</em> the code runs. That is why <code>pnpm tsc --noEmit</code> appears as a verification step throughout this rebuild &mdash; it is a whole class of bug caught without opening a browser.</p>
+
+  <h3>Tailwind CSS</h3>
+  <p>Instead of writing CSS in a separate file and inventing class names, Tailwind gives you tiny single-purpose classes you compose in the markup: <code>flex</code> means &ldquo;lay children out in a row&rdquo;, <code>mt-5</code> means &ldquo;margin-top, step 5&rdquo;, <code>text-muted-foreground</code> means &ldquo;use the muted text colour&rdquo;. The advantage is that you can see an element's full appearance without hunting through stylesheets. The discipline it requires is Part 09.</p>
+</section>
+
+<section id="p3">
+  <span class="snum">Part 03</span>
+  <h2 class="sh">Where pages come from</h2>
+  <p class="deck">The App Router, the three ways a page can be rendered, and the one-line trick that changed how articles are served.</p>
+
+  <h3>The folder is the router</h3>
+  <p>Here is the actual route map of this site, which is also just a screenshot of the folder:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/</span><em>routes</em></div>
+    <pre><code>app/
+  layout.tsx            <span class="c-com">→ wraps every page</span>
+  page.tsx              <span class="c-com">→ /</span>
+  globals.css           <span class="c-com">→ the whole design system</span>
+  global-not-found.js   <span class="c-com">→ 404</span>
+  about/page.tsx        <span class="c-com">→ /about</span>
+  blog/
+    page.tsx            <span class="c-com">→ /blog        (the archive)</span>
+    loading.tsx         <span class="c-com">→ skeleton while /blog loads</span>
+    [slug]/
+      page.tsx          <span class="c-com">→ /blog/anything (one article)</span>
+      loading.tsx       <span class="c-com">→ skeleton while an article loads</span>
+  login/page.tsx        <span class="c-com">→ /login</span>
+  signup/page.tsx       <span class="c-com">→ /signup</span></code></pre>
+  </div>
+
+  <p>Four filenames are special, and knowing them is most of what &ldquo;knowing the App Router&rdquo; means:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>File</th><th>What Next.js does with it</th></tr></thead>
+      <tbody>
+        <tr><th><code>page.tsx</code></th><td>Makes the folder a visitable URL. Its default export is the page.</td></tr>
+        <tr><th><code>layout.tsx</code></th><td>Wraps that folder <em>and everything under it</em>. Persists across navigation &mdash; it does not re-render when you move between pages inside it.</td></tr>
+        <tr><th><code>loading.tsx</code></th><td>Shown automatically while the page's data is still loading. You write no loading logic; Next.js swaps it in.</td></tr>
+        <tr><th><code>[slug]</code></th><td>Square brackets mean &ldquo;any value here&rdquo;. One file serves all 244 articles; the actual URL segment arrives as a prop.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What the root layout does</h3>
+  <p><code>app/layout.tsx</code> is 44 lines and does four jobs. It loads the typeface, it declares the light/dark theme provider, it draws the page frame, and it sets the <code>&lt;html lang="en"&gt;</code> attribute.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/layout.tsx</span><em>the frame</em></div>
+    <pre><code>&lt;div className=<span class="c-str">"mx-auto max-w-[1440px] min-h-screen
+  bg-background border-x border-border shadow-2xl"</span>&gt;</code></pre>
+  </div>
+
+  <p>Read that as: centre the site, cap it at 1440 pixels wide, always at least a full screen tall, paint the theme background, draw a hairline down each side, and lift it off the surrounding page with a shadow. That single element is why the site reads as a <em>document on a desk</em> rather than edge-to-edge web app, at every screen size, on every route, without any page repeating the rule.</p>
+
+  <p>The typeface is loaded through <code>next/font/google</code>, which downloads the font at build time and serves it from your own domain. That matters for two reasons: no request to Google when a visitor loads the page, and no flash of the wrong font, because Next.js reserves the exact space the real font will take.</p>
+
+  <h3>The three rendering modes</h3>
+  <p>This is the single most important Next.js concept for understanding the decisions in Parts 04 and 07. Every route is rendered in one of three ways:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Mode</th><th>When the HTML is built</th><th>Cost per visitor</th></tr></thead>
+      <tbody>
+        <tr><th>Static</th><td>Once, at build time</td><td>Zero. It is a file.</td></tr>
+        <tr><th>ISR</th><td>At build, then re-built on a timer</td><td>Zero, except for the one unlucky request that triggers a refresh.</td></tr>
+        <tr><th>Dynamic</th><td>On every single request</td><td>A full render plus every database query, every time.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>ISR</strong> stands for Incremental Static Regeneration, and it is the mode this site lives in. You opt in with one line at the top of a page file:</p>
+
+  <div class="spec">
+    <div class="tag"><span>app/page.tsx &middot; app/about/page.tsx &middot; app/blog/[slug]/page.tsx</span><em>ISR</em></div>
+    <pre><code><span class="c-key">export const</span> revalidate = <span class="c-str">3600</span>;</code></pre>
+  </div>
+
+  <p>3600 seconds is one hour. It means: serve the stored HTML to everyone; if an hour has passed since it was built, quietly rebuild it in the background and serve the fresh copy from then on. Visitors always get an instant file, and the content is never more than an hour stale. For an archive that updates on a pipeline schedule, that is exactly the right trade &mdash; and it is one line per page.</p>
+
+  <div class="note win">
+    <span class="lab">The trick worth stealing</span>
+    <p>A dynamic route like <code>/blog/[slug]</code> with <em>no</em> <code>generateStaticParams</code> function is treated by Next.js as fully dynamic: responses come back <code>Cache-Control: no-store</code>, and every view of every article re-runs the full corpus query.</p>
+    <p>Declaring the function &mdash; <strong>even completely empty</strong> &mdash; opts the route into on-demand ISR instead. The first visitor to a slug pays for the render; the next hour of visitors get a cached file.</p>
+  </div>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/blog/[slug]/page.tsx &mdash; empty on purpose</span><em>ISR opt-in</em></div>
+    <pre><code><span class="c-key">export function</span> generateStaticParams() {
+  <span class="c-key">return</span> [];
+}</code></pre>
+  </div>
+
+  <p>Why empty, rather than listing all 244 slugs? Because rendering one article costs one full-corpus fetch. Listing all of them means paying that cost 244 times during every build, to save the first visitor of each article a single query. That is the wrong trade, and the comment in the file says so, so nobody &ldquo;fixes&rdquo; it later.</p>
+</section>
+
+<section id="p4">
+  <span class="snum">Part 04</span>
+  <h2 class="sh">Where data comes from</h2>
+  <p class="deck">Two database clients, one subtle rule about cookies that decides the whole caching strategy, and how the same query gets reused without running twice.</p>
+
+  <h3>The cookie rule</h3>
+  <p>Supabase is the database. Talking to it needs a client object. This project has <em>two</em> of them, and the reason is a rule that is easy to miss and expensive to get wrong:</p>
+
+  <div class="note bug">
+    <span class="lab">The rule</span>
+    <p><strong>If a route reads <code>cookies()</code>, Next.js must render it per-request.</strong> It has no choice &mdash; cookies are different for every visitor, so a cached page would be the wrong person's page. The route silently drops out of static generation and becomes dynamic.</p>
+  </div>
+
+  <p>The normal Supabase server client reads cookies, because that is how it knows who is logged in. So <em>any page that used it became dynamic</em> &mdash; including the homepage and the archive, whose content is identical for every visitor on earth.</p>
+
+  <p>The fix is a second client that never touches cookies:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/supabase/static.ts</span><em>cookie-free</em></div>
+    <pre><code><span class="c-key">export function</span> createStaticClient() {
+  <span class="c-key">const</span> supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  <span class="c-key">const</span> supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  <span class="c-key">if</span> (!supabaseUrl || !supabaseKey) {
+    <span class="c-key">throw new</span> Error(<span class="c-str">"Missing required environment variables: …"</span>);
+  }
+
+  <span class="c-key">return</span> createSupabaseClient&lt;Database&gt;(supabaseUrl, supabaseKey, {
+    auth: { persistSession: <span class="c-str">false</span>, autoRefreshToken: <span class="c-str">false</span> },
+  });
+}</code></pre>
+  </div>
+
+  <p><code>persistSession: false</code> and <code>autoRefreshToken: false</code> are the whole point: this client is explicitly not for logged-in users. It reads public rows and nothing else. And because it never asks for a cookie, the pages using it stay static.</p>
+
+  <p>So the split is:</p>
+  <div class="kv">
+    <div><dt>Public content anyone can see</dt><dd>createStaticClient()</dd></div>
+    <div><dt>Anything about the logged-in user</dt><dd>createClient() &mdash; cookies</dd></div>
+  </div>
+
+  <p>And in the data layer that shows up as one deliberately-named function:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts</span><em>the public path</em></div>
+    <pre><code><span class="c-com">// Reading `cookies()` forces a route to render per-request. The post
+// list is the same for everyone, so pages that only display it use
+// this and stay statically generated with ISR.</span>
+<span class="c-key">export const</span> getPublicBlogPosts = cache(<span class="c-key">async</span> () =&gt; {
+  <span class="c-key">return</span> queryBlogPosts(createStaticClient());
+});</code></pre>
+  </div>
+
+  <h3><code>cache()</code>: the same query, asked twice, run once</h3>
+  <p>Notice the wrapper: <code>cache(...)</code>. This is a React function, and it solves a problem that appears the moment you fetch data inside components.</p>
+  <p>The article page needs the corpus twice: once to render the article, and once in <code>generateMetadata</code> to produce the browser tab title and the social preview. Two separate functions, both needing the same rows. Without <code>cache()</code>, that is two identical database round-trips per render.</p>
+  <p><code>cache()</code> memoises for the duration of one render pass: the first call runs the query, the second gets the stored result, and the cache is discarded when the render finishes. No stale data, no manual plumbing, no passing the data down through props just to avoid a second fetch.</p>
+
+  <h3>The shape the frontend actually wants</h3>
+  <p>The database does not store rows in the shape a page wants to render. So one function does the translation, once, at the boundary &mdash; and this is the part that replaced an entire folder of components (Part 05).</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts &mdash; makeBlocks()</span><em>the boundary</em></div>
+    <pre><code><span class="c-com">// One row in → a small typed array out. A `title` block, a
+// `summary` block, optionally an `image` block, and the body
+// as an `explanation` block.</span></code></pre>
+  </div>
+
+  <p>One detail inside it is worth pulling out, because it is a good example of the governing rule from Part 01 doing real work. The <code>date</code> field is <strong>normalised, not defaulted</strong>:</p>
+
+  <div class="note">
+    <span class="lab">Why dates get rewritten here</span>
+    <p>The generator writes <code>date</code> in whatever shape the source used. So the archive was rendering raw ISO strings (<code>2026-07-12</code>) directly next to formatted ones (<code>April 23, 2026</code>) in the same list &mdash; two date formats in one column, which reads as a bug even though every value was correct.</p>
+    <p>Fixing it in the component would mean fixing it in every component that ever shows a date. Fixing it at the boundary means every consumer downstream gets one format, for free, forever.</p>
+  </div>
+
+  <h3>Neighbours without a second query</h3>
+  <p>An article page shows &ldquo;older&rdquo; and &ldquo;newer&rdquo; links at the bottom. The naive approach is two extra queries: one for the row before, one for the row after. Instead:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts &mdash; getPublicArticle(slug)</span><em>zero extra queries</em></div>
+    <pre><code><span class="c-key">return</span> { post, newer, older };
+<span class="c-com">// The query is newest-first, so posts[index - 1] is the NEWER one
+// and posts[index + 1] is the older one. Same ordered list the
+// archive already uses — no second fetch, and the ordering can
+// never disagree with the archive's ordering.</span></code></pre>
+  </div>
+
+  <p>That last clause is the real benefit. Two separate queries could drift apart &mdash; different sort, different filter, and suddenly the article's &ldquo;newer&rdquo; link points somewhere the archive lists as older. Deriving both from one list makes the disagreement impossible rather than unlikely.</p>
+</section>
+
+<section id="p5">
+  <span class="snum">Part 05</span>
+  <h2 class="sh">The block teardown</h2>
+  <p class="deck">You had built one component per content type. Ten files became three, and this is the full argument for why that is an improvement rather than a simplification.</p>
+
+  <h3>What was there before</h3>
+  <p>The old article renderer was a folder, <code>components/blocks/</code>, containing ten files:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/blocks/ &mdash; deleted</span><em>before</em></div>
+    <pre><code><span class="c-del">block-renderer.tsx        ← the switch statement
+code-block.tsx            ← server half
+code-block-client.tsx     ← client half
+difficulty-block.tsx
+example-block.tsx
+explanation-block.tsx
+header-block.tsx
+image-block.tsx
+related-topics-block.tsx
+summary-block.tsx</span></code></pre>
+  </div>
+
+  <p>The design was reasonable on paper. Content arrives as a list of typed blocks; each type gets a component that knows how to draw it; a dispatcher looks at <code>block.type</code> and picks the right one:</p>
+
+  <div class="spec">
+    <div class="tag"><span>the pattern, reconstructed</span><em>before</em></div>
+    <pre><code><span class="c-key">switch</span> (block.type) {
+  <span class="c-key">case</span> <span class="c-str">"title"</span>:          <span class="c-key">return</span> &lt;HeaderBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"summary"</span>:        <span class="c-key">return</span> &lt;SummaryBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"explanation"</span>:    <span class="c-key">return</span> &lt;ExplanationBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"code"</span>:           <span class="c-key">return</span> &lt;CodeBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"image"</span>:          <span class="c-key">return</span> &lt;ImageBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"example"</span>:        <span class="c-key">return</span> &lt;ExampleBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"related_topics"</span>: <span class="c-key">return</span> &lt;RelatedTopicsBlock … /&gt;;
+  <span class="c-key">case</span> <span class="c-str">"diagram"</span>:        <span class="c-key">return</span> &lt;DiagramBlock … /&gt;;
+}</code></pre>
+  </div>
+
+  <h3>Problem one: five of the nine branches were unreachable</h3>
+  <p>The content pipeline emits, per article, exactly three things: a <strong>title</strong> with its metadata, a <strong>summary</strong>, and <strong>one string of Markdown</strong> containing the entire body.</p>
+  <p>That is it. No code blocks arrive as blocks. No images arrive as blocks. No diagrams, no examples, no related-topics arrays. Those five block types had a TypeScript interface, a React component, and a branch in the dispatcher &mdash; and across 244 articles, not one of them ever ran.</p>
+
+  <div class="note bug">
+    <span class="lab">Why dead branches are worse than they look</span>
+    <p>They are not free. They are code you maintain, code the bundler processes, code a reader has to check before concluding it is irrelevant, and code that quietly rots &mdash; because it is never exercised, nobody notices when a refactor breaks it. Five components that had never rendered were, in effect, five confident-looking lies about what the system does.</p>
+  </div>
+
+  <h3>Problem two: spacing had nine owners</h3>
+  <p>This is the subtler failure and the one that actually shows on screen. Each block component set its own margins &mdash; <code>ExplanationBlock</code> decided the gap above a paragraph, <code>ImageBlock</code> decided the gap around a picture, <code>CodeBlock</code> decided its own.</p>
+  <p>So the vertical rhythm of an article &mdash; whether it reads as one continuous document or as a stack of unrelated cards &mdash; was an <strong>emergent property of nine independent decisions made at nine different times</strong>. There was no single place to go and change it. Making paragraphs breathe more meant editing several files and hoping the result was consistent.</p>
+
+  <h3>Problem three: one concept, two files, for a technical reason</h3>
+  <p><code>code-block.tsx</code> and <code>code-block-client.tsx</code> were one component split in half solely to cross the server/client boundary from Part 02. Syntax highlighting needed browser JavaScript, so the highlighting half needed <code>"use client"</code>, so the server half existed to wrap it. That is architecture spent on plumbing, not on the product.</p>
+
+  <h3>What replaced it: three pieces</h3>
+
+  <div class="ba">
+    <div class="before">
+      <span class="lab">Before</span>
+      <p>10 files. 9 block types. 2 dispatch layers. 5 branches that never ran. Spacing decided in 9 places. Link handling repeated per component.</p>
+    </div>
+    <div class="after">
+      <span class="lab">After</span>
+      <p>3 pieces. 1 dispatch site. Spacing decided once. Link handling defined once, structurally impossible to forget.</p>
+    </div>
+  </div>
+
+  <p><strong>Piece 1 &mdash; <code>lib/blog-data.ts</code> narrows once at the boundary.</strong> Instead of a page receiving arbitrary blocks and asking &ldquo;what is this?&rdquo;, the data layer produces exactly the three shapes the page uses. The page then <em>picks</em> what it needs by name:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/blog/[slug]/page.tsx</span><em>after</em></div>
+    <pre><code><span class="c-key">const</span> titleBlock = post.blocks.find((b) =&gt; b.type === <span class="c-str">"title"</span>);
+<span class="c-key">const</span> summaryBlock = post.blocks.find((b) =&gt; b.type === <span class="c-str">"summary"</span>);
+<span class="c-key">const</span> explanationBlock = post.blocks.find((b) =&gt; b.type === <span class="c-str">"explanation"</span>);</code></pre>
+  </div>
+
+  <p>No switch. No dispatcher. No unreachable branch, because you cannot write a branch for a type you never look up.</p>
+
+  <p><strong>Piece 2 &mdash; <code>ArticleBody.tsx</code> has one override map.</strong> The body is Markdown, so a Markdown renderer draws it. Where the default output needs changing, you override that one HTML element, in one object, in one file:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/article/ArticleBody.tsx</span><em>after</em></div>
+    <pre><code>&lt;ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  components={{
+    h1: headingRenderer(<span class="c-str">2</span>, slugify),
+    h2: headingRenderer(<span class="c-str">2</span>, slugify),
+    h3: headingRenderer(<span class="c-str">3</span>, slugify),
+    table: …, th: …, td: …,   <span class="c-com">// scrollable on phones</span>
+    a: …,                     <span class="c-com">// external-link safety</span>
+    img: …,                   <span class="c-com">// Next.js image optimisation</span>
+  }}
+&gt;</code></pre>
+  </div>
+
+  <p><strong>Piece 3 &mdash; the <code>prose</code> plugin owns vertical rhythm.</strong> One string of classes, in one exported constant, defines the spacing and typography of every element an article can contain:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/article/ArticleBody.tsx &mdash; PROSE_CLASS</span><em>one owner</em></div>
+    <pre><code><span class="c-str">"prose-h2:mt-14 prose-h2:mb-4 …"</span>
+<span class="c-str">"prose-h3:mt-10 prose-h3:mb-3 …"</span>
+<span class="c-str">"prose-p:leading-relaxed prose-li:leading-relaxed"</span>
+<span class="c-str">"prose-blockquote:border-l-2 prose-blockquote:border-brand …"</span></code></pre>
+  </div>
+
+  <p>To make articles breathe more, you edit one line. Every element moves together, because they are all described in the same place, in the same units, at the same moment.</p>
+
+  <h3>The three benefits, stated plainly</h3>
+
+  <div class="note win">
+    <span class="lab">1. Adding a content type is now zero frontend work</span>
+    <p>If the pipeline starts emitting code fences or tables inside the Markdown body, they render correctly the day they arrive. No new component, no new type, no new branch. The renderer already understands Markdown; the pipeline just has to write it.</p>
+  </div>
+
+  <div class="note win">
+    <span class="lab">2. One dispatch site instead of two layers</span>
+    <p>Previously a change to how headings look meant: find the block type, find the component, find where the dispatcher passes props to it, check the client/server split. Now it means editing <code>headingRenderer</code>. The path from &ldquo;I want to change this&rdquo; to &ldquo;here is the line&rdquo; is one step.</p>
+  </div>
+
+  <div class="note win">
+    <span class="lab">3. Link safety is structurally impossible to forget</span>
+    <p>Article text is machine-generated from third-party sources, so outbound links are untrusted. Every external link must get <code>rel="noopener noreferrer nofollow"</code>. Under the old design that rule had to be remembered in every component that could contain a link. Now there is exactly one place a link can be created, and the rule lives there:</p>
+  </div>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/article/ArticleBody.tsx</span><em>one rule, one place</em></div>
+    <pre><code>a: ({ href, children, ...props }) =&gt; {
+  <span class="c-key">const</span> external = Boolean(href &amp;&amp; /^https?:/i.test(href));
+  <span class="c-key">return</span> (
+    &lt;a href={href}
+      <span class="c-com">// Untrusted outbound links from generated text.</span>
+      {...(external
+        ? { target: <span class="c-str">"_blank"</span>, rel: <span class="c-str">"noopener noreferrer nofollow"</span> }
+        : {})}
+      {...props}&gt;{children}&lt;/a&gt;
+  );
+},</code></pre>
+  </div>
+
+  <p>Those three attributes each do a specific job. <code>noopener</code> stops the opened page from being able to script your tab. <code>noreferrer</code> stops it learning where the click came from. <code>nofollow</code> tells search engines you are not endorsing the destination &mdash; correct, since a machine chose it.</p>
+
+  <h3>What was kept, and why</h3>
+  <p>The types file, <code>types/content.ts</code>, survived. It still describes all eight block shapes even though only three are produced, because it is the contract with the pipeline: if the generator starts emitting <code>code</code> blocks tomorrow, the shape is already agreed. Its one edit was a real fix:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/types/content.ts</span><em>tightened</em></div>
+    <pre><code><span class="c-com">/**
+ * `unknown` rather than `any` for the default: every interface
+ * below narrows `data` to a concrete shape, so nothing actually
+ * relies on the default being assignable in both directions.
+ * `any` here silently disabled checking for any future `Block`
+ * used without a type argument.
+ */</span>
+<span class="c-key">export interface</span> Block&lt;T = unknown&gt; {
+  id: string; type: string; data: T;
+}</code></pre>
+  </div>
+
+  <p>For a beginner: <code>any</code> means &ldquo;stop checking this value&rdquo;. <code>unknown</code> means &ldquo;I do not know what this is, so you must check before using it&rdquo;. They look similar and behave oppositely. <code>any</code> is a hole in the type system that spreads silently to everything it touches; <code>unknown</code> is a question the compiler forces you to answer.</p>
+
+  <div class="note warn">
+    <span class="lab">A correction worth recording</span>
+    <p>During the cleanup I searched for imports of <code>types/content.ts</code> with a glob pattern of <code>lib/**/*.ts</code>, got no results, and reported the file as orphaned. That was wrong: <code>lib/blog-data.ts</code> imports from it on line 4. Ripgrep's <code>**</code> does not match files sitting <em>directly</em> in the folder, only files in subfolders. The reliable form is <code>grep -rn --include=*.ts &lt;dirs&gt;</code> with no glob at all. A tool that answers &ldquo;no matches&rdquo; when it means &ldquo;I did not look there&rdquo; is the most dangerous kind.</p>
+  </div>
+</section>
+
+<section id="p6">
+  <span class="snum">Part 06</span>
+  <h2 class="sh">Derive, never store</h2>
+  <p class="deck">Four fields the interface used to read from the database and now computes itself &mdash; because the stored values were absent, wrong, or quietly invented.</p>
+
+  <p>Part 01's rule &mdash; never render a claim the data does not support &mdash; produced a repeating pattern. Each time, the sequence was the same: a field looked reliable, the corpus was actually counted, the field turned out to be mostly missing, and the frontend started measuring the thing instead of trusting it.</p>
+
+  <h3>Reading time</h3>
+  <p><code>estimated_time</code> is absent on <strong>178 of 244</strong> entries. The old data layer filled the gap with the string <code>"5 min read"</code>. So three quarters of the archive printed a number nobody had measured, in a column that looks measured &mdash; the worst possible combination, because it is confidently wrong and impossible to distinguish from the correct rows.</p>
+  <p>The body text, however, is always there. So it is counted:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/markdown.ts &mdash; readingTime()</span><em>measured</em></div>
+    <pre><code><span class="c-key">const</span> WORDS_PER_MINUTE = <span class="c-str">220</span>;  <span class="c-com">// adult silent reading, non-fiction</span>
+<span class="c-key">const</span> MIN_WORDS = <span class="c-str">40</span>;          <span class="c-com">// below this the fetch fell back to a stub</span>
+
+<span class="c-key">const</span> words = markdown
+  .replace(/```[\s\S]*?```/g, <span class="c-str">" "</span>)      <span class="c-com">// drop fenced code</span>
+  .replace(/`[^`]*`/g, <span class="c-str">" "</span>)              <span class="c-com">// drop inline code</span>
+  .replace(/!?\[([^\]]*)\]\([^)]*\)/g, <span class="c-str">"$1"</span>) <span class="c-com">// links → their text</span>
+  .replace(/[#&gt;*_~|-]/g, <span class="c-str">" "</span>)             <span class="c-com">// strip markup chars</span>
+  .split(/\s+/)
+  .filter((t) =&gt; /[\p{L}\p{N}]/u.test(t)).length;
+
+<span class="c-key">if</span> (words &lt; MIN_WORDS) <span class="c-key">return</span> <span class="c-str">null</span>;   <span class="c-com">// ← nothing to measure: say nothing</span></code></pre>
+  </div>
+
+  <p>Markup is stripped first or a code block would inflate the count with punctuation nobody reads word by word. And the function returns <code>null</code> &mdash; not <code>"1 min read"</code> &mdash; when there is genuinely no body. The caller drops the whole element. <strong>One rule, applied to every entry, true by construction.</strong></p>
+
+  <h3>Difficulty</h3>
+  <p>Present on roughly a quarter of the corpus. The old code defaulted the rest to <code>"beginner"</code>, which invents a grade the pipeline never assigned. Now an ungraded entry gets no badge at all:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>absence is a value</em></div>
+    <pre><code><span class="c-key">const</span> graded =
+  raw === <span class="c-str">"intermediate"</span> || raw === <span class="c-str">"advanced"</span> ? raw : <span class="c-str">null</span>;</code></pre>
+  </div>
+
+  <p>Note what this also fixes visually: because &ldquo;beginner&rdquo; was the default, almost every row wore a beginner badge, which made the badge meaningless as a scanning signal. Removing the invented ones turned a decoration back into information.</p>
+  <h3>Source names</h3>
+  <p>The ingest adapters record whatever a feed called itself. One publication therefore arrived under five spellings: <code>Marktechpost</code>, <code>MarkTechPost</code>, <code>Marktech Post</code>, <code>MarktechPost</code>, <code>MarkTech Post</code>. Five buckets for one source. The filter showed five near-identical rows, and each one understated the publication's real share of the archive.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts &mdash; normaliseSource()</span><em>fold the variants</em></div>
+    <pre><code><span class="c-key">const</span> SOURCE_ALIASES = <span class="c-key">new</span> Map([
+  [<span class="c-str">"marktechpost"</span>, <span class="c-str">"MarkTechPost"</span>],
+  [<span class="c-str">"thenextweb"</span>,   <span class="c-str">"The Next Web"</span>],
+  [<span class="c-str">"techcrunch"</span>,    <span class="c-str">"TechCrunch"</span>],
+  [<span class="c-str">"newshub"</span>,       <span class="c-str">"NewsHub"</span>],
+]);
+
+<span class="c-key">export function</span> normaliseSource(raw) {
+  <span class="c-key">const</span> trimmed = (raw ?? <span class="c-str">""</span>).trim();
+  <span class="c-key">if</span> (!trimmed) <span class="c-key">return</span> <span class="c-str">"Unattributed"</span>;   <span class="c-com">// ← not "" and not "Unknown"</span>
+  <span class="c-key">const</span> key = trimmed.toLowerCase().replace(/[^a-z0-9]/g, <span class="c-str">""</span>);
+  <span class="c-key">return</span> SOURCE_ALIASES.get(key) ?? trimmed;
+}</code></pre>
+  </div>
+
+  <p>The key is built by lowercasing and deleting everything that is not a letter or digit, so all five spellings collapse to <code>marktechpost</code> before the lookup. A source with no alias entry passes through untouched &mdash; the map fixes known collisions rather than trying to guess at every name.</p>
+
+  <h3>Repairing the Markdown itself</h3>
+  <p>The generator's output has two consistent defects. Both were rendering as visible garbage, and both are now fixed in one pass before the text reaches the renderer.</p>
+
+  <p><strong>Defect one: a duplicate H1.</strong> 175 of 244 bodies open with their own top-level heading, and it is never the headline the page displays. The page shows the source's headline; the body writes its own, differently worded. Rendering both gives the article two competing titles and two H1 elements &mdash; which is also an accessibility problem, since a document should have exactly one.</p>
+
+  <p><strong>Defect two: stray underlines.</strong> In Markdown, a line of <code>=====</code> under a line of text makes it a heading. But <code>#&nbsp;Heading</code> followed by <code>=====</code> is not that: the <code>#</code> already closed the heading, so the underline renders as a paragraph of equals signs. The <code>-----</code> version is worse &mdash; it renders as a horizontal rule, which is why the corpus was full of stray dividers sitting directly under headings. <strong>147 of these across 244 documents.</strong></p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/markdown.ts &mdash; sanitizeArticleMarkdown()</span><em>the fence guard</em></div>
+    <pre><code><span class="c-com">// Inside a fence everything is verbatim — `# load the model` is a
+// comment in someone's Python, not a heading, and `---` may be YAML.</span>
+<span class="c-key">if</span> (FENCE.test(line)) { inFence = !inFence; out.push(line); <span class="c-key">continue</span>; }
+<span class="c-key">if</span> (inFence)          { out.push(line); <span class="c-key">continue</span>; }</code></pre>
+  </div>
+
+  <p>That guard is the difference between a repair and a corruption. A text-transforming function that does not understand code fences will happily rewrite the inside of someone's code sample.</p>
+
+  <p>The pass is careful in three more ways, and each one is a judgement call rather than a rule:</p>
+  <ul>
+    <li>A <em>real</em> underline &mdash; one sitting directly below paragraph text &mdash; is a genuine heading, so it is kept. But it is <strong>rewritten into the <code>##</code> form</strong>, because the table of contents is built by scanning for <code>#</code>-prefixed lines. Left alone, such a heading would appear in the body but be missing from the contents rail.</li>
+    <li>Three documents carry a second H1 further down. Those are <strong>demoted to H2, not deleted</strong> &mdash; they are real sections, and dropping them would lose content.</li>
+    <li>A <code>---</code> with nothing above it to underline is a genuine divider and survives; a run of <code>===</code> in the same position is meaningless and is removed.</li>
+  </ul>
+
+  <h3>The standfirst</h3>
+  <p>A <em>standfirst</em> is the large intro paragraph under a headline. The summaries average <strong>~1,130 characters</strong> and restate the entire article. Set at display size, one ran thirteen lines of large serif covering the funding round, the investors, the founder's background and his Harvard exit &mdash; all of which the body then said again in its own sections. The reader reached the real opening having already read it.</p>
+  <p>So the page takes the first sentence or two and stops. The rest is not shown anywhere, because <em>the body is the long version</em>.</p>
+
+  <div class="kv">
+    <div><dt>Target length, in characters</dt><dd>230</dd></div>
+    <div><dt>Hard ceiling, however sentences fall</dt><dd>340</dd></div>
+    <div><dt>First sentence kept whole regardless of length</dt><dd>yes</dd></div>
+  </div>
+
+  <p>That last row is deliberate: a truncated opening sentence reads as broken markup, whereas a slightly long one just reads as a long sentence.</p>
+
+  <p>There is one more repair in the same file, and it is a nice example of a data problem that only became visible after a design change:</p>
+
+  <div class="note bug">
+    <span class="lab">The generator talking to itself</span>
+    <p>Ten summaries in the corpus open by addressing the request rather than the article: <em>&ldquo;I can summarize the content for you.&rdquo;</em>, <em>&ldquo;I generated a summary but it seems I have to provide it in a specific format. Here is the summary:&rdquo;</em></p>
+    <p>This was harmless while the summary was a wall of small text nobody finished. Promoted to a standfirst at display size, it became the first sentence anyone reads. Two patterns now strip it &mdash; an explicit hand-off phrase, taken <strong>last-match-wins</strong> because one row narrates a failed attempt and <em>then</em> hands off, and a leading first-person sentence about the act of summarising.</p>
+  </div>
+
+  <h3>Excerpts, and cutting on a word boundary</h3>
+  <p>The archive list clamps each summary to two lines. Shipping the full 1,130 characters and hiding most of it with CSS would put roughly <strong>275KB of prose</strong> into the page for text nobody sees. So summaries are cut to 180 characters before they ever reach the markup &mdash; and cut at a space, not mid-word, because a mid-word ellipsis reads as a rendering bug rather than a deliberate trim.</p>
+</section>
+
+<section id="p7">
+  <span class="snum">Part 07</span>
+  <h2 class="sh">The archive filter</h2>
+  <p class="deck">Why 244 entries are filtered in the browser rather than the server, and what that trade cost.</p>
+
+  <h3>The obvious approach, and why it was rejected</h3>
+  <p>The normal way to filter a list on the web is through the URL: <code>/blog?source=TechCrunch</code>. The server reads the query parameter, fetches matching rows, sends a page. Shareable links, works without JavaScript, standard.</p>
+  <p>It was rejected for the same reason as the cookie rule in Part 04:</p>
+
+  <div class="note bug">
+    <span class="lab">The rule, again</span>
+    <p><strong>Reading <code>searchParams</code> opts a route out of static generation.</strong> Next.js cannot pre-build a page whose content depends on a value that only exists at request time. Adding one query filter would convert <code>/blog</code> from a cached file into a full render plus database round-trip, for every visitor, forever.</p>
+  </div>
+
+  <h3>The approach taken</h3>
+  <p>Send all 244 entries once as part of the static page, and filter them in the browser with no network request at all. Typing in the search box re-filters instantly &mdash; no spinner, no round trip, no server load.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/archive/ArchiveIndex.tsx &mdash; header comment</span><em>the trade, stated</em></div>
+    <pre><code><span class="c-com">/**
+ * Filtering happens in the browser rather than through
+ * `searchParams`, because reading search params opts the route out
+ * of static generation…
+ *
+ * That trade is only affordable because `lib/archive.ts` cuts each
+ * summary to an excerpt first. The full summaries average ~1,130
+ * characters across 244 entries; sending them all would put roughly
+ * 275KB of prose into the payload for text that is clamped to two
+ * lines.
+ */</span></code></pre>
+  </div>
+
+  <p>Read those two paragraphs together and you have the entire design: <em>the client-side filter is only viable because of the excerpt trimming in Part 06.</em> Without the trim, the payload makes the page slow to load in exchange for making it fast to filter &mdash; a bad trade. With the trim, you get both.</p>
+
+  <p>This is the most transferable idea in the document. A decision that looks like a free choice usually has a precondition somewhere else in the system. Writing the precondition down next to the decision is what stops someone removing it later without understanding what they broke.</p>
+
+  <h3>How the filtering is written</h3>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/archive/ArchiveIndex.tsx</span><em>useMemo</em></div>
+    <pre><code><span class="c-key">const</span> filtered = useMemo(() =&gt; { <span class="c-com">/* … */</span> }, [query, source]);</code></pre>
+  </div>
+
+  <p><code>useMemo</code> is React's &ldquo;only redo this when the inputs change&rdquo; wrapper. The list is 244 items and every keystroke re-runs the component; without <code>useMemo</code> it would re-filter on every unrelated re-render too. The array at the end lists what it depends on &mdash; the search text and the selected source &mdash; and the work is skipped whenever neither has changed.</p>
+
+  <p>The search deliberately matches <strong>title and excerpt only, never the source name</strong>:</p>
+
+  <div class="note">
+    <span class="lab">Why exclude the source from search</span>
+    <p>Matching the source name would make a search for &ldquo;TechCrunch&rdquo; return that publication's entire output &mdash; which is exactly what the source filter beside the box already does, better. Two controls doing the same job means neither is predictable.</p>
+  </div>
+
+  <h3>Telling a screen reader that the list changed</h3>
+  <p>When you type and the list shrinks, a sighted user sees it happen. A screen reader user gets no signal at all &mdash; the page did not navigate, so nothing is announced.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/archive/ArchiveIndex.tsx</span><em>the announcement</em></div>
+    <pre><code>&lt;p className=<span class="c-str">"sr-only"</span> role=<span class="c-str">"status"</span> aria-live=<span class="c-str">"polite"</span>&gt;
+  {shown} entries shown
+&lt;/p&gt;</code></pre>
+  </div>
+
+  <p><code>sr-only</code> hides it visually while leaving it in the accessibility tree. <code>aria-live="polite"</code> means &ldquo;read this out when it changes, but wait until the user pauses&rdquo;. Three lines, and the filter becomes usable without sight.</p>
+
+  <h3>The month strip</h3>
+  <p>Above the list is a small bar chart of entries per month. It is built with more restraint than it looks:</p>
+
+  <div class="kv">
+    <div><dt>Hidden entirely when there are fewer than two months</dt><dd>one bar is not a distribution</dd></div>
+    <div><dt>Group order reversed for the chart</dt><dd>the list is newest-first, a time axis is not</dd></div>
+    <div><dt>Undated entries moved to the end</dt><dd>never sorted as 1970</dd></div>
+    <div><dt>Minimum bar height</dt><dd>3px</dd></div>
+    <div><dt>Maximum strip width</dt><dd>max-w-2xl</dd></div>
+  </div>
+
+  <p>The 3px floor exists so a month with one entry is still visible rather than a mathematically-correct invisible sliver. The width cap exists so a four-month archive does not stretch four bars across 1200 pixels and imply a dataset it does not have. Both are cases of the chart refusing to misrepresent its own data &mdash; the same rule as Part 01, applied to geometry.</p>
+
+  <h3>One layout detail that was a real bug</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/components/archive/ArchiveIndex.tsx</span><em>sticky offset</em></div>
+    <pre><code>className=<span class="c-str">"sticky top-16 …"</span>
+<span class="c-com">// Offset by the 64px navbar, which is itself sticky — at `top-0`
+// the month header slid underneath it and the group went unlabelled.</span></code></pre>
+  </div>
+
+  <p>Two sticky elements on one page have to know about each other. The navbar sticks at 0 and is 64 pixels tall, so anything else that sticks has to start at 64 (<code>top-16</code> in Tailwind's scale). The same arithmetic appears on the article page's contents rail at <code>top-24</code>, and again as <code>scroll-mt-24</code> on body headings so that clicking a contents link lands the heading below the navbar rather than behind it.</p>
+</section>
+
+<section id="p8">
+  <span class="snum">Part 08</span>
+  <h2 class="sh">Never render a lie</h2>
+  <p class="deck">Failure handling as a design decision: why a missing count disappears instead of showing zero, and the database quirk that made every number on the homepage suspect.</p>
+
+  <h3><code>null</code> and <code>0</code> are different claims</h3>
+  <p>Every figure on the homepage is counted from the database. When a count fails, the function returns <code>null</code>, and the interface <strong>drops the figure</strong> rather than printing <code>0</code>.</p>
+  <p>The distinction is not pedantry. <code>0</code> says <em>&ldquo;we looked, and there is nothing&rdquo;</em>. <code>null</code> says <em>&ldquo;we do not know&rdquo;</em>. Printing zero when you mean &ldquo;we do not know&rdquo; converts a temporary infrastructure hiccup into a factual claim that the pipeline has processed nothing. An absent row is honest; a zero is not.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/home/SignalMeter.tsx</span><em>refuse to draw</em></div>
+    <pre><code><span class="c-key">if</span> (articlesRead === <span class="c-str">null</span> || entriesKept === <span class="c-str">null</span>) {
+  <span class="c-key">return</span> <span class="c-str">null</span>;   <span class="c-com">// no readout at all, rather than a readout of nothing</span>
+}
+
+<span class="c-com">// and, in the chart:</span>
+<span class="c-key">if</span> (buckets.length &lt; <span class="c-str">2</span>) {
+  <span class="c-key">return</span> <span class="c-str">null</span>;   <span class="c-com">// "Without buckets there is no shape to draw,
+                 //  and inventing one would make the page lie."</span>
+}</code></pre>
+  </div>
+
+  <div class="note bug">
+    <span class="lab">That first line used to read <code>if (!articlesRead || !entriesKept)</code></span>
+    <p>Which is the same bug this section is about, committed by the code enforcing it. <code>0</code> is falsy in JavaScript, so a genuine zero &mdash; a real measurement &mdash; took the same branch as a failed read and deleted the entire readout, along with the source count and the start date that were sitting beside it and were perfectly fine.</p>
+    <p><strong>Once a value is <code>number | null</code>, the truthiness test is no longer the null test.</strong> Writing <code>=== null</code> costs six characters and is the only form that means what it says.</p>
+  </div>
+
+  <p>In React, <code>return null</code> from a component means &ldquo;render nothing&rdquo;. The rest of the page closes up around the gap automatically, because the layout is built with flex and grid gaps rather than fixed positions.</p>
+
+  <h3>A third claim: &ldquo;there is no answer yet&rdquo;</h3>
+  <p>Two states were not enough. The landing page showed a flat <strong>0% keep rate for the two most recent months</strong>, which read as <em>we rejected everything we read</em>. Nothing had been rejected. The triage queue simply had not reached those items yet.</p>
+  <p>The rate was computed as <code>kept / read</code>, and an item sitting in the queue as <code>pending</code> or <code>processing</code> counted in the denominator as though it had been judged and refused. So the figure was not merely imprecise, it stated the opposite of the truth, and it grew more wrong the harder the ingest ran.</p>
+
+  <div class="ba">
+    <div class="before">
+      <span class="lab">kept / read</span>
+      <p>Denominator: everything ingested. Anything not yet triaged is counted as a rejection.</p>
+      <p>A month the bot has not reached shows <strong>0%</strong>.</p>
+    </div>
+    <div class="after">
+      <span class="lab">kept / resolved</span>
+      <p>Denominator: the items the queue has finished with &mdash; succeeded, skipped or failed.</p>
+      <p>A month the bot has not reached shows <strong>no rate at all</strong>, and a line of prose saying why.</p>
+    </div>
+  </div>
+
+  <p>So the component now distinguishes three things where it previously distinguished two:</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>State</th><th>Means</th><th>Renders as</th></tr></thead>
+      <tbody>
+        <tr><th><code>null</code></th><td>The count could not be read.</td><td>An em dash, or the section disappears.</td></tr>
+        <tr><th><code>0</code></th><td>We counted; there were none.</td><td>A zero. It is a measurement.</td></tr>
+        <tr><th>no rate</th><td>We counted, but nothing has been decided yet, so no percentage exists to print.</td><td>The bar's volume, with &ldquo;awaiting triage&rdquo; in place of a figure.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><code>formatRate()</code> returns <code>string | null</code> rather than <code>"0%"</code>, which pushes the decision onto the type system: every call site has to say what it does with the absent case, and none of them can accidentally print a zero.</p>
+
+  <h3>Independent degradation</h3>
+  <p>The homepage has one further requirement: it is the one page that must never return a server error. So its two data sources fail separately:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/page.tsx</span><em>parallel, independently fallible</em></div>
+    <pre><code><span class="c-key">const</span> [stats, posts] = <span class="c-key">await</span> Promise.all([
+  getPipelineStats(),
+  getPublicBlogPosts().catch((error) =&gt; {
+    console.error(<span class="c-str">"Homepage: failed to load posts"</span>, error);
+    <span class="c-key">return</span> [];
+  }),
+]);</code></pre>
+  </div>
+
+  <p>Two things are happening here, and both are worth understanding.</p>
+  <p><code>Promise.all</code> runs both queries <strong>at the same time</strong> rather than one after the other. If each takes 200ms, sequential code costs 400ms and this costs 200ms. Any time you see two <code>await</code> lines in a row with no dependency between them, that is a free speed-up being left on the table.</p>
+  <p>The <code>.catch</code> means a failed post query yields an empty array instead of crashing the page. The comment in the file states the goal directly: <em>&ldquo;the hero and the meter each degrade on their own if their data is missing, so a failure here costs a section rather than the site.&rdquo;</em></p>
+
+  <h3>Two ways a database can hand you a wrong number quietly</h3>
+  <p>Both of these ship, because in both the wrong answer looks completely plausible.</p>
+
+  <div class="note bug">
+    <span class="lab">One &mdash; PostgREST truncates silently</span>
+    <p>The API layer in front of the database enforces a server-side ceiling of <strong>1000 rows per response</strong> and truncates past it without complaint. So <code>.limit(10000)</code> appears to work and returns 1000 rows. No error, no warning, no flag on the response.</p>
+    <p>Counting distinct sources from a truncated sample would understate the figure &mdash; and the understated figure would be a believable number, printed confidently on the homepage.</p>
+  </div>
+
+  <p>The defence is a paging loop with two independent stop conditions: a short page, which is the normal exit, and a hard ceiling, so a misbehaving API cannot spin forever. It lives in <code>blog-data.ts:173</code>, which still walks the table this way.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts</span><em>page, don't trust the limit</em></div>
+    <pre><code><span class="c-key">const</span> PAGE = <span class="c-str">1000</span>;       <span class="c-com">// the actual ceiling, named</span>
+<span class="c-key">const</span> MAX_PAGES = <span class="c-str">50</span>;      <span class="c-com">// a guard, so a bad response can't loop forever</span></code></pre>
+  </div>
+
+  <div class="note bug">
+    <span class="lab">Two &mdash; Row-Level Security reports a closed door as an empty room</span>
+    <p><code>raw_api_data</code>, the table every &ldquo;articles read&rdquo; figure is counted from, has RLS enabled and <strong>no policy at all</strong>. A client holding the public key is not refused. It is told there are zero rows: status <code>200</code>, <code>data: []</code>, <code>error: null</code>, and a count request returns <code>Content-Range: */0</code>.</p>
+    <p>Nothing in that response distinguishes &ldquo;you may not look&rdquo; from &ldquo;there is nothing there&rdquo;. Every guard in the old <code>pipeline-stats.ts</code> tested <code>error</code>, and <code>error</code> was <code>null</code>.</p>
+  </div>
+
+  <p>The homepage showed real numbers anyway, and the reason is the security issue in Part 17. <code>frontend/.env</code> supplies an <code>sb_secret_</code> key, which runs as <code>service_role</code> and bypasses RLS entirely. <strong>Rotating that key to a genuine publishable one &mdash; the correct fix, on its own &mdash; would have zeroed every read count on the landing page without a single error appearing anywhere.</strong> The keeps, which come from the publicly-readable <code>posts</code> table, would have carried on working, so the chart would have drawn a kept segment taller than the column supposed to contain it.</p>
+
+  <div class="note warn">
+    <span class="lab">The general shape</span>
+    <p>Two things that were each individually fine &mdash; a query returning no error, and a key that worked &mdash; were covering for one another. <strong>A permission system that reports absence rather than refusal can only be tested with the credentials you actually deploy.</strong> Building this page with the key it claims to use produces different numbers, and that difference is the test.</p>
+  </div>
+
+  <h3>The fix: count where the privilege already is</h3>
+  <p>There were two options. Add a read policy opening <code>raw_api_data</code> to anonymous visitors, or move the counting into the database. The table holds scraped article bodies, source URLs and triage failure text; none of that belongs on a public page, and a policy is a standing grant that outlives whatever motivated it. So: a <strong>Security Definer</strong> function, which runs with its author's privileges rather than the caller's, counts rows the caller cannot see, and returns only aggregates.</p>
+
+  <div class="spec">
+    <div class="tag"><span>supabase/migrations/20260618121728_redesign_schema.sql</span><em>the privacy seam</em></div>
+    <pre><code>Create Or Replace Function public.pipeline_stats()
+Returns jsonb
+Language sql
+Stable
+Security Definer
+Set search_path = <span class="c-str">''</span>    <span class="c-com">-- every name inside must be schema-qualified</span>
+As $$ &hellip; $$;
+
+Revoke All On Function public.pipeline_stats() From Public;
+Grant Execute On Function public.pipeline_stats() To anon, authenticated, service_role;</code></pre>
+  </div>
+
+  <p><code>Set search_path = ''</code> is not decoration. A definer function resolves unqualified names through the <em>caller's</em> search path unless pinned, so anyone able to create a table could create their own <code>posts</code>, put it first, and have an elevated function read it. Pinning to the empty string forbids that by making every unqualified name a compile error &mdash; which is why the body says <code>public.raw_api_data</code> throughout. And <code>Revoke All</code> before <code>Grant</code>, because a definer function you forgot to revoke is a definer function everyone has.</p>
+
+  <p>Three things improved at once, and only one of them was the point:</p>
+  <div class="kv">
+    <div><dt>Round trips to draw the chart</dt><dd>5 + 2&times;N &rarr; 1</dd></div>
+    <div><dt>Read access the browser key needs</dt><dd><code>raw_api_data</code> &rarr; none</dd></div>
+    <div><dt>A permissions failure now surfaces as</dt><dd>a <code>42501</code> error, not a plausible zero</dd></div>
+  </div>
+
+  <p>The counting itself is also simply better expressed in SQL. &ldquo;How many distinct sources&rdquo; is <code>count(distinct …)</code> rather than a paging loop and a <code>Set</code>; the per-bucket figures are one <code>generate_series</code> left-joined against the data, so idle windows come back at zero for free instead of costing two head requests each.</p>
+
+  <h3>Why the table names are written out longhand</h3>
+  <p>A reviewer would reasonably suggest extracting the repeated table strings into constants. The code explains why not:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts</span><em>a deliberate repetition</em></div>
+    <pre><code><span class="c-com">// the generated Database types key off the literal, so a generic
+// helper loses the row typing for every caller.</span>
+supabase.from(<span class="c-str">"posts"</span>).select(POST_COLUMNS)</code></pre>
+  </div>
+
+  <p>Supabase generates TypeScript types from the real database schema, and it matches on the literal string you pass. Replace <code>"posts"</code> with a variable and TypeScript no longer knows which table you mean, so it can no longer tell you that a column name is wrong. The duplication buys compile-time checking of every query in the file.</p>
+
+  <p>The same rule applies to the new function call. <code>supabase.rpc("pipeline_stats")</code> is checked against the generated <code>Functions</code> map; <code>rpc(name)</code> is not. That map is also why one hand-edit was needed: <code>database.types.ts</code> had to learn the new function exists.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/database.types.ts</span><em>added by hand, deliberately</em></div>
+    <pre><code>pipeline_stats: {
+  Args: Record&lt;PropertyKey, never&gt;   <span class="c-com">// takes no arguments</span>
+  Returns: Json                      <span class="c-com">// jsonb; the shape is not in the schema</span>
+}</code></pre>
+  </div>
+
+  <p>Regenerating the whole file would have been the obvious move and was the wrong one: the CLI installed here is older than the one that produced the committed file, so a full regeneration <em>removes</em> fields the current file has and reformats several thousand lines. A four-line insertion is reviewable; a four-thousand-line diff hiding a downgrade is not.</p>
+
+  <p><code>Returns: Json</code> is honest rather than convenient. Postgres records that the function returns <code>jsonb</code> and nothing more, so the generator cannot know what is inside it, and pretending otherwise with a hand-written interface would be an assertion no one checks. Instead the payload is narrowed at the boundary in <code>pipeline-stats.ts</code> &mdash; every field tested before use, a malformed one collapsing to the empty state rather than to <code>NaN%</code> halfway down the page.</p>
+
+  <div class="note win">
+    <span class="lab">The general lesson</span>
+    <p>&ldquo;Do not repeat yourself&rdquo; is a good default and not a law. Here the repetition is what makes the code checkable, and a comment saying so is what stops a future contributor helpfully removing the safety.</p>
+  </div>
+</section>
+
+<section id="p9">
+  <span class="snum">Part 09</span>
+  <h2 class="sh">The token layer</h2>
+  <p class="deck">Where every colour on the site is defined, why each one is defined twice, and how Tailwind turns a variable into a class name.</p>
+
+  <h3>What a design token is</h3>
+  <p>A <strong>token</strong> is a named colour rather than a literal one. Instead of writing <code>#6366f1</code> in forty places, you define it once as <code>--brand</code> and refer to that name everywhere. Change the definition, and all forty places move together.</p>
+  <p>In CSS these are called custom properties, and they look like this:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css</span><em>light theme</em></div>
+    <pre><code>:root {
+  --secondary: <span class="c-str">#f3f3f8</span>;   --muted: <span class="c-str">#f3f3f8</span>;   --accent: <span class="c-str">#f3f3f8</span>;
+  --muted-foreground: <span class="c-str">#6d6d7c</span>;
+  --border: <span class="c-str">#e3e3ec</span>;      --input: <span class="c-str">#e3e3ec</span>;
+  --brand: <span class="c-str">#6366f1</span>;       --brand-subtle: <span class="c-str">#eef0fe</span>;   --ring: <span class="c-str">#6366f1</span>;
+
+  --hue-1: <span class="c-str">#6366f1</span>;  <span class="c-com">/* indigo — the brand slot */</span>
+  --hue-2: <span class="c-str">#b45309</span>;  <span class="c-com">/* amber  */</span>
+  --hue-3: <span class="c-str">#0d9488</span>;  <span class="c-com">/* teal   */</span>
+  --hue-4: <span class="c-str">#e11d48</span>;  <span class="c-com">/* rose   */</span>
+}</code></pre>
+  </div>
+
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#6366f1"></div><div class="meta"><b>hue-1</b>#6366f1 · indigo</div></div>
+    <div class="sw"><div class="chip" style="background:#b45309"></div><div class="meta"><b>hue-2</b>#b45309 · amber</div></div>
+    <div class="sw"><div class="chip" style="background:#0d9488"></div><div class="meta"><b>hue-3</b>#0d9488 · teal</div></div>
+    <div class="sw"><div class="chip" style="background:#e11d48"></div><div class="meta"><b>hue-4</b>#e11d48 · rose</div></div>
+  </div>
+
+  <h3>Why every token is defined twice</h3>
+  <p>The site has a dark mode. The naive implementation is to invert everything &mdash; and it produces a bad dark mode every time, because colour does not behave the same on both grounds.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css</span><em>dark theme &mdash; re-stepped, not inverted</em></div>
+    <pre><code>.dark {
+  --secondary: <span class="c-str">#26262f</span>;   --muted-foreground: <span class="c-str">#a0a0af</span>;
+  --border: <span class="c-str">#25252e</span>;
+  --brand: <span class="c-str">#818cf8</span>;       <span class="c-com">/* ← lighter step than the light theme's */</span>
+  --brand-subtle: <span class="c-str">#1b1b2c</span>;  --ring: <span class="c-str">#818cf8</span>;
+  --hue-1: <span class="c-str">#6d78f5</span>;  --hue-2: <span class="c-str">#bd7e06</span>;
+  --hue-3: <span class="c-str">#0f9d8e</span>;  --hue-4: <span class="c-str">#ee4a67</span>;
+}</code></pre>
+  </div>
+
+  <div class="note">
+    <span class="lab">The concrete reason, with an example</span>
+    <p>A translucent accent needs a per-theme step. <code>bg-indigo-500/25</code> &mdash; indigo at 25% opacity &mdash; sits visibly on white and is <strong>nearly invisible on black</strong>, because a 25% tint of a mid-tone over near-black barely moves off the background. The dark theme therefore uses a <em>lighter</em> indigo (<code>#818cf8</code>), not a darker one.</p>
+    <p>The same applies to the wash tokens: they sit at 7% in light and <strong>11% in dark</strong>, because a wash has to climb further off pure black before it reads as a tint at all.</p>
+  </div>
+
+  <p>Those washes are computed rather than hand-picked:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css</span><em>derived tints</em></div>
+    <pre><code>--hue-1-wash: color-mix(<span class="c-key">in oklab</span>, var(--hue-1) <span class="c-str">7%</span>, var(--background));</code></pre>
+  </div>
+
+  <p><code>color-mix</code> blends two colours in the browser. Because the wash is expressed as a percentage <em>of the hue token</em>, re-stepping the hue automatically re-derives the wash &mdash; you cannot end up with a teal panel behind indigo text. <code>oklab</code> is the colour space: mixing in it keeps perceived lightness even, where the older sRGB mixing muddies mid-blends.</p>
+
+  <h3>Tailwind v4: turning a variable into a class</h3>
+  <p>Defining <code>--brand</code> does not by itself give you a <code>bg-brand</code> class. Tailwind v4 wires that up with a block at the top of the stylesheet:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css</span><em>the bridge</em></div>
+    <pre><code><span class="c-key">@import</span> <span class="c-str">"tailwindcss"</span>;
+<span class="c-key">@plugin</span> <span class="c-str">"@tailwindcss/typography"</span>;
+<span class="c-key">@custom-variant</span> dark (&amp;:is(.dark *));
+
+<span class="c-key">@theme inline</span> {
+  --color-brand: var(--brand);
+  --color-hue-1: var(--hue-1);
+  --color-hue-1-wash: var(--hue-1-wash);
+  <span class="c-com">/* …and so on */</span>
+}</code></pre>
+  </div>
+
+  <p>The naming is the mechanism: register <code>--color-brand</code> and Tailwind generates <code>bg-brand</code>, <code>text-brand</code>, <code>border-brand</code>, <code>ring-brand</code>, and every opacity variant of each. The <code>@custom-variant</code> line defines what <code>dark:</code> means &mdash; here, &ldquo;inside an element carrying the <code>.dark</code> class&rdquo;, which is what the theme provider toggles on <code>&lt;html&gt;</code>.</p>
+
+  <p>The payoff is that almost no component ever writes <code>dark:</code> at all. <code>bg-brand</code> is correct in both themes because <code>--brand</code> resolves differently in each. Dark mode is handled in one file, not sprinkled across fifty.</p>
+
+  <h3>The quirk that made an accent system necessary</h3>
+  <div class="note warn">
+    <span class="lab">Why nothing uses <code>--primary</code></span>
+    <p>In this project <code>--primary</code> is <strong>pure <code>#000000</code> in light and <code>#ffffff</code> in dark</strong>. It is not a colour; it is ink. So <code>bg-primary</code> gives a black button, and there is no way to get an accent out of it.</p>
+    <p>That is why <code>--brand</code> and the four <code>--hue-*</code> tokens were added as a separate layer rather than by re-defining <code>--primary</code>. Repointing <code>--primary</code> at indigo would have turned every existing black button, every ink-coloured heading and every default border indigo at once. The new tokens sit alongside and are opted into.</p>
+  </div>
+
+  <h3>One bug that lived in this file</h3>
+  <p>The <code>body</code> rule used to read <code>bg-neutral-100 dark:bg-neutral-950</code> while the site frame used <code>bg-background</code>. Those are two different near-blacks: <code>#0a0a0a</code> and <code>#000000</code>. They only met at the extreme edges of the viewport, so the difference was invisible &mdash; until you scrolled past the end of the page on a trackpad and the overscroll revealed a visible seam of the wrong black. Both now use <code>bg-background</code>.</p>
+
+  <p>A second fix in the same file is small and worth copying:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css</span><em>global, not per-page</em></div>
+    <pre><code>::selection {
+  background-color: color-mix(<span class="c-key">in oklab</span>, var(--brand) <span class="c-str">22%</span>, transparent);
+}</code></pre>
+  </div>
+
+  <p>Text-selection colour had been applied as a utility class on three of the six pages. About, login and signup got the browser default &mdash; so highlighting text on one page and then another produced two different colours. A site-wide rule in the base layer is the correct home for something that is true of the whole site.</p>
+</section>
+
+<section id="p10">
+  <span class="snum">Part 10</span>
+  <h2 class="sh">Colour with a job</h2>
+  <p class="deck">Four hues, each with a defined role; a hash function instead of a counter; and the contrast arithmetic that decided two specific shades.</p>
+
+  <p>You asked for &ldquo;subtle colours, not too flashy&rdquo;. The way that request was met was not by choosing quiet colours &mdash; it was by giving every colour a <em>job</em>, and refusing to use it anywhere else. Colour that means something reads as considered even when it is saturated; colour used decoratively reads as noise even when it is pale.</p>
+
+  <h3>The four jobs colour can do</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Job</th><th>Rule</th><th>Where it is used here</th></tr></thead>
+      <tbody>
+        <tr><th>Categorical</th><td>Distinct hues for distinct things. No order implied.</td><td>Sources in the archive; the four pipeline stages on /about.</td></tr>
+        <tr><th>Sequential</th><td>One hue, light to dark. Implies magnitude.</td><td>Not used &mdash; nothing here is a magnitude ramp.</td></tr>
+        <tr><th>Diverging</th><td>Two hues with a neutral middle. Implies polarity.</td><td>Not used &mdash; nothing here has a positive/negative axis.</td></tr>
+        <tr><th>Status</th><td>Reserved. Good / warning / critical. Never a series colour.</td><td>Kept reserved. The amber on /about is caveat-adjacent, deliberately not the rose slot.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Being explicit about which of these you are doing is most of the discipline. A common failure is using a sequential ramp for categories &mdash; four shades of blue for four sources &mdash; which tells the reader that source&nbsp;4 is somehow more than source&nbsp;1.</p>
+
+  <h3>Colour follows the entity, never its rank</h3>
+  <p>Here is the failure mode this avoids. Assign colours by list position &mdash; first source gets hue&nbsp;1, second gets hue&nbsp;2 &mdash; and then filter the archive down to three sources. The survivors move up the list, so <strong>they change colour</strong>. TechCrunch was teal a second ago and is indigo now. The reader's mental map is destroyed by an interaction that was supposed to narrow it.</p>
+  <p>The fix is to derive the colour from the source's own name:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/source-hues.ts</span><em>stable by construction</em></div>
+    <pre><code><span class="c-key">export function</span> hueFor(source: string): SourceHue {
+  <span class="c-key">let</span> hash = <span class="c-str">0</span>;
+  <span class="c-key">for</span> (<span class="c-key">let</span> i = <span class="c-str">0</span>; i &lt; source.length; i++) {
+    hash = (hash * <span class="c-str">31</span> + source.charCodeAt(i)) &gt;&gt;&gt; <span class="c-str">0</span>;
+  }
+  <span class="c-key">return</span> HUE_CLASSES[hash % HUE_CLASSES.length];
+}</code></pre>
+  </div>
+
+  <p>A hash turns text into a number. The same text always produces the same number, so the same source always lands in the same slot &mdash; on the archive index, inside a filtered view, and on the article page. Nothing is stored and nothing has to be kept in sync.</p>
+  <p>Three implementation notes worth reading, because each answers an obvious objection:</p>
+  <ul>
+    <li><strong>Why <code>&gt;&gt;&gt; 0</code>?</strong> It forces the running total back into an unsigned 32-bit integer, so the hash cannot overflow into a negative number and produce a negative array index.</li>
+    <li><strong>Collisions?</strong> Expected &mdash; there are more than four sources and four slots. Acceptable, because <em>the hue is never the only carrier</em>: the source name is printed next to every dot, everywhere a dot appears. The colour is a scanning aid for &ldquo;these two rows are the same publication&rdquo;, not an identifier. Nothing is gated behind telling hue&nbsp;2 from hue&nbsp;4.</li>
+    <li><strong>Why does it live in <code>lib/</code>?</strong> Because both a client component (the archive index) and a server component (the article page) need it. Importing it from the client module would drag that whole component graph onto the server &mdash; the Part 02 boundary showing up as a file-placement decision.</li>
+  </ul>
+
+  <h3>The colourblindness check, which was run rather than reasoned about</h3>
+  <p>Roughly 1 in 12 men has some form of colour-vision deficiency. &ldquo;These look different to me&rdquo; is not evidence. The palette was measured under simulated protanopia, deuteranopia and tritanopia, and the numbers are recorded so nobody has to re-derive them:</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Measurement</th><th class="num">Light</th><th class="num">Dark</th></tr></thead>
+      <tbody>
+        <tr><th>Worst adjacent pair, deuteranopia (&Delta;E)</th><td class="num">10.2</td><td class="num">8.9</td></tr>
+        <tr><th>Worst adjacent pair, normal vision (&Delta;E)</th><td class="num">23.6</td><td class="num">20.0</td></tr>
+        <tr><th>Contrast against the surface</th><td class="num">3:1</td><td class="num">3:1</td></tr>
+        <tr><th>Chart pair (indigo vs. grey), all three simulations</th><td class="num">33+</td><td class="num">33+</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>&Delta;E is a perceptual distance between two colours &mdash; how different they look, not how different their numbers are. The target for an adjacent pair is 8 or more; 6&ndash;8 is a floor that is only acceptable with a second encoding alongside the colour.</p>
+
+  <div class="note win">
+    <span class="lab">The ordering decision</span>
+    <p>Amber and rose are the closest pair in the set under red-green deficiency, so <strong>they are deliberately not adjacent slots</strong> &mdash; teal sits between them. The order of the four hues is itself a decision, not an arbitrary listing, and it is the cheapest possible fix for the tightest pair.</p>
+  </div>
+
+  <h3>The contrast gate that produced two specific shades</h3>
+  <p>Text on a coloured fill has a legibility minimum: 4.5:1 for body-sized text, 3:1 for large text. White on <code>indigo-500</code> measures <strong>4.3:1</strong> &mdash; under the bar at small sizes.</p>
+  <p>So every solid accent fill carrying a white label uses <code>indigo-600</code> instead of the <code>--brand</code> token. Three places: the archive's active filter pill, the auth-page mark, and the Subscribe button. And the same arithmetic decided body links inside articles:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/article/ArticleBody.tsx</span><em>contrast-driven</em></div>
+    <pre><code><span class="c-com">// Links carry the accent; underlined so they're not colour-only.
+// `indigo-600` rather than the `--brand` step: this is body-copy-sized
+// text, which needs 4.5:1, and indigo-500 on white is 4.4.</span>
+<span class="c-str">"prose-a:font-medium prose-a:text-indigo-600 prose-a:underline
+ prose-a:underline-offset-4 dark:prose-a:text-indigo-400"</span></code></pre>
+  </div>
+
+  <h3>Never colour alone</h3>
+  <p>Every place colour carries meaning, a second signal carries the same meaning. This is not a checklist item; it is what makes the colour system safe to use at all.</p>
+
+  <div class="kv">
+    <div><dt>Active nav link</dt><dd>brand underline + font-medium</dd></div>
+    <div><dt>Active filter pill</dt><dd>fill + aria-pressed + dot turns white</dd></div>
+    <div><dt>Source identity</dt><dd>coloured dot + the name, printed</dd></div>
+    <div><dt>Pipeline stage on /about</dt><dd>hue + ordinal + title</dd></div>
+    <div><dt>Chart series</dt><dd>colour + legend + table twin</dd></div>
+    <div><dt>Article link</dt><dd>colour + underline</dd></div>
+  </div>
+
+  <p>Read that list as a single rule: <strong>if you removed all the colour from this site, nothing would become unusable.</strong> Colour makes it faster to scan. It never makes it possible to understand.</p>
+</section>
+
+<section id="p11">
+  <span class="snum">Part 11</span>
+  <h2 class="sh">The page grammar</h2>
+  <p class="deck">One layout vocabulary, reused on every page &mdash; and the specific devices that replaced cards, shadows and glow.</p>
+
+  <p>Your instruction was: <em>&ldquo;the landing page design first &mdash; something unique and cool and a new way &mdash; then according to that we design other pages.&rdquo;</em> That is exactly the order it was done in, and the result is that every page is built from the same six parts. The technical name for this is a <strong>design grammar</strong>: a small set of devices you combine, rather than a new invention per page.</p>
+
+  <h3>The six devices</h3>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Device</th><th>What it is</th><th>Where it recurs</th></tr></thead>
+      <tbody>
+        <tr><th>Eyebrow</th><td>A small dot plus one word above the headline.</td><td>&ldquo;Colophon&rdquo; on /about, the ping on the hero, the nav wordmark.</td></tr>
+        <tr><th>Display headline</th><td>Very large, tight tracking, one swashed word.</td><td>Home, archive, /about, article.</td></tr>
+        <tr><th>Readout column</th><td>A right-hand list of figures beside the headline.</td><td>Home hero, /about header &mdash; the same component in both.</td></tr>
+        <tr><th>Ruled list</th><td>Rows separated by hairlines. No cards, no boxes.</td><td>Archive entries, pipeline stages, latest insights.</td></tr>
+        <tr><th>Accent hairline</th><td>A gradient rule, one per page.</td><td>Navbar bottom edge, above the meter, capping the readout.</td></tr>
+        <tr><th>Ambient wash</th><td>Two very faint radial tints at the top of a page.</td><td>Home, archive, /about, article masthead (at 70% strength).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Rules instead of cards</h3>
+  <p>The old design put content in cards: rounded rectangles with borders and shadows. A card says <em>&ldquo;this is a separate object&rdquo;</em>. An archive of 244 entries in the same series is not 244 separate objects &mdash; it is one list. Hairline rules say &ldquo;these are rows of one thing&rdquo;, they cost no vertical space, and they let the eye run down the column instead of stopping at every border.</p>
+  <p>Cards survive in exactly two places, both correct: the previous/next article links at the foot of an article (they genuinely are two distinct destinations), and the caveat panel on /about (it genuinely is set apart from the page).</p>
+
+  <h3>The ambient wash, and why it is not a blur</h3>
+  <p>The old hero had a <code>.hero-glow</code>: a coloured shape with <code>filter: blur()</code> on it. It looked fine and was expensive.</p>
+
+  <div class="note bug">
+    <span class="lab">What <code>filter: blur()</code> costs on a large element</span>
+    <p>The browser has to allocate a full-size offscreen buffer and re-run the blur on every paint, and the element is promoted onto its own compositor layer. On a big decorative shape behind the hero, you are paying real per-frame cost for something nobody is looking at.</p>
+  </div>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css &mdash; .ambient-wash</span><em>gradients, not filters</em></div>
+    <pre><code><span class="c-com">/* Two radial gradients: indigo upper-left at 16%,
+   teal upper-right at 13%. A gradient is painted directly —
+   no offscreen buffer, no extra layer. */</span></code></pre>
+  </div>
+
+  <p>The visual result is the same class of effect. The cost is roughly nothing. There is a matching <code>.ambient-wash-bottom</code> &mdash; indigo at 15%, rose at 11%, positioned below the fold &mdash; used behind the newsletter panel so the page closes the way it opened.</p>
+
+  <h3>The accent hairline</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/app/globals.css &mdash; .rule-accent</span><em>the signature device</em></div>
+    <pre><code>linear-gradient(to right,
+  transparent,
+  var(--hue-1) <span class="c-str">45%</span> at <span class="c-str">18%</span>,
+  var(--hue-3) <span class="c-str">38%</span> at <span class="c-str">55%</span>,
+  transparent)</code></pre>
+  </div>
+
+  <p>A one-pixel line that fades in from nothing, passes through indigo and then teal, and fades back out. It is used as a <em>border</em>, not as decoration &mdash; the navbar's bottom edge is this rule rather than a flat 1px border. The budget is deliberate: <strong>one accented full-width rule per page</strong>. The footer's top edge is a plain border precisely because the navbar already spent the page's allowance.</p>
+
+  <h3>Hover-revealed colour</h3>
+  <p>Both the archive rows and the /about stages have a coloured left edge that is invisible at rest and grows on hover:</p>
+
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx &middot; about/page.tsx</span><em>restraint as a mechanism</em></div>
+    <pre><code>scale-y-0 group-hover:scale-y-100</code></pre>
+  </div>
+
+  <p>Scaling from zero height to full height, rather than fading opacity, because a transform is handled by the compositor and does not force the browser to re-lay-out the row. The design reason is stated in the /about file: <em>&ldquo;At rest the ordinal alone carries it, so four coloured bars aren't all shouting at once.&rdquo;</em> The colour exists, and it arrives only when you point at the thing it belongs to.</p>
+
+  <h3>Two layout fixes that were genuine bugs</h3>
+
+  <div class="note bug">
+    <span class="lab">The contents rail released itself</span>
+    <p>On the article page, the contents rail was inside the <code>&lt;header&gt;</code>. In CSS, <code>position: sticky</code> is bounded by the element's parent &mdash; so the rail unstuck the moment the header scrolled off, taking the section list away <em>exactly</em> when the reader reached the sections it lists.</p>
+    <p>The fix was structural: one grid spanning both the masthead and the body, with the rail as a cell that spans both rows. It is now pinned for the whole article, so it is also capped at <code>max-h-[calc(100vh-8rem)]</code> with its own scrollbar &mdash; the longest documents carry enough headings to run past the bottom of the window.</p>
+  </div>
+
+  <div class="note bug">
+    <span class="lab">A rule drawn twice</span>
+    <p>The archive's sticky month header draws a line, and the first entry underneath it drew its own top border. Two hairlines, two pixels apart. Fixed with <code>[&amp;&gt;li:first-child&gt;a]:border-t-0</code> &mdash; Tailwind's syntax for &ldquo;apply this to a descendant matching this selector&rdquo;, which avoids adding a prop to <code>EntryRow</code> purely to tell it that it is first.</p>
+  </div>
+
+  <h3>The swash</h3>
+  <p>The landing page sets &ldquo;Signal&rdquo; in teal against an indigo-swashed &ldquo;Noise.&rdquo; The swash is a rotated coloured bar sitting behind one word. It is built by painting the bar first and putting the word after it in document order:</p>
+
+  <div class="spec">
+    <div class="tag"><span>app/about/page.tsx &mdash; the same trick, reused</span><em>document order, not z-index</em></div>
+    <pre><code>&lt;span className=<span class="c-str">"relative inline-block"</span>&gt;
+  &lt;span className=<span class="c-str">"absolute right-0 -bottom-1 left-0 h-3 -rotate-1 bg-brand/25"</span>
+        aria-hidden=<span class="c-str">"true"</span> /&gt;
+  &lt;span className=<span class="c-str">"relative"</span>&gt;is made.&lt;/span&gt;
+&lt;/span&gt;</code></pre>
+  </div>
+
+  <p>The obvious implementation is a negative <code>z-index</code> on the bar, and it does not work here: a negative z-index needs an ancestor that opens a stacking context, which a plain header does not. Painting in the right order sidesteps the whole problem. <code>aria-hidden="true"</code> keeps the decorative bar out of the accessibility tree so a screen reader reads the sentence, not a stray element.</p>
+</section>
+
+<section id="p12">
+  <span class="snum">Part 12</span>
+  <h2 class="sh">The chart</h2>
+  <p class="deck">The signal meter is the landing page's whole argument. Every encoding decision in it, and why it ships without a charting library.</p>
+
+  <p>The site's claim is &ldquo;we read everything and keep the good part&rdquo;. The meter is the evidence: one column per bucket, full height is everything read, the bright segment at the base is what was kept.</p>
+
+  <p>&ldquo;Bucket&rdquo; rather than &ldquo;month&rdquo; because the width is chosen from the data. Under ten weeks of history the buckets are weeks; past that they are calendar months. A monthly axis over three weeks of operation draws one column and calls it a trend, and a weekly axis over two years draws a hundred and four. The threshold is decided in SQL, travels with the payload as <code>granularity</code>, and the component reads it to pick its heading, its labels and its table header &mdash; so the chart cannot disagree with itself about what a column means.</p>
+
+  <h3>One axis, always</h3>
+  <p>Reads and keeps differ by roughly <strong>80&times;</strong>. The tempting move is a dual-axis chart &mdash; reads on the left scale, keeps on the right &mdash; so both lines are visible. This is the single most common charting mistake, and it is a fabrication: the two scales are chosen by whoever made the chart, so any crossing, convergence or gap between the lines is an artefact of that choice, not something in the data.</p>
+  <p>Keeps are a <em>subset</em> of reads, measured in the same unit. So it is drawn as part-to-whole inside one column. No second scale exists, so there is nothing to misalign and nothing to misread.</p>
+
+  <h3>One clock, or the shape means nothing</h3>
+  <p>This is the correctness fix that mattered most, and it was invisible because the chart looked fine.</p>
+  <p>The two halves of every column used to come from different tables on different timestamps: <code>read</code> from <code>raw_api_data.created_at</code>, the moment an article was ingested, and <code>kept</code> from <code>posts.published_at</code>, the moment an entry went live. Those are two populations on two clocks. An article read in September and published in October was counted in two separate columns, so the bright segment in a column was <em>not a subset of</em> the column containing it &mdash; which is the only premise that makes a part-to-whole bar legitimate.</p>
+
+  <div class="note bug">
+    <span class="lab">What that allowed</span>
+    <p>A keep rate above 100%, for a start &mdash; nothing in the arithmetic forbade it. And entries backfilled into <code>posts</code> ahead of the pipeline &mdash; most of the table, at the time &mdash; have no originating raw item at all, so they were counted as keeps against reads that were never made.</p>
+  </div>
+
+  <p>Every figure is now counted over one cohort on one clock: the raw item's own ingest timestamp, with the keep credited through the <code>posts.raw_item_id</code> foreign key back to the item it came from. An article read in September and published in October is a September keep. That is also the more useful question &mdash; <em>of what we read then, how much survived</em> &mdash; rather than <em>what did we publish this month</em>, which is a publishing schedule, not a filter.</p>
+  <p>The backfilled entries have no <code>raw_item_id</code>, so they are now absent from both halves rather than present in one. And the migration that introduced the queue stamped every pre-existing raw row <code>status = 'skipped'</code>, <code>last_error = 'pre-queue backlog'</code>; those are reads the pipeline never actually performed, so the SQL excludes them from every figure it returns.</p>
+
+  <h3>In flight is not rejected</h3>
+  <p>Covered in full in Part 08: the rate's denominator is the <em>decided</em> population, not everything ingested, so a bucket the triage queue has not reached yet shows its volume and no percentage. Two consequences are visible in the chart itself.</p>
+  <p>A bucket whose window is still open is marked <code>partial</code> by the SQL and rendered at 60% opacity, with &ldquo;(in progress)&rdquo; in its readout. It is real data and it is not yet comparable to the closed buckets beside it, and that is a distinction the eye can carry without a legend entry.</p>
+  <p>Those buckets are also excluded from the caption's endpoints. The caption compares a first and last bucket, and an in-flight bucket's volume is not comparable to a finished one's &mdash; a week that is two days old always looks like a collapse in throughput.</p>
+
+  <h3>Empty buckets are drawn, not dropped</h3>
+  <p>The pipeline was idle for a stretch. Removing those columns would compress the time axis and imply continuous operation. A gap in the data is data.</p>
+  <p>This is now guaranteed on the database side rather than assembled in TypeScript: the SQL generates the full series of bucket edges with <code>generate_series</code> and left-joins the data onto it, so a window with no activity comes back at zero by construction. Previously each window cost two separate count requests, and an absent window was a bug waiting on someone to notice a missing column.</p>
+
+  <h3>Labels are sparing</h3>
+  <p>Only the two endpoints of the story carry a direct label. Axis ticks carry the values in between; the table carries all of them. A number printed on every column is the classic way to make a chart unreadable &mdash; the point of a chart is the shape, and if every value is labelled you have made a table with decorative bars.</p>
+  <p>The caption underneath is generated from the data rather than written:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/home/SignalMeter.tsx</span><em>a caption that cannot go stale</em></div>
+    <pre><code><span class="c-key">const</span> caption = <span class="c-str">`Keep rate ${</span>
+  last.kept / last.resolved &lt; first.kept / first.resolved ? <span class="c-str">"fell"</span> : <span class="c-str">"rose"</span>
+<span class="c-str">} from … while the volume read each ${period} ${</span>
+  volumePhrase(first.read, last.read)
+<span class="c-str">}.`</span>;</code></pre>
+  </div>
+
+  <p>The direction word is <em>read off the data</em>, not assumed. If next month's filter loosens, the caption says &ldquo;rose&rdquo;. A hardcoded &ldquo;fell&rdquo; would eventually become a lie that nobody notices, because captions are the last thing anyone re-reads.</p>
+  <p>The volume half had the same defect one layer down and it is worth spelling out, because it is the subtler version of the mistake. The verb was hardcoded to &ldquo;grew&rdquo; while the number was computed &mdash; so the first period the pipeline read less than it did at the start, the caption would have said <em>&ldquo;grew 0.5&times;&rdquo;</em>. Both halves of that phrase are now derived together in <code>volumePhrase()</code>, which reads the verb off the rounded multiplier and keeps the multiplier above 1 in both directions: <em>&ldquo;fell 2.0&times;&rdquo;</em> is the sentence, never <em>&ldquo;grew 0.5&times;&rdquo;</em>. A multiplier that rounds to <code>1.0</code> gets a third branch, &ldquo;remained unchanged&rdquo;, because <em>&ldquo;grew 1.0&times;&rdquo;</em> is not a sentence either. <strong>A generated number next to a hardcoded word is a lie with a delay on it.</strong></p>
+  <p><code>${period}</code> rather than the literal &ldquo;month&rdquo;, for the same reason: the buckets are weeks when the history is short, and the sentence has to say which.</p>
+
+  <h3>Mark geometry</h3>
+  <div class="kv">
+    <div><dt>Plot height</dt><dd>176px</dd></div>
+    <div><dt>Gap between the two stacked segments</dt><dd>2px of surface</dd></div>
+    <div><dt>Minimum visible segment</dt><dd>2px</dd></div>
+    <div><dt>Column corners</dt><dd>rounded at the data end, square at the baseline</dd></div>
+    <div><dt>Axis ticks</dt><dd>3 &mdash; top, midpoint, zero</dd></div>
+    <div><dt>Bucket still in progress</dt><dd>60% opacity, and no rate printed</dd></div>
+  </div>
+
+  <p>Two details there are quietly important. The 2px gap between the kept segment and the remainder is <em>surface colour</em>, not a border &mdash; it separates the two values without adding a line that could be mistaken for data. And the remainder's height is reduced by exactly that gap, so the stack still totals the true read height rather than overshooting by two pixels every column.</p>
+  <p>Rounding only the top is the small thing that makes a bar chart look finished: a rounded baseline lifts the bar off the axis and makes zero look like a positive value.</p>
+  <p>The axis top is snapped to a clean number rather than the exact maximum, so column heights are scaled against 1500 rather than 1473 and the ticks read as round figures.</p>
+
+  <h3>The grey is deliberately low contrast</h3>
+  <p>The &ldquo;read&rdquo; track sits below 3:1 against the surface, which would normally be a failure. Here it is the design: the grey is recessive context, and the accessibility requirement is met a different way &mdash; every value is reachable as text in the table, and nothing is gated behind seeing the grey at all. A contrast warning obligates you to provide the value elsewhere; it does not forbid a quiet colour.</p>
+
+  <h3>Two series, so a legend always exists</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/components/home/SignalMeter.tsx</span><em>identity, spelled out</em></div>
+    <pre><code>&lt;dl&gt;
+  &lt;div&gt;■ &lt;dt&gt;Kept&lt;/dt&gt; &lt;dd&gt;survived the filter&lt;/dd&gt;&lt;/div&gt;
+  &lt;div&gt;■ &lt;dt&gt;Read&lt;/dt&gt; &lt;dd&gt;everything ingested&lt;/dd&gt;&lt;/div&gt;
+&lt;/dl&gt;</code></pre>
+  </div>
+
+  <p>A definition list, not a row of divs, because a legend genuinely is a set of term/definition pairs and saying so gives assistive technology the structure for free.</p>
+
+  <h3>The table twin</h3>
+  <p>Under the chart is a collapsed <code>&lt;details&gt;</code> element containing every plotted value as a real HTML table. Native disclosure &mdash; no JavaScript, works before hydration, and the browser's own find-in-page can search inside it. The chart is never the only route to the data.</p>
+  <p>It carries one column the chart cannot: <strong>Triaged</strong>, the rate's denominator. The plot can show that a bucket has no percentage, but only the number of items actually decided explains why &mdash; and a rate whose denominator is invisible is a rate the reader has to take on trust. The rate cell itself prints an em dash where no rate exists, which is the same claim the missing label on the column makes.</p>
+
+  <h3>No charting library, and no client JavaScript</h3>
+  <div class="note win">
+    <span class="lab">The whole chart is server-rendered HTML and CSS</span>
+    <p>Column heights are inline <code>style="height: …"</code> values computed on the server from static counts. There is no canvas, no SVG library, no animation loop, no <code>"use client"</code>. Nothing about this chart is downloaded as JavaScript.</p>
+    <p>The hover readout is <code>group-hover:block</code> plus <code>group-focus-within:block</code> &mdash; pure CSS. It therefore works before hydration, and it works for keyboard users, because focus triggers it as well as the pointer.</p>
+  </div>
+
+  <p>The hit target for that readout is the full column slot, not the 24-pixel-wide bar:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/home/SignalMeter.tsx</span><em>a target you can actually hit</em></div>
+    <pre><code>&lt;button <span class="c-key">type</span>=<span class="c-str">"button"</span>
+  aria-label={<span class="c-str">`${title}: ${read} read, ${kept} kept${</span>
+    rate ? <span class="c-str">`, ${rate} kept`</span> : undecided ? <span class="c-str">", awaiting triage"</span> : <span class="c-str">""</span>
+  <span class="c-str">}`</span>}
+  className=<span class="c-str">"absolute inset-0 cursor-default rounded
+             focus-visible:ring-2 focus-visible:ring-ring"</span> /&gt;</code></pre>
+  </div>
+
+  <p>A real <code>&lt;button&gt;</code>, not a div, so it is in the tab order with no extra work. <code>cursor-default</code> because it does not navigate anywhere &mdash; a pointer cursor would promise a click that does nothing. And the <code>aria-label</code> carries the same two numbers the tooltip shows, so the chart is fully readable by voice.</p>
+
+  <h3>The readout beside it is not a chart</h3>
+  <p><code>PipelineReadout</code> renders up to five all-time figures as a plain list. It is separate from the meter because these are single current values &mdash; a KPI list, not a plot &mdash; and conflating the two is how dashboards end up with a bar chart of four unrelated numbers.</p>
+  <p>&ldquo;Up to&rdquo; is load-bearing. Three of the rows are conditional, and the signal-to-noise row is dropped entirely unless the ratio is a real statement about signal. It used to be <code>1 in ${Math.round(articlesRead / entriesKept)}</code>, guarded only against a zero denominator &mdash; so the moment all-time keeps exceeded all-time reads, which the two-clock bug and the unreadable raw table together guaranteed, it rounded down and the homepage printed <strong>&ldquo;Signal-to-noise: 1 in 0&rdquo;</strong>. It is now taken over the triaged population, for the same reason the chart's rates are, and the row only appears when the result is at least 1.</p>
+  <p>One typographic decision in it is worth stealing: the figures use <em>proportional</em> numerals, not tabular ones. <code>tabular-nums</code> gives every digit the width of a zero, which is correct when digits stack in a column and wrong here, where it makes a number like 244 look loose. Tabular figures are reserved for the axis ticks and the table, where alignment actually matters.</p>
+  <p>And exactly one of the values is coloured &mdash; the signal-to-noise ratio, because that is the figure the entire page is arguing for. Colouring one value in five marks it as the headline number. Colouring all five would mark nothing.</p>
+
+  <div class="note bug">
+    <span class="lab">A conditional row and a positional test</span>
+    <p>That highlight was written as <code>index === 2</code>, the ratio row's position when every row is present. But three of the rows are conditional, so whenever the ratio row was dropped the brand colour landed on whichever row slid into slot 2 &mdash; emphasising the source count as though it were the page's argument.</p>
+    <p>It is now <code>label === highlight</code>, compared against the same variable that decides whether the row is pushed at all. <strong>When a list is built conditionally, nothing downstream may address its items by index.</strong> The two facts have to come from one place or they drift apart on the first edit.</p>
+  </div>
+</section>
+
+<section id="p13">
+  <span class="snum">Part 13</span>
+  <h2 class="sh">Access as a constraint</h2>
+  <p class="deck">Accessibility treated as a build rule rather than an audit &mdash; the specific attributes used here, and what each one actually does.</p>
+
+  <p>The difference between accessibility as a constraint and accessibility as an audit: a constraint changes what you build, an audit changes what you patch. Everything below was decided while writing the component, which is why almost none of it is a wrapper added afterwards.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Attribute</th><th>What it tells assistive tech</th><th>Used on</th></tr></thead>
+      <tbody>
+        <tr><th><code>aria-current="page"</code></th><td>&ldquo;This link is the page you are on.&rdquo;</td><td>Active nav links, desktop and mobile.</td></tr>
+        <tr><th><code>aria-pressed</code></th><td>&ldquo;This is a toggle, and here is its state.&rdquo;</td><td>Archive source-filter pills.</td></tr>
+        <tr><th><code>aria-live="polite"</code></th><td>&ldquo;Announce this when it changes.&rdquo;</td><td>The filtered result count.</td></tr>
+        <tr><th><code>aria-hidden="true"</code></th><td>&ldquo;Skip this &mdash; it is decoration.&rdquo;</td><td>Dots, swashes, gradient rules, icons beside text.</td></tr>
+        <tr><th><code>aria-label</code></th><td>A name for a control with no visible text.</td><td>Chart hit targets, the mobile menu button, heading anchors.</td></tr>
+        <tr><th><code>aria-labelledby</code></th><td>Points a section at its own heading.</td><td>The signal meter section.</td></tr>
+        <tr><th><code>sr-only</code></th><td>Present for screen readers, invisible on screen.</td><td>Social-icon names, the result count.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Icons beside text are hidden, not labelled</h3>
+  <p>A common mistake is giving every icon an <code>aria-label</code>. If the icon sits next to the word it illustrates, that makes a screen reader announce the concept twice: &ldquo;clock, clock, 6 min read&rdquo;. So decorative icons get <code>aria-hidden="true"</code>, and only icons that are <em>alone</em> get a name.</p>
+
+  <h3>Semantic elements before ARIA attributes</h3>
+  <p>The best ARIA is the ARIA you did not have to write. This codebase leans on real elements throughout: <code>&lt;nav aria-label="Breadcrumb"&gt;</code>, <code>&lt;ol&gt;</code> for the pipeline stages because they genuinely are ordered, <code>&lt;dl&gt;</code> for the legend and the readout because they genuinely are term/definition pairs, <code>&lt;details&gt;</code> for the table disclosure, <code>&lt;button type="button"&gt;</code> rather than a clickable div, and <code>&lt;th scope="row"&gt;</code> in the data table so each row announces which month it belongs to.</p>
+
+  <h3>Focus</h3>
+  <p>Every interactive element has a visible keyboard focus state, written as <code>focus-visible:ring-2 focus-visible:ring-ring</code>. <code>focus-visible</code> rather than <code>focus</code> is the important half: it shows the ring for keyboard navigation and suppresses it for mouse clicks, which is why removing focus rings ever seemed tempting in the first place.</p>
+
+  <h3>Heading structure</h3>
+  <p>Part 06's Markdown repair is an accessibility fix as much as a visual one. A document should have exactly one H1; the corpus was shipping two on 175 of 244 pages. Screen reader users navigate by heading level, so a duplicated H1 and an unpredictable hierarchy make the document's outline useless. Demoting rather than deleting the stray second H1 keeps the section in the outline where it belongs.</p>
+
+  <div class="note warn">
+    <span class="lab">Not done</span>
+    <p>There is no <code>prefers-reduced-motion</code> handling anywhere in the stylesheet. The site's remaining animation is modest &mdash; the navbar's entrance fade, a few hover transforms &mdash; but a user who has asked their operating system for less motion is currently not being listened to. This belongs in Part 17's open list, not in the credit column.</p>
+  </div>
+</section>
+
+<section id="p14">
+  <span class="snum">Part 14</span>
+  <h2 class="sh">Performance</h2>
+  <p class="deck">What is downloaded, what is not, and the decisions that moved work off the visitor's machine.</p>
+
+  <p>Every technique here reduces to the same question: <em>can this happen once, on our machine, instead of once per visitor, on theirs?</em></p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Decision</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><th>ISR at 3600s on every public page</th><td>Visitors get a pre-built file. Database work happens once an hour, not once per view.</td></tr>
+        <tr><th>Cookie-free Supabase client</th><td>Keeps those pages eligible for static generation at all &mdash; the precondition for the row above.</td></tr>
+        <tr><th><code>generateStaticParams</code> returning <code>[]</code></th><td>Articles become cacheable instead of <code>no-store</code>, without paying 244 renders per build.</td></tr>
+        <tr><th><code>cache()</code> around the corpus query</th><td>Halves the queries on article pages, which fetch it twice per render.</td></tr>
+        <tr><th><code>Promise.all</code> on the homepage</th><td>Two queries in the time of the slower one.</td></tr>
+        <tr><th>Head-only count requests</th><td>Month buckets cost a number each, not a page of rows each.</td></tr>
+        <tr><th>Excerpts cut to 180 characters</th><td>Roughly 275KB of never-displayed prose kept out of the archive payload.</td></tr>
+        <tr><th>Gradients instead of <code>filter: blur()</code></th><td>No offscreen buffers, no extra compositor layers for decoration.</td></tr>
+        <tr><th>Server-rendered chart</th><td>A whole data visualisation with zero JavaScript shipped.</td></tr>
+        <tr><th>framer-motion removed from the article</th><td>The body is HTML again, not a hydration side-effect.</td></tr>
+        <tr><th>Fonts self-hosted via <code>next/font</code></th><td>No third-party request, no layout shift when the face swaps in.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The animation that was removed, and why</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/components/article/ArticleBody.tsx &mdash; header comment</span><em>the reasoning, kept in the file</em></div>
+    <pre><code><span class="c-com">/**
+ * Server-rendered. This was previously wrapped in a framer-motion
+ * section that faded the whole article in on mount, which meant the
+ * text existed only after hydration and arrived as one 20px lurch —
+ * an animation applied to a wall of prose, where it costs legibility
+ * and buys nothing.
+ */</span></code></pre>
+  </div>
+
+  <p>Unpack &ldquo;existed only after hydration&rdquo;, because it is the real cost. A fade-in animation starts from opacity zero. So the server's perfectly good HTML arrived, and was invisible, until the JavaScript loaded and told it to appear. On a slow connection that is a blank article for as long as the bundle takes. The reader gains a fade they did not ask for and loses the text they came for.</p>
+
+  <h3>The image rules</h3>
+  <p><code>next.config.ts</code> lists which remote hosts the image optimiser may fetch from. Two template leftovers &mdash; giphy and pixabay &mdash; were removed because nothing in the codebase referenced them, and each entry in that list widens what your own server can be asked to fetch and re-serve.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/next.config.ts</span><em>narrowed</em></div>
+    <pre><code><span class="c-com">// Only hosts we actually serve images from. Each entry here widens
+// what the optimizer will fetch and re-serve from our own origin…
+// Supabase storage stays: article markdown can embed images.</span>
+remotePatterns: [
+  { protocol: <span class="c-str">"https"</span>, hostname: <span class="c-str">"*.supabase.co"</span>,
+    pathname: <span class="c-str">"/storage/v1/object/public/**"</span> },
+  { protocol: <span class="c-str">"http"</span>, hostname: <span class="c-str">"127.0.0.1"</span>, port: <span class="c-str">"54321"</span> },
+]</code></pre>
+  </div>
+
+  <p>Note the <code>pathname</code> constraint on the Supabase entry. Without it, the pattern would allow any path on any Supabase subdomain; with it, only the public storage bucket. Narrow the pattern to what you actually use.</p>
+</section>
+
+<section id="p15">
+  <span class="snum">Part 15</span>
+  <h2 class="sh">Bugs found &amp; fixed</h2>
+  <p class="deck">Everything that was actually broken, in one place. Several of these were invisible until something else changed.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>What was wrong</th><th>Why it happened</th></tr></thead>
+      <tbody>
+        <tr><th>Footer social icons were inert</th><td>Written as <code>&lt;Twitter href="#"&gt;Twitter&lt;/Twitter&gt;</code>. Lucide icons are SVG components: they ignore <code>href</code> and render no children. Three glyphs with no link and no accessible name.</td></tr>
+        <tr><th>Copyright frozen at 2025</th><td>A hardcoded string. Now <code>new Date().getFullYear()</code>.</td></tr>
+        <tr><th><code>/search</code> nav link 404'd</th><td>No such route exists in <code>app/</code>. Dropped from the link list rather than shipped broken.</td></tr>
+        <tr><th>/about rendered a black rectangle</th><td>The page was a single absolutely-positioned gradient div with no content, hardcoded to <code>gray-950</code> so it ignored the theme entirely. In light mode it was a black slab with nothing on it.</td></tr>
+        <tr><th>A visible seam on overscroll</th><td><code>body</code> used <code>dark:bg-neutral-950</code> (<code>#0a0a0a</code>) while the frame used <code>bg-background</code> (<code>#000000</code>). They only met at the edges.</td></tr>
+        <tr><th>Text selection colour differed by page</th><td>Applied as a utility on 3 of 6 pages; About, login and signup got the browser default.</td></tr>
+        <tr><th>The contents rail vanished mid-article</th><td><code>sticky</code> is bounded by its parent, and the rail lived inside the header.</td></tr>
+        <tr><th>Month header slid under the navbar</th><td>Two sticky elements, one offset. <code>top-0</code> → <code>top-16</code>.</td></tr>
+        <tr><th>Double hairline above the first archive row</th><td>The month header's rule plus the row's own top border.</td></tr>
+        <tr><th>Article header said &ldquo;Deep Dive&rdquo;</th><td>A hardcoded heading and a stale author name that appeared only after hydration.</td></tr>
+        <tr><th>Three quarters of entries showed a fake reading time</th><td><code>estimated_time</code> missing on 178/244; the gap filled with <code>"5 min read"</code>.</td></tr>
+        <tr><th>Nearly every entry was graded &ldquo;beginner&rdquo;</th><td>A default standing in for an ungraded field.</td></tr>
+        <tr><th>One publication counted as five</th><td>Five spellings of MarkTechPost from the ingest adapters.</td></tr>
+        <tr><th>Stray horizontal rules under headings</th><td>147 setext underlines below ATX headings across the corpus.</td></tr>
+        <tr><th>Two competing headlines per article</th><td>175/244 bodies open with their own H1.</td></tr>
+        <tr><th>Summaries opening with &ldquo;I can summarize the content for you.&rdquo;</th><td>Generator preamble &mdash; harmless in small text, fatal at display size.</td></tr>
+        <tr><th>Two date formats in one column</th><td>Raw ISO strings rendering beside formatted ones.</td></tr>
+        <tr><th>The chart compared two different populations</th><td><code>read</code> came from <code>raw_api_data.created_at</code> and <code>kept</code> from <code>posts.published_at</code> &mdash; two tables on two clocks. The bright segment was not a subset of the column holding it, so the keep rate could exceed 100%, and entries backfilled ahead of the pipeline counted as keeps against reads that were never made. Part 12.</td></tr>
+        <tr><th>Two recent months showed a flat 0% keep rate</th><td>The rate was <code>kept / read</code>, which counts an item still sitting in the triage queue as a rejection. Nothing had been rejected; the bot had not reached them. Now <code>kept / resolved</code>, and a bucket with nothing decided gets no rate at all.</td></tr>
+        <tr><th>The readout could print &ldquo;Signal-to-noise: 1 in 0&rdquo;</th><td><code>Math.round(articlesRead / entriesKept)</code>, guarded only against a zero denominator. Once keeps outnumbered reads &mdash; which the two bugs above guaranteed &mdash; it rounded to zero and stated it confidently.</td></tr>
+        <tr><th>The wrong readout row was coloured</th><td>The brand highlight was <code>index === 2</code>, but three of the five rows are conditional. With the ratio row dropped, the colour landed on the source count.</td></tr>
+        <tr><th>A real zero deleted the whole readout</th><td><code>if (!articlesRead || !entriesKept)</code>. <code>0</code> is falsy, so a genuine measurement took the failure branch and took the sources and start date with it. Now <code>=== null</code>.</td></tr>
+        <tr><th>The caption could have said &ldquo;grew 0.5&times;&rdquo;</th><td>The multiplier was computed while the verb beside it was hardcoded to &ldquo;grew&rdquo;. Latent rather than visible &mdash; it needed one period of falling volume to fire. Both halves now come from <code>volumePhrase()</code>.</td></tr>
+        <tr><th>Every &ldquo;articles read&rdquo; figure depended on a secret key</th><td><code>raw_api_data</code> has RLS on and no policy, and PostgREST reports that as an empty table with no error. The counts only worked because the build was authenticating as <code>service_role</code>. Rotating the key, as Part 17 says to, would have silently zeroed them. Part 08.</td></tr>
+        <tr><th>The navbar looked like a different website</th><td>Four separate causes &mdash; see below.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The navbar, in detail</h3>
+  <p>Your words were: <em>&ldquo;Looks nice but the navbar feels like odd one out.&rdquo;</em> That instinct was correct four times over, and the causes are recorded in the file so the diagnosis is not lost:</p>
+  <ol>
+    <li><strong>It was the only user of shadcn's <code>NavigationMenu</code>.</strong> That component's default style puts a filled <code>bg-accent</code> pill behind each link on hover. Every other link on the site is bare text that changes colour. So the nav had three chunky blobs where the rest of the page has hairlines and type. The menu primitive is now gone entirely &mdash; these are two links, not a menu system with triggers and viewports.</li>
+    <li><strong>Nothing marked the current page</strong>, even though <code>usePathname</code> was already imported for the auth-page check. Every other list on the site tells you where you are.</li>
+    <li><strong>It had no colour at all</strong>, on a site now running a four-hue system.</li>
+    <li><strong>One of its links 404'd.</strong></li>
+  </ol>
+
+  <p>The rebuild deliberately introduces no new devices. The bottom edge is the <code>rule-accent</code> hairline that already caps the readout column and sits above the meter. The brand dot is the one <code>/about</code> uses on its eyebrow. Both are quotes of existing elements, which is the point &mdash; the nav should read as the top of <em>this</em> page, not as a component from another kit.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/components/Navbar.tsx</span><em>the active-state rule</em></div>
+    <pre><code><span class="c-com">/** `/blog` stays marked while you're inside an entry — it's still the archive. */</span>
+<span class="c-key">const</span> isActive = (href: string) =&gt;
+  pathname === href || pathname.startsWith(<span class="c-str">`${href}/`</span>);</code></pre>
+  </div>
+
+  <p>Desktop and mobile mark the active row differently, and for a reason. Desktop gets a brand underline plus a weight change &mdash; the weight matters, because an underline alone would be colour-plus-decoration and the weight makes it survive with colour removed. Mobile gets a left edge instead, because an underline would collide with the row separators.</p>
+
+  <h3>The footer fix, written out</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/components/Footer.tsx</span><em>after</em></div>
+    <pre><code><span class="c-com">/* Rendered but not linked — no destination exists yet, and a live
+   anchor to `#` is worse than a plain mark. */</span>
+{UNLINKED.map(({ label, Icon }) =&gt; (
+  &lt;span key={label} className=<span class="c-str">"text-muted-foreground/40"</span>&gt;
+    &lt;Icon className=<span class="c-str">"h-[18px] w-[18px]"</span> aria-hidden=<span class="c-str">"true"</span> /&gt;
+    &lt;span className=<span class="c-str">"sr-only"</span>&gt;{label} — not yet available&lt;/span&gt;
+  &lt;/span&gt;
+))}</code></pre>
+  </div>
+
+  <p>GitHub &mdash; the one real URL in the file &mdash; became a proper anchor with a visually hidden name. Twitter and LinkedIn are dimmed and carry an sr-only explanation, because a link to <code>#</code> is a promise the page cannot keep.</p>
+
+  <h3>The bug that was not a bug</h3>
+  <div class="note bug">
+    <span class="lab">The completely unstyled page</span>
+    <p>You sent a screenshot of the site rendered in raw HTML: serif type, a bulleted navigation list, default purple links, &ldquo;in theNoise.&rdquo; run together. It looked like the design system had collapsed.</p>
+    <p>Nothing was wrong with the code. The production server on port 3001 had been started <em>before</em> the last <code>pnpm build</code>. The build replaced the <code>.next</code> folder underneath the running process, so the server was still serving HTML that referenced a stylesheet hash that no longer existed on disk. Every CSS request 404'd. The HTML was fine; the page had no stylesheet to apply.</p>
+    <p><strong>Standing rule that came out of this: restart the server after every build.</strong> A stale process serving a fresh build's HTML is indistinguishable, on screen, from a catastrophic CSS bug.</p>
+  </div>
+
+  <p>That episode is the reason this document exists in the shape it does. Half an hour could have gone into &ldquo;fixing&rdquo; a design system that was never broken. The habit worth keeping is: <strong>before believing a symptom, verify that what you are looking at is what you just built.</strong></p>
+</section>
+
+<section id="p16">
+  <span class="snum">Part 16</span>
+  <h2 class="sh">Practices that paid</h2>
+  <p class="deck">The working habits behind everything above, each with the concrete thing it bought.</p>
+
+  <h3>1. Comments explain <em>why</em>, never <em>what</em></h3>
+  <p>Read almost any file in this project and the comments are unusual: they are long, and none of them describe what the code does. <code>const PAGE = 1000</code> does not get &ldquo;the page size&rdquo;. It gets the paragraph about PostgREST silently truncating.</p>
+  <p>The reason is that <em>what</em> is already in the code and cannot go stale, while <em>why</em> exists only in the head of whoever wrote it and evaporates in a week. Every comment in this codebase is answering the question a future reader will actually have: <strong>&ldquo;why is it like this, and what happens if I change it?&rdquo;</strong></p>
+  <p>The practical payoff is that these comments are load-bearing. The one on <code>countIn</code> stops someone extracting the table names into constants and silently losing type checking. The one on the empty <code>generateStaticParams</code> stops someone &ldquo;completing&rdquo; it and adding 244 renders to every build. They are guardrails written in English.</p>
+
+  <h3>2. Delete dead code, but ask before deleting the unrecoverable</h3>
+  <p>Ten block components, a navigation-menu primitive, two image hosts, and a 58MB folder of screenshots came out. Dead code is not neutral: it is maintained, bundled, read, and eventually trusted by someone who assumes it runs.</p>
+  <p>But the deletion was split by recoverability. Tracked files are one <code>git checkout</code> away, so removing them is cheap and reversible. The 58MB of untracked screenshots and the ad-hoc scripts folder were <strong>gone forever</strong> if wrong &mdash; so those were confirmed with you first, and the confirmation named exactly what would survive (all 20 <code>public/</code> assets, the favicon, the bot diagrams). <em>Recoverability, not size, decides whether you need permission.</em></p>
+
+  <h3>3. Verify by build and typecheck, not by looking</h3>
+  <p>You said, plainly: <em>&ldquo;stop checking every small change, let me see the changes &mdash; just do the changes.&rdquo;</em> That was the right call and it changed the verification loop for the better. Screenshots after every edit are slow and prove almost nothing. Three commands prove a great deal:</p>
+
+  <div class="spec">
+    <div class="tag"><span>the verification loop</span><em>run in this order</em></div>
+    <pre><code>pnpm biome check .     <span class="c-com"># style + a class of real mistakes</span>
+pnpm tsc --noEmit      <span class="c-com"># every type, every call site, no output files</span>
+pnpm build             <span class="c-com"># does it compile, and which routes are static?</span></code></pre>
+  </div>
+
+  <p>The build output is the most underused of the three. It prints a route table with a symbol per route &mdash; <code>○</code> static, <code>●</code> prebuilt, <code>ƒ</code> dynamic. That table is how you catch a page silently falling out of static generation because something deep in its import graph started reading a cookie. It is a performance regression test you get for free on every build.</p>
+
+  <h3>4. One source of truth per fact</h3>
+  <p>The pattern repeats everywhere once you look for it:</p>
+  <div class="kv">
+    <div><dt>Nav links</dt><dd>one LINKS array → desktop + mobile</dd></div>
+    <div><dt>Date format</dt><dd>normalised once in blog-data</dd></div>
+    <div><dt>Article spacing</dt><dd>one PROSE_CLASS constant</dd></div>
+    <div><dt>Source colour</dt><dd>one hash function</dd></div>
+    <div><dt>Every colour</dt><dd>one token block</dd></div>
+    <div><dt>Older/newer links</dt><dd>the archive's own ordered list</dd></div>
+    <div><dt>Heading slugs</dt><dd>one slugger, shared by body and rail</dd></div>
+  </div>
+  <p>That last one is the sharpest example. The contents rail and the article body both need anchor IDs, and they must agree exactly &mdash; including how a document with two &ldquo;Conclusion&rdquo; headings de-duplicates them into <code>conclusion</code> and <code>conclusion-1</code>. Two separate implementations would agree until the day they didn't, and then the contents links would point at the wrong sections. One shared <code>createSlugger()</code> makes disagreement impossible.</p>
+
+  <h3>5. Count the corpus before trusting a field</h3>
+  <p>Every &ldquo;this field is unreliable&rdquo; claim in this document is a number: 178 of 244 missing, 175 of 244 with a stray H1, 147 setext underlines, ~1,130 characters average, 10 summaries with a generator preamble. None of those were guesses.</p>
+  <p>This matters because the difference between &ldquo;sometimes missing&rdquo; and &ldquo;missing three quarters of the time&rdquo; is the difference between a default being reasonable and a default being a lie. You cannot make that call without counting.</p>
+
+  <h3>6. Prefer the platform</h3>
+  <p><code>&lt;details&gt;</code> instead of a JavaScript accordion. CSS <code>group-hover</code> instead of a mouse-event handler. A real <code>&lt;button&gt;</code> instead of a clickable div. <code>&lt;ol&gt;</code> because the stages are ordered. Native elements are smaller, faster, accessible by default, and work before hydration &mdash; four wins for less code.</p>
+
+  <h3>7. Write the trade-off down next to the decision</h3>
+  <p>The archive's client-side filter is only affordable because of the excerpt trim. The empty <code>generateStaticParams</code> is a considered trade against 244 build-time renders. The chart's grey deliberately fails a contrast ratio and compensates with a table. Each of those is a decision someone could reasonably reverse &mdash; and each one carries, in the file, the sentence explaining what reversing it would cost.</p>
+
+  <div class="note win">
+    <span class="lab">The through-line</span>
+    <p>Almost every practice above is the same move: <strong>make the wrong thing hard to do by accident.</strong> One dispatch site means link security cannot be forgotten. One slugger means the rail cannot disagree with the body. Union-typed table names mean a typo is a compile error. Returning <code>null</code> means a missing value cannot be printed as zero.</p>
+    <p>Discipline that depends on remembering fails. Discipline built into the shape of the code does not.</p>
+  </div>
+</section>
+
+<section id="p17">
+  <span class="snum">Part 17</span>
+  <h2 class="sh">Still open</h2>
+  <p class="deck">An honest list. Nothing in the table below is fixed; several are one-line changes; one is a security issue you should handle soon.</p>
+
+  <div class="note bug">
+    <span class="lab">Security &mdash; handle this first</span>
+    <p><code>frontend/.env</code> sets <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> to a value whose prefix is <code>sb_secret_</code>. Next.js <strong>inlines every <code>NEXT_PUBLIC_</code> variable directly into the JavaScript bundle it sends to browsers</strong> &mdash; that is the entire meaning of the prefix. A secret key under that name is published to every visitor.</p>
+    <p>Two steps, in order: <strong>rotate the key</strong> (assume the current one is compromised), then <strong>rename the variable</strong> so a secret is never again carried by a name that means &ldquo;send this to the browser&rdquo;. The value has not been printed in any report, log, or commit.</p>
+    <p><strong>One thing changed since this was first written, and it removes a trap.</strong> The homepage used to read <code>raw_api_data</code> directly, and that table has RLS enabled with no policy &mdash; so those reads only ever succeeded because the secret key bypasses RLS. Rotating to a genuine publishable key would have fixed the security bug and silently zeroed every &ldquo;articles read&rdquo; figure on the landing page, with no error logged anywhere. The counting now goes through <code>public.pipeline_stats()</code>, which needs only <code>EXECUTE</code>, so the rotation is safe to do on its own. It has been verified end to end against a local stack with a real publishable key: the function returns its figures, the table itself still returns nothing, and the service-role-only functions still refuse the key outright.</p>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Detail</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr><th>Site metadata is template text</th><td><code>app/layout.tsx</code> still declares <code>title: "Recent-AI"</code> and <code>description: "Generated by create next app"</code>. This is what search results and link previews show.</td><td>2 lines</td></tr>
+        <tr><th><code>database.types.ts</code> is not valid UTF-8</th><td>Biome fails on it every run with an encoding error &mdash; UTF-16LE with a BOM, from a PowerShell redirect when the Supabase CLI generated it. Not a plain regenerate, though: the locally installed CLI is older than the one that wrote the file and would drop type detail the app relies on. Convert the encoding in place, or regenerate with a CLI matching the original and redirect through <code>-Encoding utf8</code>. Part 08 covers why the <code>pipeline_stats</code> entry was added by hand in the meantime.</td><td>1 command, with the right CLI</td></tr>
+        <tr><th>/login and /signup render blank briefly</th><td>Both do <code>if (loading) return null</code> against an auth context whose <code>loading</code> starts <code>true</code>. Until the Supabase session probe resolves, the page is empty. A skeleton would be better than nothing.</td><td>small</td></tr>
+        <tr><th>No <code>prefers-reduced-motion</code> support</th><td>Nothing in the stylesheet responds to the OS setting.</td><td>one CSS block</td></tr>
+        <tr><th><code>.glass-effect</code> is unreferenced</th><td>Left in <code>globals.css</code> deliberately, and commented as unused. Delete it or use it.</td><td>trivial</td></tr>
+        <tr><th><code>/search</code> does not exist</th><td>The nav link was removed rather than left broken. Restoring it is one entry in <code>LINKS</code> once the route lands.</td><td>1 line, later</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note warn">
+    <span class="lab">State of the working tree</span>
+    <p>The rebuild described in Parts 01&ndash;14 is now committed on <code>redesign/frontend</code>. The pipeline-stats work &mdash; the <code>pipeline_stats()</code> function, the rewritten <code>lib/pipeline-stats.ts</code> and <code>SignalMeter.tsx</code>, and the hand-added entry in <code>database.types.ts</code> &mdash; is still uncommitted in the working tree.</p>
+    <p>The SQL function was appended to <code>20260618121728_redesign_schema.sql</code> rather than given a migration of its own, deliberately: that migration has not been applied to production yet, so editing it is still free, and it is the first of the stacked changes this work sits on top of. A new timestamped file would have to be ordered after it and would be the wrong shape for a stack that has not landed.</p>
+    <p>One consequence worth stating plainly: <strong>because that migration is unapplied, production does not have <code>pipeline_stats()</code> yet.</strong> Production also has no read policy on <code>raw_api_data</code>, which means the 0% months were rendered either from the old two-clock arithmetic or from a database whose access rules were changed outside these migration files. If the latter, that state is not visible here and is worth checking before the stack lands.</p>
+  </div>
+</section>
+
+<section id="p18">
+  <span class="snum">Part 18</span>
+  <h2 class="sh">Glossary</h2>
+  <p class="deck">Every term this document used, defined in one line each. Ordered roughly by when you first meet it.</p>
+
+  <dl class="gloss">
+    <div><dt>component</dt><dd>A function that returns a piece of interface. The unit React is built from.</dd></div>
+    <div><dt>JSX</dt><dd>The HTML-looking syntax inside a JavaScript file. Converted to real JavaScript at build time.</dd></div>
+    <div><dt>props</dt><dd>Inputs to a component. Function arguments with HTML-style spelling at the call site.</dd></div>
+    <div><dt>state</dt><dd>A value a component remembers between interactions. Changing it re-renders the component.</dd></div>
+    <div><dt>server component</dt><dd>Runs on the server, can query the database directly, ships no JavaScript to the browser. The default in Next.js.</dd></div>
+    <div><dt>client component</dt><dd>Opted in with <code>"use client"</code>. Runs in the browser, needed for interactivity, costs bundle size.</dd></div>
+    <div><dt>hydration</dt><dd>The moment React's JavaScript attaches to server-rendered HTML and interactivity starts working.</dd></div>
+    <div><dt>App Router</dt><dd>Next.js's routing system where the folder structure under <code>app/</code> defines the URLs.</dd></div>
+    <div><dt>dynamic segment</dt><dd>A folder named <code>[slug]</code>. One file serves every value of that URL segment.</dd></div>
+    <div><dt>static generation</dt><dd>Building a page's HTML once at build time and serving the same file to everyone.</dd></div>
+    <div><dt>ISR</dt><dd>Incremental Static Regeneration. Static, but automatically rebuilt on a timer. <code>revalidate = 3600</code> means hourly.</dd></div>
+    <div><dt>dynamic rendering</dt><dd>Building the HTML fresh on every request. What reading cookies or search params forces.</dd></div>
+    <div><dt>generateStaticParams</dt><dd>Lists which values of a dynamic segment to prebuild. Declaring it empty still opts into on-demand caching.</dd></div>
+    <div><dt>generateMetadata</dt><dd>Produces the page title and description for the browser tab and link previews.</dd></div>
+    <div><dt>cache()</dt><dd>A React helper that runs a function once per render pass no matter how many times it is called.</dd></div>
+    <div><dt>Promise.all</dt><dd>Runs several async operations concurrently instead of one after another.</dd></div>
+    <div><dt>useMemo</dt><dd>Recomputes a value only when its listed dependencies change.</dd></div>
+    <div><dt>TypeScript</dt><dd>JavaScript with type labels, checked before the code runs.</dd></div>
+    <div><dt>any vs unknown</dt><dd><code>any</code> disables checking and spreads. <code>unknown</code> forces you to check before using. Prefer <code>unknown</code>.</dd></div>
+    <div><dt>union type</dt><dd>A value restricted to an explicit set, e.g. <code>"posts" | "raw_api_data"</code>. A typo becomes a compile error.</dd></div>
+    <div><dt>design token</dt><dd>A named colour or size defined once and referenced everywhere.</dd></div>
+    <div><dt>@theme inline</dt><dd>The Tailwind v4 block that turns a CSS variable into usable utility classes.</dd></div>
+    <div><dt>color-mix / oklab</dt><dd>A CSS function that blends two colours; <code>oklab</code> is the perceptually even space to blend in.</dd></div>
+    <div><dt>&Delta;E (delta E)</dt><dd>How different two colours look to a human. Target 8+ for adjacent categorical hues.</dd></div>
+    <div><dt>CVD</dt><dd>Colour vision deficiency. Protanopia, deuteranopia and tritanopia are the three simulated here.</dd></div>
+    <div><dt>contrast ratio</dt><dd>Legibility of text on a background. 4.5:1 for body text, 3:1 for large text.</dd></div>
+    <div><dt>categorical / sequential / diverging</dt><dd>The three colour jobs. Identity, magnitude, polarity. Never mix them up.</dd></div>
+    <div><dt>part-to-whole</dt><dd>Drawing a subset inside its total on one axis, instead of two series on two scales.</dd></div>
+    <div><dt>standfirst</dt><dd>The large introductory paragraph under a headline.</dd></div>
+    <div><dt>ATX / setext heading</dt><dd>The two Markdown heading forms: <code># Heading</code> and text with <code>=====</code> beneath it.</dd></div>
+    <div><dt>slug</dt><dd>The URL-safe version of a title, e.g. <code>how-it-works</code>. Also used for heading anchors.</dd></div>
+    <div><dt>ARIA</dt><dd>Attributes that describe meaning and state to assistive technology when HTML alone cannot.</dd></div>
+    <div><dt>sr-only</dt><dd>A class that hides an element visually while keeping it available to screen readers.</dd></div>
+    <div><dt>focus-visible</dt><dd>Shows a focus ring for keyboard navigation but not for mouse clicks.</dd></div>
+    <div><dt>PostgREST</dt><dd>The API layer in front of the Postgres database. Caps responses at 1000 rows, silently.</dd></div>
+    <div><dt>head request</dt><dd>Asking for a count without the rows. Immune to the row ceiling.</dd></div>
+    <div><dt>remotePatterns</dt><dd>The allowlist of hosts the Next.js image optimiser may fetch from.</dd></div>
+  </dl>
+
+  <hr />
+
+  <h3>The four sentences worth keeping</h3>
+  <ol>
+    <li><strong>Never render a claim the data does not support.</strong> Absence is a value; print nothing rather than a default.</li>
+    <li><strong>Ask whether it can stay on the server.</strong> The answer is yes more often than it looks, and every yes is bundle a visitor never downloads.</li>
+    <li><strong>Give every colour a job, and never use it for anything else.</strong> Then make sure removing all colour breaks nothing.</li>
+    <li><strong>Write down why, next to the code.</strong> What the code does is already visible; why it is like this is not, and it is what the next person needs.</li>
+  </ol>
+</section>
+
+<p class="end">
+  <span>AI Dictionary &mdash; frontend rebuild</span>
+  <span>branch redesign/frontend &middot; uncommitted</span>
+  <span><a href="#p1" class="tocjump">Back to top &uarr;</a></span>
+</p>
+
+</main>
+</div>
+</div>
+

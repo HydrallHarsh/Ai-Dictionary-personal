@@ -1,0 +1,1853 @@
+<title>The Code Volume — lib/ and the TypeScript in it</title>
+
+<style>
+:root {
+  --paper:#eef1f6; --surface:#ffffff; --sunk:#e4e9f1;
+  --ink:#131c2c; --ink-2:#41506a; --ink-3:#6e7c95;
+  --rule:#cfd7e4; --rule-soft:#dfe5ee;
+  --blue:#2c4ea0; --blue-wash:#e2e8f8;
+  --verd:#14776a; --verd-wash:#dcefeb;
+  --rust:#a8502a; --rust-wash:#f6e4dc;
+  --amber:#8a6410; --amber-wash:#f5ecd8;
+  --grid:rgba(44,78,160,.055);
+  --shadow:0 1px 2px rgba(19,28,44,.05),0 8px 24px -16px rgba(19,28,44,.18);
+  --serif:"Iowan Old Style","Sitka Text",Cambria,Charter,"Bitstream Charter",Georgia,serif;
+  --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b1220; --surface:#121b2a; --sunk:#0e1624;
+    --ink:#e3e9f3; --ink-2:#a6b2c6; --ink-3:#7c8aa0;
+    --rule:#233047; --rule-soft:#1b2537;
+    --blue:#8fa8f6; --blue-wash:#16203a;
+    --verd:#3fb6a0; --verd-wash:#0f2420;
+    --rust:#e08a63; --rust-wash:#2a1a13;
+    --amber:#d3a64e; --amber-wash:#241d0f;
+    --grid:rgba(143,168,246,.05);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b1220; --surface:#121b2a; --sunk:#0e1624;
+  --ink:#e3e9f3; --ink-2:#a6b2c6; --ink-3:#7c8aa0;
+  --rule:#233047; --rule-soft:#1b2537;
+  --blue:#8fa8f6; --blue-wash:#16203a;
+  --verd:#3fb6a0; --verd-wash:#0f2420;
+  --rust:#e08a63; --rust-wash:#2a1a13;
+  --amber:#d3a64e; --amber-wash:#241d0f;
+  --grid:rgba(143,168,246,.05);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17.5px; line-height:1.68;
+  -webkit-font-smoothing:antialiased;
+}
+*{box-sizing:border-box;}
+::selection{background:var(--blue-wash);}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:2px;}
+
+/* ---- shell ---- */
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px 96px;}
+.cols{display:grid;grid-template-columns:1fr;gap:0;}
+@media(min-width:1040px){
+  .cols{grid-template-columns:15rem minmax(0,1fr);gap:64px;align-items:start;}
+}
+main{max-width:70ch;min-width:0;}
+
+/* ---- masthead ---- */
+.mast{border-bottom:2px solid var(--ink);padding:56px 0 22px;margin-bottom:0;}
+.mast .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+.mast h1{font-size:clamp(2.5rem,6.2vw,4.1rem);line-height:1.02;letter-spacing:-.022em;font-weight:700;margin:20px 0 0;text-wrap:balance;}
+.mast .sub{color:var(--ink-2);font-size:1.14rem;margin:18px 0 0;max-width:56ch;}
+.stamp{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;}
+.stamp span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--rule);border-radius:2px;padding:4px 9px;color:var(--ink-2);background:var(--surface);}
+
+/* ---- contents rail ---- */
+.rail{font-family:var(--mono);font-size:12.5px;line-height:1.45;padding-top:40px;}
+@media(min-width:1040px){.rail{position:sticky;top:24px;max-height:calc(100vh - 48px);overflow-y:auto;padding-top:56px;}}
+.rail h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin:0 0 14px;font-weight:400;}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;}
+.rail li{border-top:1px solid var(--rule-soft);}
+.rail li:last-child{border-bottom:1px solid var(--rule-soft);}
+.rail a{display:grid;grid-template-columns:2.1rem 1fr;gap:6px;padding:7px 0;color:var(--ink-2);text-decoration:none;}
+.rail a:hover{color:var(--ink);}
+.rail a b{color:var(--blue);font-weight:400;font-variant-numeric:tabular-nums;}
+
+/* ---- sections ---- */
+section{padding-top:64px;scroll-margin-top:20px;}
+.snum{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:10px;}
+h2.sh{font-size:clamp(1.6rem,3.6vw,2.15rem);line-height:1.12;letter-spacing:-.017em;margin:0 0 6px;font-weight:700;text-wrap:balance;}
+.deck{color:var(--ink-3);font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0 0 26px;padding-bottom:18px;border-bottom:1px solid var(--rule);}
+h3{font-size:1.24rem;line-height:1.3;letter-spacing:-.01em;margin:38px 0 10px;font-weight:700;text-wrap:balance;}
+h4{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2);margin:30px 0 8px;font-weight:400;}
+p{margin:0 0 17px;}
+main a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+strong{font-weight:700;}
+em{font-style:italic;}
+ul,ol{margin:0 0 18px;padding-left:1.3em;}
+li{margin-bottom:9px;}
+li::marker{color:var(--ink-3);}
+hr{border:0;border-top:1px solid var(--rule);margin:40px 0;}
+
+/* ---- code specimens ---- */
+.spec{margin:26px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden;}
+.spec .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding:8px 14px;border-bottom:1px solid var(--rule-soft);background:var(--sunk);display:flex;justify-content:space-between;gap:12px;}
+.spec .tag em{font-style:normal;color:var(--blue);letter-spacing:.1em;}
+.spec pre{margin:0;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:12.6px;line-height:1.62;color:var(--ink);}
+code{font-family:var(--mono);font-size:.855em;background:var(--sunk);border:1px solid var(--rule-soft);border-radius:2px;padding:1px 4px;}
+pre code{background:none;border:0;padding:0;font-size:inherit;}
+.c-com{color:var(--ink-3);font-style:italic;}
+.c-key{color:var(--blue);}
+.c-str{color:var(--verd);}
+.c-del{color:var(--rust);}
+
+/* ---- annotation callouts ---- */
+.note{margin:26px 0;padding:16px 18px 14px;border-left:3px solid var(--blue);background:var(--blue-wash);border-radius:0 3px 3px 0;}
+.note>.lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:7px;}
+.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0;}
+.note.bug{border-color:var(--rust);background:var(--rust-wash);}
+.note.bug>.lab{color:var(--rust);}
+.note.win{border-color:var(--verd);background:var(--verd-wash);}
+.note.win>.lab{color:var(--verd);}
+.note.warn{border-color:var(--amber);background:var(--amber-wash);}
+.note.warn>.lab{color:var(--amber);}
+
+/* ---- comparison / data tables ---- */
+.tbl{margin:26px 0;overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--surface);}
+table{width:100%;min-width:480px;border-collapse:collapse;font-size:14.5px;}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;}
+thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);font-weight:400;background:var(--sunk);border-bottom:1px solid var(--rule);}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0;}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+tbody th{font-weight:700;}
+td code,th code{white-space:nowrap;}
+
+/* ---- type signature strip ---- */
+.sig{margin:22px 0;font-family:var(--mono);font-size:13px;line-height:1.7;background:var(--sunk);border:1px solid var(--rule);border-left:3px solid var(--blue);border-radius:0 3px 3px 0;padding:12px 15px;overflow-x:auto;}
+.sig b{font-weight:400;color:var(--blue);}
+.sig i{font-style:normal;color:var(--ink-3);}
+
+/* ---- before/after ---- */
+.ba{display:grid;gap:14px;margin:26px 0;}
+@media(min-width:720px){.ba{grid-template-columns:1fr 1fr;}}
+.ba>div{border:1px solid var(--rule);border-radius:3px;padding:14px 16px;background:var(--surface);}
+.ba>div.before{border-left:3px solid var(--rust);}
+.ba>div.after{border-left:3px solid var(--verd);}
+.ba .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;display:block;margin-bottom:8px;}
+.ba .before .lab{color:var(--rust);}
+.ba .after .lab{color:var(--verd);}
+.ba p{font-size:15px;margin-bottom:10px;}
+.ba p:last-child{margin-bottom:0;}
+.ba pre{margin:0;font-family:var(--mono);font-size:12.3px;line-height:1.6;overflow-x:auto;}
+
+/* ---- diagram ---- */
+.fig{margin:30px 0;border:1px solid var(--rule);border-radius:3px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden;}
+.fig .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding:8px 14px;border-bottom:1px solid var(--rule-soft);background:var(--sunk);}
+.fig .plot{padding:18px 14px;overflow-x:auto;}
+.fig svg{display:block;min-width:560px;width:100%;height:auto;}
+.fig figcaption{font-size:14px;color:var(--ink-3);padding:0 15px 14px;}
+
+/* ---- glossary ---- */
+.gloss{margin:24px 0;border-top:1px solid var(--rule);}
+.gloss>div{padding:13px 0;border-bottom:1px solid var(--rule-soft);}
+.gloss dt{font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--blue);margin-bottom:4px;}
+.gloss dd{margin:0;font-size:15.5px;color:var(--ink-2);padding-bottom:13px;}
+.gloss dt{padding-top:13px;border-top:1px solid var(--rule-soft);}
+.gloss dt:first-of-type{border-top:none;padding-top:13px;}
+.ba>div.col:nth-child(odd){border-left:3px solid var(--rust);}
+.ba>div.col:nth-child(even){border-left:3px solid var(--verd);}
+.ba .col:nth-child(odd) .lab{color:var(--rust);}
+.ba .col:nth-child(even) .lab{color:var(--verd);}
+
+/* ---- footer ---- */
+.closing{margin-top:74px;padding:22px 24px;border:1px solid var(--rule);border-left:3px solid var(--blue);border-radius:0 3px 3px 0;background:var(--sunk);}
+.closing p{font-size:15.5px;line-height:1.72;color:var(--ink-2);margin:0 0 12px;}
+.closing p:last-child{margin-bottom:0;}
+.end{margin-top:80px;padding-top:22px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;}
+.tocjump{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
+html{scroll-behavior:smooth;}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">
+    <span>Volume II</span>
+    <span>&middot;</span>
+    <span>frontend/lib &amp; the TypeScript in it</span>
+    <span>&middot;</span>
+    <span>8 modules &middot; 1 client component</span>
+  </div>
+  <h1>The Code Volume</h1>
+  <p class="sub">How the eight files in <code>lib/</code> wire together, what every piece of TypeScript syntax in them means, and the patterns worth taking to your next project.</p>
+  <div class="stamp">
+    <span>companion to the Field Manual</span>
+    <span>assumes no TypeScript</span>
+    <span>every snippet is real code from this repo</span>
+  </div>
+</header>
+
+<div class="cols">
+
+<nav class="rail" aria-label="Contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#p1"><b>01</b><span>The shape of lib/</span></a></li>
+    <li><a href="#p2"><b>02</b><span>TypeScript in one sitting</span></a></li>
+    <li><a href="#p3"><b>03</b><span>blog-data — the boundary</span></a></li>
+    <li><a href="#p4"><b>04</b><span>Three Supabase clients</span></a></li>
+    <li><a href="#p5"><b>05</b><span>markdown — a state machine</span></a></li>
+    <li><a href="#p6"><b>06</b><span>archive — reshaping data</span></a></li>
+    <li><a href="#p7"><b>07</b><span>source-hues — 39 lines, 3 tricks</span></a></li>
+    <li><a href="#p8"><b>08</b><span>pipeline-stats — one call, then narrowing</span></a></li>
+    <li><a href="#p9"><b>09</b><span>utils — six lines</span></a></li>
+    <li><a href="#p10"><b>10</b><span>ArchiveIndex — the browser</span></a></li>
+    <li><a href="#p11"><b>11</b><span>api.ts — the odd one out</span></a></li>
+    <li><a href="#p12"><b>12</b><span>Patterns worth stealing</span></a></li>
+    <li><a href="#p13"><b>13</b><span>Syntax glossary</span></a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="p1">
+  <span class="snum">Part 01</span>
+  <h2 class="sh">The shape of <code>lib/</code></h2>
+  <p class="deck">Eight files, four tiers, one direction of flow. Learn the tiers and you can guess where any new code belongs.</p>
+
+  <p>Everything in <code>lib/</code> is <strong>not a component</strong>. That is the whole selection rule. A component's job is to produce markup; a <code>lib/</code> module's job is to produce <em>data</em> or <em>a decision</em>. This split matters more than it sounds, because it is what lets the same function be called from a server page and a browser component without either one knowing about the other.</p>
+
+  <p>The eight files sort into four tiers, and imports only ever point downward in this picture:</p>
+
+  <figure class="fig">
+    <div class="tag">Module graph — arrows point from importer to imported</div>
+    <div class="plot">
+      <svg viewBox="0 0 760 430" role="img" aria-labelledby="grtitle grdesc">
+        <title id="grtitle">Dependency graph of the frontend lib modules</title>
+        <desc id="grdesc">Four tiers. Pages and components at the top import derivation modules, which import shaping modules, which import the Supabase client modules, which all import the generated Database types.</desc>
+
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink-3)" />
+          </marker>
+        </defs>
+
+        <!-- tier labels -->
+        <g font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)" letter-spacing="1.6">
+          <text x="4" y="26">RENDER</text>
+          <text x="4" y="132">DERIVE</text>
+          <text x="4" y="240">SHAPE</text>
+          <text x="4" y="344">ACCESS</text>
+        </g>
+
+        <!-- tier rules -->
+        <g stroke="var(--rule-soft)" stroke-width="1">
+          <line x1="0" y1="78" x2="760" y2="78" />
+          <line x1="0" y1="186" x2="760" y2="186" />
+          <line x1="0" y1="292" x2="760" y2="292" />
+        </g>
+
+        <g font-family="var(--mono)" font-size="11.5">
+          <!-- RENDER -->
+          <g>
+            <rect x="90" y="10" width="200" height="46" rx="3" fill="var(--sunk)" stroke="var(--rule)" />
+            <text x="190" y="30" text-anchor="middle" fill="var(--ink)">app/blog/page.tsx</text>
+            <text x="190" y="45" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">server component</text>
+          </g>
+          <g>
+            <rect x="330" y="10" width="230" height="46" rx="3" fill="var(--blue-wash)" stroke="var(--blue)" />
+            <text x="445" y="30" text-anchor="middle" fill="var(--ink)">ArchiveIndex.tsx</text>
+            <text x="445" y="45" text-anchor="middle" fill="var(--blue)" font-size="9.5">"use client"</text>
+          </g>
+
+          <!-- DERIVE -->
+          <g>
+            <rect x="90" y="112" width="150" height="46" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="165" y="132" text-anchor="middle" fill="var(--ink)">archive.ts</text>
+            <text x="165" y="147" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">213 lines</text>
+          </g>
+          <g>
+            <rect x="280" y="112" width="150" height="46" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="355" y="132" text-anchor="middle" fill="var(--ink)">markdown.ts</text>
+            <text x="355" y="147" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">333 lines &middot; pure</text>
+          </g>
+          <g>
+            <rect x="470" y="112" width="130" height="46" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="535" y="132" text-anchor="middle" fill="var(--ink)">source-hues.ts</text>
+            <text x="535" y="147" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">39 lines &middot; pure</text>
+          </g>
+          <g>
+            <rect x="632" y="112" width="110" height="46" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="687" y="132" text-anchor="middle" fill="var(--ink)">utils.ts</text>
+            <text x="687" y="147" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">6 lines</text>
+          </g>
+
+          <!-- SHAPE -->
+          <g>
+            <rect x="90" y="218" width="180" height="46" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="180" y="238" text-anchor="middle" fill="var(--ink)">blog-data.ts</text>
+            <text x="180" y="253" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">rows &rarr; BlogPost[]</text>
+          </g>
+          <g>
+            <rect x="320" y="218" width="190" height="46" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="415" y="238" text-anchor="middle" fill="var(--ink)">pipeline-stats.ts</text>
+            <text x="415" y="253" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">one RPC &rarr; PipelineStats</text>
+          </g>
+
+          <!-- ACCESS -->
+          <g>
+            <rect x="90" y="322" width="150" height="42" rx="3" fill="var(--verd-wash)" stroke="var(--verd)" />
+            <text x="165" y="341" text-anchor="middle" fill="var(--ink)">supabase/static</text>
+            <text x="165" y="355" text-anchor="middle" fill="var(--verd)" font-size="9.5">no cookies &rarr; static</text>
+          </g>
+          <g>
+            <rect x="270" y="322" width="150" height="42" rx="3" fill="var(--amber-wash)" stroke="var(--amber)" />
+            <text x="345" y="341" text-anchor="middle" fill="var(--ink)">supabase/server</text>
+            <text x="345" y="355" text-anchor="middle" fill="var(--amber)" font-size="9.5">cookies &rarr; dynamic</text>
+          </g>
+          <g>
+            <rect x="450" y="322" width="150" height="42" rx="3" fill="var(--surface)" stroke="var(--rule)" />
+            <text x="525" y="341" text-anchor="middle" fill="var(--ink)">supabase/client</text>
+            <text x="525" y="355" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">browser</text>
+          </g>
+          <g>
+            <rect x="620" y="322" width="130" height="42" rx="3" fill="var(--sunk)" stroke="var(--rule)" stroke-dasharray="3 3" />
+            <text x="685" y="341" text-anchor="middle" fill="var(--ink)">database.types</text>
+            <text x="685" y="355" text-anchor="middle" fill="var(--ink-3)" font-size="9.5">generated</text>
+          </g>
+        </g>
+
+        <!-- edges -->
+        <g stroke="var(--ink-3)" stroke-width="1.2" fill="none" marker-end="url(#ar)">
+          <path d="M 160 56 L 160 112" />
+          <path d="M 250 56 L 330 112" />
+          <path d="M 445 56 L 500 112" />
+          <path d="M 520 56 L 660 112" />
+          <path d="M 290 33 L 330 33" />
+          <path d="M 150 158 L 150 218" />
+          <path d="M 230 158 L 300 218" />
+          <path d="M 165 264 L 165 322" />
+          <path d="M 230 264 L 300 322" />
+          <path d="M 400 264 L 220 322" />
+          <path d="M 200 344 L 265 344" opacity="0" />
+          <path d="M 240 340 L 620 340" opacity=".45" />
+        </g>
+      </svg>
+    </div>
+    <figcaption>The one arrow that goes sideways at the top is the server page handing its finished data to the client component as a prop. That is the only place data crosses from server to browser.</figcaption>
+  </figure>
+
+  <h3>What each tier is allowed to do</h3>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Tier</th><th>Files</th><th>Allowed to</th><th>Never</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Access</th>
+          <td><code>supabase/static</code>, <code>supabase/server</code>, <code>supabase/client</code></td>
+          <td>Build a configured database connection</td>
+          <td>Know what a post is</td>
+        </tr>
+        <tr>
+          <th>Shape</th>
+          <td><code>blog-data</code>, <code>pipeline-stats</code></td>
+          <td>Query, validate, turn rows into typed objects</td>
+          <td>Know how anything looks</td>
+        </tr>
+        <tr>
+          <th>Derive</th>
+          <td><code>archive</code>, <code>markdown</code>, <code>source-hues</code>, <code>utils</code></td>
+          <td>Compute display facts from typed objects</td>
+          <td>Touch the network</td>
+        </tr>
+        <tr>
+          <th>Render</th>
+          <td><code>app/**</code>, <code>components/**</code></td>
+          <td>Produce markup</td>
+          <td>Compute a fact it could have been given</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="lab">Why the direction matters</span>
+    <p>Because <code>markdown.ts</code> imports nothing, it can be called from anywhere &mdash; a server page, a client component, a test, a script. The moment it imported a Supabase client, calling it from the browser would drag database code into the browser bundle. <strong>A module's import list is its deployment surface.</strong> The comment at the top of <code>source-hues.ts</code> says this outright: it lives in <code>lib/</code> rather than beside the archive component because a server page and a client component both need it, and importing it <em>from</em> the client module would pull that whole graph server-side.</p>
+  </div>
+
+  <p>One file breaks the tiers on purpose: <code>api.ts</code> talks to your FastAPI backend rather than Supabase, and is called from browser components. Part 11 covers it separately, including where it is weaker than the rest.</p>
+</section>
+
+<section id="p2">
+  <span class="snum">Part 02</span>
+  <h2 class="sh">TypeScript in one sitting</h2>
+  <p class="deck">Everything you need to read the rest of this document. Each item appears in the real code, so you meet it here and recognise it later.</p>
+
+  <p>TypeScript is JavaScript plus labels describing what each value is. The labels are erased before the code runs &mdash; the browser never sees them. Their only job is to let a checker tell you, before you run anything, that you are about to use a value in a way that cannot work.</p>
+
+  <h3>The five things that are 90% of it</h3>
+
+  <h4>1 &mdash; Annotations</h4>
+  <div class="spec">
+    <div class="tag"><span>the basic form</span><em>value: Type</em></div>
+    <pre><code><span class="c-key">const</span> EXCERPT_LENGTH = <span class="c-str">180</span>;              <span class="c-com">// inferred as number</span>
+<span class="c-key">function</span> excerpt(text: string) { … }        <span class="c-com">// parameter annotated</span>
+<span class="c-key">function</span> monthKey(time: number): string { } <span class="c-com">// return annotated</span></code></pre>
+  </div>
+  <p>You rarely annotate variables. TypeScript infers them: it knows <code>180</code> is a <code>number</code> without being told. You <em>do</em> annotate function parameters, because a function can be called from anywhere and there is nothing to infer from.</p>
+
+  <h4>2 &mdash; Object types</h4>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts:21</span><em>a shape with a name</em></div>
+    <pre><code><span class="c-key">export type</span> ArchiveEntry = {
+  slug: string;
+  title: string;
+  time: number | <span class="c-key">null</span>;      <span class="c-com">// a union — see below</span>
+  difficulty: string | <span class="c-key">null</span>;
+};</code></pre>
+  </div>
+  <p>Read <code>type X = { … }</code> as "from now on, <code>ArchiveEntry</code> means an object with exactly these fields". Passing an object missing <code>slug</code> is now an error at the call site, not a crash at 3am.</p>
+
+  <h4>3 &mdash; Unions, and the null union in particular</h4>
+  <p><code>A | B</code> means "either an A or a B". The single most valuable use in this codebase is <code>T | null</code>, because it makes <em>absence</em> part of the type:</p>
+  <div class="sig"><b>time</b>: number | <b>null</b>&nbsp;&nbsp;<i>— a timestamp, or explicitly "no date"</i></div>
+  <p>Once a field is <code>number | null</code>, TypeScript refuses to let you do arithmetic on it until you have checked for null. That single rule is what mechanically enforces the "never render a lie" principle from Volume I &mdash; the compiler will not let you forget the absent case.</p>
+
+  <h4>4 &mdash; Literal unions</h4>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/pipeline-stats.ts:31</span><em>a typo becomes a compile error</em></div>
+    <pre><code><span class="c-key">export type</span> Granularity = <span class="c-str">"week"</span> | <span class="c-str">"month"</span>;</code></pre>
+  </div>
+  <p>The type is not <code>string</code> &mdash; it is <em>those two strings and nothing else</em>. Write <code>"weekly"</code> and the editor underlines it immediately. This is one of TypeScript's genuinely delightful features and it costs nothing.</p>
+  <p>It is also what keeps the parse honest at the far end of the wire. This value arrives from the database inside untyped JSON, and the file converts it with <code>payload.granularity === "week" ? "week" : "month"</code>. A value the union does not allow cannot get in, so nothing downstream has to defend against one.</p>
+
+  <h4>5 &mdash; Optional vs nullable</h4>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Written</th><th>Means</th><th>In this repo</th></tr></thead>
+      <tbody>
+        <tr><td><code>tags?: string[]</code></td><td>The key may be missing entirely</td><td><code>PostContentPayload</code> &mdash; the JSON blob may not have it</td></tr>
+        <tr><td><code>time: number | null</code></td><td>The key is always there; the value may be null</td><td><code>ArchiveEntry</code> &mdash; we always compute it, sometimes to nothing</td></tr>
+        <tr><td><code>x?: T | null</code></td><td>Both</td><td>Rare, and usually a sign of an unclear contract</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The distinction is worth internalising. <code>?</code> describes <em>the shape of data you were handed</em>. <code>| null</code> describes <em>a decision you made</em>. <code>archive.ts</code> uses <code>| null</code> for difficulty because deciding "this post is ungraded" is an act, not an accident.</p>
+
+  <hr />
+
+  <h3>The four operators you will see constantly</h3>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Operator</th><th>Reads as</th><th>Fires when</th></tr></thead>
+      <tbody>
+        <tr><td><code>a ?? b</code></td><td>nullish coalescing</td><td><code>a</code> is <code>null</code> or <code>undefined</code> only</td></tr>
+        <tr><td><code>a || b</code></td><td>logical or</td><td><code>a</code> is <em>any</em> falsy value: <code>0</code>, <code>""</code>, <code>false</code>, null…</td></tr>
+        <tr><td><code>a?.b</code></td><td>optional chaining</td><td>returns <code>undefined</code> instead of throwing if <code>a</code> is nullish</td></tr>
+        <tr><td><code>x!</code></td><td>non-null assertion</td><td>"trust me, not null" &mdash; disables the check</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note bug">
+    <span class="lab">?? versus || is a real bug source</span>
+    <p>Consider a count of zero. <code>count ?? 0</code> keeps the zero. <code>count || 0</code> also gives zero &mdash; fine. But <code>likes || "unknown"</code> turns a genuine <strong>0 likes</strong> into the string "unknown", because <code>0</code> is falsy. The rule: use <code>??</code> when the fallback is for <em>absence</em>, and <code>||</code> only when you truly want every falsy value handled the same way.</p>
+    <p><code>blog-data.ts:184</code> gets this right &mdash; <code>posts.find(…) ?? null</code>, because <code>find</code> returns <code>undefined</code> when nothing matches and we want to convert that specific case. Meanwhile <code>archive.ts:139</code> deliberately uses <code>||</code>: <code>title?.content || post.metadata?.title || "Untitled"</code> &mdash; here an empty string <em>should</em> fall through to the next option, which <code>??</code> would not do.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="lab">The one to be suspicious of</span>
+    <p><code>x!</code> tells the compiler to stop checking. It appears exactly twice in this codebase, both in <code>lib/supabase/client.ts</code>:</p>
+    <pre style="font-family:var(--mono);font-size:12.3px;margin:0;overflow-x:auto;">process.env.NEXT_PUBLIC_SUPABASE_URL!,
+process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,</pre>
+    <p>Compare with <code>static.ts</code>, which checks the same two variables and throws a named error if either is missing. The <code>!</code> version fails later and more confusingly &mdash; somewhere inside the Supabase library, with a message that does not mention your environment file. The explicit check is the better pattern, and <code>client.ts</code> is the file that has not caught up.</p>
+  </div>
+
+  <h3>Two things that look like magic but are not</h3>
+
+  <h4><code>as const</code></h4>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/source-hues.ts:27 &middot; Navbar.tsx:44</span><em>freeze into literals</em></div>
+    <pre><code><span class="c-key">const</span> LINKS = [
+  { href: <span class="c-str">"/blog"</span>, label: <span class="c-str">"Blog"</span> },
+] <span class="c-key">as const</span>;</code></pre>
+  </div>
+  <p>Without <code>as const</code>, TypeScript infers <code>{ href: string; label: string }[]</code> &mdash; a mutable array of general strings. With it, every value becomes its exact literal and everything is readonly. You get two benefits: accidental mutation is an error, and the literal types flow into anything derived from the array. It costs nine characters.</p>
+
+  <h4>Indexed access: <code>(typeof X)[number]</code></h4>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/source-hues.ts:29</span><em>derive the type from the data</em></div>
+    <pre><code><span class="c-key">export type</span> SourceHue = (<span class="c-key">typeof</span> HUE_CLASSES)[number];</code></pre>
+  </div>
+  <p>Read it right to left. <code>typeof HUE_CLASSES</code> is "the type of that array". <code>[number]</code> is "index it with any number" &mdash; i.e. one element. So <code>SourceHue</code> is exactly one hue object, and it was never typed by hand.</p>
+  <p>This is the pattern to remember: <strong>write the data, derive the type</strong>. Add a fifth hue slot to the array and <code>SourceHue</code> updates itself. Had the type been hand-written, the array and its type could drift apart silently.</p>
+
+  <h3>Generics, briefly</h3>
+  <p>A generic is a type with a blank in it, filled at the call site.</p>
+  <div class="sig"><b>Map</b>&lt;string, number&gt;&nbsp;&nbsp;<i>— a Map whose keys are strings and values numbers</i><br /><b>Set</b>&lt;string&gt;&nbsp;&nbsp;<i>— a Set of strings</i><br /><b>Promise</b>&lt;BlogPost[]&gt;&nbsp;&nbsp;<i>— a promise that will produce an array of BlogPost</i></div>
+  <p>You will mostly <em>use</em> generics rather than write them. The one place this codebase writes its own is <code>types/content.ts</code>: <code>Block&lt;T = unknown&gt;</code> &mdash; a block whose <code>data</code> field type is filled in later, defaulting to <code>unknown</code>.</p>
+
+  <h3>The <code>unknown</code> / <code>any</code> distinction</h3>
+  <div class="ba">
+    <div class="before">
+      <span class="lab">any</span>
+      <p>"Stop checking this value."</p>
+      <p>Every operation on it is allowed. The lack of checking spreads to everything it touches, silently, forever.</p>
+    </div>
+    <div class="after">
+      <span class="lab">unknown</span>
+      <p>"I do not know what this is."</p>
+      <p>No operation is allowed until you narrow it with a check. The uncertainty is contained at the boundary.</p>
+    </div>
+  </div>
+  <p>They look like synonyms and behave as opposites. <code>unknown</code> is the correct type for anything arriving from outside your program &mdash; a JSON column, a network response, a parsed file.</p>
+</section>
+
+<section id="p3">
+  <span class="snum">Part 03</span>
+  <h2 class="sh"><code>blog-data.ts</code> &mdash; the boundary</h2>
+  <p class="deck">213 lines whose entire job is converting untrusted database JSON into objects the rest of the app can trust. The most type-heavy file in the repo, and the best one to learn from.</p>
+
+  <p>This file sits on the seam between two worlds. On one side: a Postgres <code>jsonb</code> column, which can legally contain anything &mdash; an object, an array, a number, <code>null</code>. On the other: the rest of the frontend, which wants to write <code>post.blocks[0].data.content</code> without checking four things first.</p>
+
+  <p>The pattern for a boundary like this is always the same three steps, and they are worth naming because you will need them again:</p>
+
+  <ol>
+    <li><strong>Describe what you hope for</strong> as a type, with everything optional.</li>
+    <li><strong>Check at runtime</strong>, once, at the door.</li>
+    <li><strong>Produce a strict type</strong> that downstream code can rely on unconditionally.</li>
+  </ol>
+
+  <h3>Step 1 &mdash; the hopeful type</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:14</span><em>everything optional on purpose</em></div>
+    <pre><code><span class="c-key">type</span> PostContentPayload = {
+  title?: Partial&lt;TitleBlock[<span class="c-str">"data"</span>]&gt;;
+  summary?: string;
+  description?: string;
+  slug?: string;
+  generated_image?: string | <span class="c-key">null</span>;
+};</code></pre>
+  </div>
+
+  <p>Two pieces of syntax here are worth unpacking, because together they are one of the neatest lines in the codebase.</p>
+
+  <p><code>TitleBlock["data"]</code> is <strong>indexed access on a type</strong>. It means "the type of the <code>data</code> field of <code>TitleBlock</code>". Not the value &mdash; the type. So instead of re-declaring the title's fields here, this file points at the single definition in <code>types/content.ts</code>. Change it there and this follows.</p>
+
+  <p><code>Partial&lt;…&gt;</code> is a <strong>built-in type transformer</strong>: it takes a type and makes every field optional. So <code>Partial&lt;TitleBlock["data"]&gt;</code> means "the title block's data shape, but assume nothing is actually present".</p>
+
+  <div class="note win">
+    <span class="lab">Why this combination is correct</span>
+    <p><code>TitleBlock["data"]</code> alone would be a lie: it declares <code>content: string</code> as required, and the database absolutely contains rows without it. Re-typing the fields by hand would create a second source of truth that drifts. <code>Partial&lt;TitleBlock["data"]&gt;</code> is the honest version &mdash; <em>same fields, no promises</em> &mdash; and it stays in sync automatically.</p>
+  </div>
+
+  <h3>Step 2 &mdash; the type predicate, the pattern to actually memorise</h3>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:30</span><em>a function that teaches the compiler</em></div>
+    <pre><code><span class="c-key">function</span> isPostContentPayload(
+  value: unknown
+): value <span class="c-key">is</span> PostContentPayload {
+  <span class="c-key">return</span> Boolean(
+    value &amp;&amp; <span class="c-key">typeof</span> value === <span class="c-str">"object"</span> &amp;&amp; !Array.isArray(value)
+  );
+}</code></pre>
+  </div>
+
+  <p>Look at the return type. It is not <code>boolean</code> &mdash; it is <code>value is PostContentPayload</code>. This is a <strong>type predicate</strong>, and it is the mechanism by which runtime checks become compile-time knowledge.</p>
+
+  <p>What it does: after <code>if (isPostContentPayload(row.content))</code>, inside that block, TypeScript treats <code>row.content</code> as a <code>PostContentPayload</code> instead of <code>unknown</code>. You have converted a runtime fact into a static one. Nothing else in the language does this.</p>
+
+  <div class="note">
+    <span class="lab">Read the body carefully — it is doing three jobs</span>
+    <ul>
+      <li><code>value &amp;&amp;</code> rejects <code>null</code>. Necessary because <code>typeof null === "object"</code> in JavaScript, a 1995 bug that will outlive us all.</li>
+      <li><code>typeof value === "object"</code> rejects strings, numbers, booleans.</li>
+      <li><code>!Array.isArray(value)</code> rejects arrays. Also necessary, because arrays are objects too, and <code>["a"].title</code> is <code>undefined</code> rather than an error &mdash; so an array would sail through and produce a post with every field empty.</li>
+    </ul>
+    <p>Three clauses, three distinct JavaScript quirks, one line each. This is what a boundary check looks like when it is taken seriously.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="lab">The honest limitation</span>
+    <p>This predicate checks that the value is <em>an object</em>. It does not check that <code>summary</code> is a string. So the type is a promise the code only partially keeps &mdash; which is exactly why the next step never trusts individual fields either. <code>asString(content.summary, "…")</code> re-checks each one at the point of use. Belt and braces, and appropriate: a full schema validator (Zod, Valibot) would be the alternative, and is worth considering if this file grows.</p>
+  </div>
+
+  <h3>Step 3 &mdash; the field-level guard</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:34</span><em>default parameter + truthiness</em></div>
+    <pre><code><span class="c-key">function</span> asString(value: unknown, fallback = <span class="c-str">""</span>) {
+  <span class="c-key">return typeof</span> value === <span class="c-str">"string"</span> &amp;&amp; value.trim()
+    ? value
+    : fallback;
+}</code></pre>
+  </div>
+  <p><code>fallback = ""</code> is a <strong>default parameter</strong>: callers may omit it. TypeScript infers its type as <code>string</code> from the default, so no annotation is needed.</p>
+  <p>Note <code>value.trim()</code> in a boolean position &mdash; a string of only spaces trims to <code>""</code>, which is falsy, so whitespace counts as absent. That is a deliberate content decision expressed as three characters, and it is why no article renders a title of one space.</p>
+
+  <h3>The line that ties it together</h3>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:162</span><em>the map/filter idiom</em></div>
+    <pre><code><span class="c-key">return</span> (data ?? [])
+  .map((row) =&gt; mapRowToBlogPost(row))
+  .filter((post): post <span class="c-key">is</span> BlogPost =&gt; post !== <span class="c-key">null</span>);</code></pre>
+  </div>
+
+  <p>Three things happen in three lines.</p>
+
+  <p><code>data ?? []</code> &mdash; Supabase returns <code>data: T[] | null</code>. Coalescing to an empty array means every following line can assume an array exists. This is the "make the absent case boring" move, and it appears throughout the codebase.</p>
+
+  <p><code>.map(…)</code> &mdash; <code>mapRowToBlogPost</code> returns <code>BlogPost | null</code>: <code>null</code> for a row whose content failed the check. So after the map you hold <code>(BlogPost | null)[]</code>. Bad rows are skipped, not thrown &mdash; one malformed row does not empty the archive.</p>
+
+  <p><code>.filter((post): post is BlogPost =&gt; …)</code> &mdash; and here is the trick. A plain <code>.filter(p =&gt; p !== null)</code> removes the nulls at runtime but TypeScript <em>still</em> types the result as <code>(BlogPost | null)[]</code>, because it cannot see inside the callback. Annotating the callback as a type predicate tells it: things that survive this filter are <code>BlogPost</code>. The result is <code>BlogPost[]</code>, with no cast and no lie.</p>
+
+  <div class="note win">
+    <span class="lab">This idiom appears three times — learn it once</span>
+    <div class="tbl" style="margin:10px 0 0;">
+      <table>
+        <thead><tr><th>File</th><th>Line</th><th>Narrowing</th></tr></thead>
+        <tbody>
+          <tr><td><code>blog-data.ts</code></td><td class="num">164</td><td><code>post is BlogPost</code></td></tr>
+          <tr><td><code>archive.ts</code></td><td class="num">202</td><td><code>time is number</code></td></tr>
+          <tr><td><code>blog-data.ts</code></td><td class="num">30</td><td><code>value is PostContentPayload</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p>The <code>archive.ts</code> one is worth seeing, because it is what makes the date span safe:</p>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts:200</span><em>same pattern, different type</em></div>
+    <pre><code><span class="c-key">const</span> times = entries
+  .map((entry) =&gt; entry.time)              <span class="c-com">// (number | null)[]</span>
+  .filter((time): time <span class="c-key">is</span> number =&gt; time !== <span class="c-key">null</span>);  <span class="c-com">// number[]</span>
+
+<span class="c-key">const</span> span = times.length &gt; 0
+  ? { from: …Math.min(...times), to: …Math.max(...times) }
+  : <span class="c-key">null</span>;</code></pre>
+  </div>
+  <p><code>Math.min(...times)</code> would be a type error on <code>(number | null)[]</code>. The predicate is what permits the next line, and the <code>times.length &gt; 0</code> guard is what stops <code>Math.min()</code> of nothing returning <code>Infinity</code> &mdash; which would have printed a span of "January 1970 &mdash; …". The type system caught the first problem; a human had to catch the second.</p>
+
+  <h3>Deriving a type from a function: <code>Awaited&lt;ReturnType&lt;typeof f&gt;&gt;</code></h3>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:134</span><em>never hand-write what you can derive</em></div>
+    <pre><code><span class="c-com">/** Either Supabase client — the cookie-aware one or the public read-only one. */</span>
+<span class="c-key">type</span> PostsClient =
+  | Awaited&lt;ReturnType&lt;<span class="c-key">typeof</span> createClient&gt;&gt;
+  | ReturnType&lt;<span class="c-key">typeof</span> createStaticClient&gt;;</code></pre>
+  </div>
+
+  <p>Peel it from the inside:</p>
+  <div class="sig"><b>typeof createClient</b>&nbsp;&nbsp;<i>— the type of the function itself</i><br /><b>ReturnType&lt;…&gt;</b>&nbsp;&nbsp;<i>— what it returns: Promise&lt;SupabaseClient&gt;</i><br /><b>Awaited&lt;…&gt;</b>&nbsp;&nbsp;<i>— unwrap the promise: SupabaseClient</i></div>
+
+  <p>Why bother? Because <code>queryBlogPosts</code> must accept either client, and the Supabase client type is a large generic monstrosity nobody wants to type by hand. Deriving it means the day you change how a client is built, this type follows silently. <code>createStaticClient</code> is not async, so it needs no <code>Awaited</code> &mdash; and that asymmetry is itself information about the two functions.</p>
+
+  <div class="note">
+    <span class="lab">The same trick, one tier up</span>
+    <p><code>app/blog/page.tsx:31</code> does it again for a value: <code>let archive: ReturnType&lt;typeof buildArchive&gt; | null = null;</code>. The page needs a variable that can hold "the archive or nothing" before the <code>try</code> block, and it gets the archive type without importing <code>Archive</code> at all. Both spellings are fine; this one has one less import.</p>
+  </div>
+
+  <h3>The memoised export</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:178</span><em>one query per render pass</em></div>
+    <pre><code><span class="c-key">export const</span> getPublicBlogPosts = cache(<span class="c-key">async</span> (): Promise&lt;BlogPost[]&gt; =&gt; {
+  <span class="c-key">return</span> queryBlogPosts(createStaticClient());
+});</code></pre>
+  </div>
+  <p><code>cache()</code> from React wraps a function so that within a single server render, calling it repeatedly runs the body once and hands everyone the same result. The article page needs this: it calls <code>getPublicArticle</code> for the page body <em>and</em> React separately calls <code>generateMetadata</code>, which needs the same corpus. Without <code>cache</code>, that is two full queries for one page view.</p>
+  <p>Note what <code>cache</code> is <em>not</em>: it is not a cross-request cache, and it holds nothing between page views. It is a per-render memo, and that is exactly the scope you want &mdash; broader would mean serving stale data.</p>
+
+  <h3>Neighbour lookup by index arithmetic</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/blog-data.ts:200</span><em>free adjacency</em></div>
+    <pre><code><span class="c-key">const</span> posts = <span class="c-key">await</span> getPublicBlogPosts();
+<span class="c-key">const</span> index = posts.findIndex((post) =&gt; post.slug === slug);
+<span class="c-key">if</span> (index === -1) <span class="c-key">return null</span>;
+
+<span class="c-com">// The query orders newest first, so the preceding entry is the newer one.</span>
+<span class="c-key">return</span> {
+  post: posts[index],
+  newer: posts[index - 1] ?? <span class="c-key">null</span>,
+  older: posts[index + 1] ?? <span class="c-key">null</span>,
+};</code></pre>
+  </div>
+  <p>Getting the previous and next article costs no query at all &mdash; the ordered list is already in hand, so adjacency is just <code>index ± 1</code>. The <code>?? null</code> handles the two ends: <code>posts[-1]</code> is <code>undefined</code> in JavaScript rather than an error, and the first article genuinely has no newer neighbour.</p>
+  <p>The comment earns its place. <code>index - 1</code> being the <em>newer</em> post is only true because the SQL ordered descending; without that sentence the next reader has to go find the query to know whether the arrows are backwards.</p>
+</section>
+
+<section id="p4">
+  <span class="snum">Part 04</span>
+  <h2 class="sh">Three Supabase clients, and why</h2>
+  <p class="deck"><code>lib/supabase/</code> holds three files that all create a database client. That looks like duplication. It is not &mdash; each one exists because of a different constraint, and picking the wrong one changes how the page renders.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>File</th><th>Lines</th><th>Runs in</th><th>Knows about you</th><th>Effect on the route</th></tr></thead>
+      <tbody>
+        <tr><td><code>static.ts</code></td><td class="num">30</td><td>Server, build time</td><td>Nothing</td><td>Route stays <strong>static</strong></td></tr>
+        <tr><td><code>server.ts</code></td><td class="num">42</td><td>Server, per request</td><td>Reads cookies</td><td>Route becomes <strong>dynamic</strong></td></tr>
+        <tr><td><code>client.ts</code></td><td class="num">9</td><td>Browser</td><td>Session in storage</td><td>n/a &mdash; runs after load</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The whole design turns on one Next.js fact: <strong>calling <code>cookies()</code> opts a route out of static generation.</strong> Not "might" &mdash; it is the mechanism by which Next decides. A cookie is per-visitor, so a page that reads one cannot be a single pre-built file.</p>
+
+  <p>Which means the innocent-looking act of importing the wrong client turns a page that could be served as flat HTML into one that runs a server render on every hit.</p>
+
+  <h3><code>static.ts</code> &mdash; the one the public pages use</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/supabase/static.ts</span><em>no cookies, therefore static</em></div>
+    <pre><code><span class="c-key">export function</span> createStaticClient() {
+  <span class="c-key">const</span> url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  <span class="c-key">const</span> key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  <span class="c-key">if</span> (!url || !key) {
+    <span class="c-key">throw new</span> Error(
+      <span class="c-str">"Supabase environment variables are missing…"</span>
+    );
+  }
+
+  <span class="c-key">return</span> createSupabaseClient&lt;Database&gt;(url, key, {
+    auth: { persistSession: <span class="c-key">false</span>, autoRefreshToken: <span class="c-key">false</span> },
+  });
+}</code></pre>
+  </div>
+
+  <p>Three things to notice.</p>
+
+  <p><strong>The explicit check earns a real error message.</strong> <code>process.env.X</code> is typed <code>string | undefined</code> &mdash; TypeScript will not let you pass it where <code>string</code> is required. There are two ways past that. This file checks and throws with a sentence a human can act on. The alternative is on the next page.</p>
+
+  <p><strong><code>createSupabaseClient&lt;Database&gt;</code> &mdash; the generic is doing all the work.</strong> <code>Database</code> is the generated type describing every table and column. Passing it means <code>.from("posts")</code> is checked against real table names, <code>.select("slug, published_at")</code> is checked against real columns, and the rows that come back are typed. Drop the <code>&lt;Database&gt;</code> and every query silently returns <code>any</code> &mdash; the code still compiles, and every typo becomes a runtime surprise.</p>
+
+  <p><strong><code>persistSession: false</code> is the point of the file.</strong> It tells the client: do not try to remember anyone. No session storage, no refresh timer. This is a read-only pipe for public data, and saying so explicitly is what makes it safe to call at build time.</p>
+
+  <h3><code>client.ts</code> &mdash; and the two <code>!</code> assertions</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/supabase/client.ts</span><em>the same problem, the shortcut answer</em></div>
+    <pre><code><span class="c-key">export function</span> createClient() {
+  <span class="c-key">return</span> createBrowserClient&lt;Database&gt;(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  );
+}</code></pre>
+  </div>
+
+  <div class="note warn">
+    <span class="lab">Same problem, worse failure mode</span>
+    <p><code>!</code> is the <strong>non-null assertion</strong>: "trust me, this is not undefined." It silences the compiler and changes nothing at runtime. If the variable is actually missing, <code>static.ts</code> throws <em>"Supabase environment variables are missing"</em> and you fix it in a minute. This one passes <code>undefined</code> into the Supabase constructor and you get a network error about an invalid URL, three layers down, at some later moment.</p>
+    <p>These are the only two <code>!</code> assertions in the frontend. That is not an accident of taste &mdash; it is a rule that held everywhere except here.</p>
+  </div>
+
+  <h3><code>server.ts</code> &mdash; the cookie bridge</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/supabase/server.ts</span><em>async, because cookies() is</em></div>
+    <pre><code><span class="c-key">export async function</span> createClient() {
+  <span class="c-key">const</span> cookieStore = <span class="c-key">await</span> cookies();
+
+  <span class="c-key">return</span> createServerClient&lt;Database&gt;(url, key, {
+    cookies: {
+      getAll() { <span class="c-key">return</span> cookieStore.getAll(); },
+      setAll(cookiesToSet) {
+        <span class="c-key">try</span> {
+          cookiesToSet.forEach(({ name, value, options }) =&gt;
+            cookieStore.set(name, value, options)
+          );
+        } <span class="c-key">catch</span> {
+          <span class="c-com">// Called from a Server Component. Middleware refreshes the</span>
+          <span class="c-com">// session, so this is safe to ignore.</span>
+        }
+      },
+    },
+  });
+}</code></pre>
+  </div>
+
+  <p>This is the one that makes "who is logged in" work on the server. Supabase does not know about Next.js cookies, so you hand it two functions and it calls them when it needs to read or write the session.</p>
+
+  <p>The <code>catch</code> with only a comment in it looks like swallowed-error sloppiness, and normally would be. Here it is correct and the comment is the proof: Server Components are not allowed to set cookies (the response headers are already gone by then), so <code>setAll</code> throws in exactly one predictable situation, and middleware has already refreshed the session anyway. <strong>An empty catch is acceptable only when a comment explains which specific throw it is absorbing.</strong> One without that sentence is a bug in waiting.</p>
+
+  <p><code>catch {</code> with no binding is also worth naming &mdash; modern JavaScript lets you omit <code>(error)</code> when you are not going to look at it. Small thing, but it signals intent: this is not a dropped variable, it is a deliberately unexamined error.</p>
+
+  <div class="note win">
+    <span class="lab">The wiring, in one sentence each</span>
+    <ul>
+      <li><code>blog-data.ts</code> imports <strong>both</strong> server clients and accepts either via the <code>PostsClient</code> union &mdash; so the query logic is written once.</li>
+      <li>The public exports (<code>getPublicBlogPosts</code>, <code>getPublicArticle</code>) hard-wire <code>createStaticClient</code>, which is what keeps <code>/blog</code> and <code>/blog/[slug]</code> static.</li>
+      <li><code>client.ts</code> is imported only by <code>AuthContext</code> &mdash; the browser side, where a session genuinely exists.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="p5">
+  <span class="snum">Part 05</span>
+  <h2 class="sh"><code>markdown.ts</code> &mdash; a state machine you can read</h2>
+  <p class="deck">333 lines, no dependencies, six exports. The most algorithmic file in the repo and the one with the most to teach about writing loops that are correct rather than merely usually-right.</p>
+
+  <p>Every function here exists because generated markdown is not trustworthy markdown. The model writes a title even though the page already has one. It writes summaries of wildly varying length. It leaves handoff notes in the body. Each of those is a real defect, and each gets one focused function.</p>
+
+  <h3>The two-flag line loop</h3>
+
+  <p><code>sanitizeArticleMarkdown</code> walks the document one line at a time carrying exactly two pieces of state:</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/markdown.ts</span><em>the shape of the loop</em></div>
+    <pre><code><span class="c-key">let</span> inFence = <span class="c-key">false</span>;
+<span class="c-key">let</span> droppedLeadingH1 = <span class="c-key">false</span>;
+
+<span class="c-key">for</span> (<span class="c-key">let</span> i = 0; i &lt; lines.length; i++) {
+  <span class="c-key">const</span> line = lines[i];
+
+  <span class="c-com">// Fence check FIRST — everything else is suspended inside a code block.</span>
+  <span class="c-key">if</span> (FENCE.test(line)) {
+    inFence = !inFence;
+    out.push(line);
+    <span class="c-key">continue</span>;
+  }
+  <span class="c-key">if</span> (inFence) { out.push(line); <span class="c-key">continue</span>; }
+
+  …
+}</code></pre>
+  </div>
+
+  <div class="note win">
+    <span class="lab">Why the fence check must come first</span>
+    <p>A code block can contain the line <code># TODO</code>. That is a comment in a shell script, not a heading. Any rewriting rule that runs before the fence check will happily demote it to <code>## TODO</code> and corrupt the sample. Ordering here is not style &mdash; it is correctness, and it is the reason the two <code>continue</code>s sit at the top of the loop before any other rule gets a look.</p>
+  </div>
+
+  <p><code>inFence = !inFence</code> is a toggle: fences come in pairs, so the same line type both opens and closes. Two lines of code for a rule that would otherwise need a counter and an off-by-one bug.</p>
+
+  <h3>The regexes, and reading them without fear</h3>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Name</th><th>Pattern</th><th>Matches</th></tr></thead>
+      <tbody>
+        <tr><td><code>ATX_HEADING</code></td><td><code>/^(#{1,6})\s+(.*)$/</code></td><td><code># Title</code> through <code>###### Title</code></td></tr>
+        <tr><td><code>SETEXT_UNDERLINE</code></td><td><code>/^\s{0,3}(=+|-+)\s*$/</code></td><td>The <code>====</code> under an old-style heading</td></tr>
+        <tr><td><code>FENCE</code></td><td><code>/^\s{0,3}(```|~~~)/</code></td><td>A code-block delimiter</td></tr>
+        <tr><td><code>PARAGRAPH_TEXT</code></td><td><code>/^(?![ \t]|[-*+&gt;|]|\d+[.)]\s)\S/</code></td><td>A line that is real prose</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The last one is the interesting one, and it reads backwards from how it looks. <code>(?!…)</code> is a <strong>negative lookahead</strong>: "the next thing must <em>not</em> be any of these." So <code>PARAGRAPH_TEXT</code> says &mdash; starting at the beginning of the line, this must not be indentation, not a bullet (<code>-</code> <code>*</code> <code>+</code>), not a blockquote (<code>&gt;</code>), not a table row (<code>|</code>), not a numbered item (<code>1.</code> or <code>1)</code>) &mdash; and then must be a non-space character.</p>
+
+  <p>In plain words: <em>a line of actual prose, not a list item and not part of a structure.</em> That definition matters because setext headings are underlined paragraphs, and you cannot tell "heading text" from "bullet" without it.</p>
+
+  <div class="note">
+    <span class="lab">The look-back that makes setext work</span>
+    <p>To know whether <code>=====</code> is underlining a heading, you have to look at the line above &mdash; but a blank line may sit between them in the source. So the loop walks backwards past blanks until it finds real text, and only then decides. This is the single fiddliest piece of logic in the file, and it exists because markdown has two entirely different heading syntaxes and the generator uses both.</p>
+  </div>
+
+  <h3>The stateful closure: <code>createSlugger()</code></h3>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/markdown.ts</span><em>a function that remembers</em></div>
+    <pre><code><span class="c-com">/** Create one per render pass. Never share one across documents. */</span>
+<span class="c-key">export function</span> createSlugger() {
+  <span class="c-key">const</span> seen = <span class="c-key">new</span> Map&lt;string, number&gt;();
+
+  <span class="c-key">return function</span> slugify(text: string) {
+    <span class="c-key">const</span> base = … <span class="c-com">// lowercase, strip punctuation, hyphenate</span>
+    <span class="c-key">const</span> count = seen.get(base) ?? 0;
+    seen.set(base, count + 1);
+    <span class="c-key">return</span> count === 0 ? base : <span class="c-str">`</span>${base}-${count}<span class="c-str">`</span>;
+  };
+}</code></pre>
+  </div>
+
+  <p>A function that returns a function, where the inner one can still see <code>seen</code> after the outer one has finished. That is a <strong>closure</strong>, and it is how JavaScript does private state without a class.</p>
+
+  <p>The problem it solves is concrete: an article with two sections both called "Overview" would produce two elements with <code>id="overview"</code>, and the table-of-contents link would only ever reach the first. The counter turns the second into <code>overview-1</code>.</p>
+
+  <div class="note warn">
+    <span class="lab">Why the doc comment is not optional</span>
+    <p>Because the state lives in the closure, a slugger shared between two articles would number the second article's headings as if they were continuations of the first &mdash; <code>overview-1</code> on a page with only one Overview. It would look like an intermittent bug and be miserable to find. <code>Map&lt;string, number&gt;</code> is the generic to read here: keys are strings, values are numbers, and TypeScript enforces both.</p>
+  </div>
+
+  <h3>Recursive narrowing: <code>nodeText(node: unknown)</code></h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/markdown.ts</span><em>walking a tree you were not handed a type for</em></div>
+    <pre><code><span class="c-key">function</span> nodeText(node: unknown): string {
+  <span class="c-key">if</span> (<span class="c-key">typeof</span> node === <span class="c-str">"string"</span>) <span class="c-key">return</span> node;
+  <span class="c-key">if</span> (<span class="c-key">typeof</span> node === <span class="c-str">"number"</span>) <span class="c-key">return</span> String(node);
+  <span class="c-key">if</span> (Array.isArray(node)) <span class="c-key">return</span> node.map(nodeText).join(<span class="c-str">""</span>);
+  <span class="c-key">if</span> (node &amp;&amp; <span class="c-key">typeof</span> node === <span class="c-str">"object"</span> &amp;&amp; <span class="c-str">"props"</span> <span class="c-key">in</span> node) {
+    …
+  }
+  <span class="c-key">return</span> <span class="c-str">""</span>;
+}</code></pre>
+  </div>
+  <p>This is the <strong>narrowing ladder</strong> in its purest form. The parameter is <code>unknown</code>, so at the top of the function you can do nothing with it at all &mdash; not even read a property. Each <code>if</code> buys one capability, and only inside that branch.</p>
+  <p><code>"props" in node</code> is the <code>in</code> operator used as a type guard: after it, TypeScript knows <code>node</code> has a <code>props</code> key and will let you read it. Note the ordering again &mdash; <code>node &amp;&amp;</code> before <code>typeof node === "object"</code>, because <code>typeof null</code> lies, exactly as in <code>blog-data.ts</code>. The same three-clause dance, in a different file, for the same reason.</p>
+  <p>Final <code>return ""</code> rather than a throw: an unrecognised node contributes nothing to the text and the walk continues. A heading with one odd child still gets a slug.</p>
+
+  <h3>The global-regex trap</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/markdown.ts</span><em>the line that looks redundant and is not</em></div>
+    <pre><code>HANDOFF.lastIndex = 0;
+<span class="c-key">let</span> match: RegExpExecArray | <span class="c-key">null</span>;
+<span class="c-key">while</span> ((match = HANDOFF.exec(text)) !== <span class="c-key">null</span>) {
+  last = match;   <span class="c-com">// keep walking; we want the final one</span>
+}</code></pre>
+  </div>
+  <div class="note bug">
+    <span class="lab">A real footgun, not a style preference</span>
+    <p>A regex with the <code>g</code> flag <strong>carries a cursor</strong> (<code>lastIndex</code>) between calls. Because <code>HANDOFF</code> is declared once at module scope, the second call to this function would resume scanning from wherever the first one stopped &mdash; and quietly miss the match. Resetting <code>lastIndex</code> to 0 before the loop is what makes the function idempotent. This bug is invisible in a single test and appears the moment two articles render in one pass.</p>
+  </div>
+  <p>The loop deliberately keeps going to find the <em>last</em> match rather than the first, because a handoff note is appended at the end of the body &mdash; and an article that mentions the phrase earlier should not have its middle chopped out.</p>
+
+  <h3><code>standfirst()</code> &mdash; encoding an editorial rule as an invariant</h3>
+  <div class="sig"><b>const STANDFIRST_TARGET = 230</b><i> — aim for this</i><br /><b>const STANDFIRST_MAX = 340</b><i> — never exceed this</i></div>
+  <p>The function accumulates whole sentences until adding the next would pass the target, then stops. Two decisions are worth stealing:</p>
+  <ul>
+    <li><strong>The first sentence is always included</strong>, even if it alone blows past <code>MAX</code>. Cutting mid-thought to satisfy a number produces a fragment that means nothing; an over-long first sentence is at least true.</li>
+    <li><strong>Two constants, not one.</strong> A single limit forces a binary choice at the boundary. A target plus a ceiling lets the code prefer a natural stop and only hard-cut when there is no other option.</li>
+  </ul>
+
+  <h3><code>readingTime()</code> &mdash; the return type is the design</h3>
+  <div class="sig"><b>function readingTime(markdown: string):</b> <i>string | null</i></div>
+  <p>Not <code>number</code>. Not <code>string</code>. <code>string | null</code>, because below <code>MIN_WORDS = 40</code> there is no honest answer &mdash; "1 min read" on a stub is a fabricated fact. Returning <code>null</code> makes every caller handle the absence, and they do: <code>ArchiveIndex.tsx:150</code> and <code>:164</code> both read <code>{entry.readingTime ? … : null}</code>, so the label is simply absent rather than wrong.</p>
+  <p>This is the same principle as <code>mapRowToBlogPost</code> returning <code>BlogPost | null</code> and <code>archive.span</code> being nullable. <strong>Three different files, one rule: if you don't know, say so in the type.</strong></p>
+</section>
+
+<section id="p6">
+  <span class="snum">Part 06</span>
+  <h2 class="sh"><code>archive.ts</code> &mdash; reshaping data for a screen</h2>
+  <p class="deck">213 lines that take <code>BlogPost[]</code> and return one object containing everything the archive page renders. No React, no JSX, no browser APIs &mdash; which is precisely what makes it the most reusable file in the repo.</p>
+
+  <p>The signature is the whole architecture:</p>
+  <div class="sig"><b>export function buildArchive(posts: BlogPost[]):</b> <i>Archive</i></div>
+
+  <p>One input, one output, no side effects. You could call it from a test, a script, or a different framework. Compare that to the alternative &mdash; doing the grouping inside the component &mdash; where the same logic would only be runnable by rendering a page.</p>
+
+  <h3>The four types, in dependency order</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>each one contains the previous</em></div>
+    <pre><code><span class="c-key">export type</span> ArchiveEntry = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  source: string;
+  date: string;              <span class="c-com">// already formatted for display</span>
+  time: number | <span class="c-key">null</span>;      <span class="c-com">// sortable; null when undated</span>
+  readingTime: string | <span class="c-key">null</span>;
+  difficulty: string | <span class="c-key">null</span>;
+};
+
+<span class="c-key">export type</span> MonthGroup = { key: string; label: string; entries: ArchiveEntry[] };
+<span class="c-key">export type</span> SourceCount = { name: string; count: number };
+
+<span class="c-key">export type</span> Archive = {
+  total: number;
+  groups: MonthGroup[];
+  sources: SourceCount[];
+  span: { from: string; to: string } | <span class="c-key">null</span>;
+};</code></pre>
+  </div>
+
+  <div class="note win">
+    <span class="lab">Read the nulls — they are a list of things that can genuinely be unknown</span>
+    <p><code>time</code>, <code>readingTime</code>, <code>difficulty</code>, <code>span</code>. Four nullable fields, four real gaps in the data: a post with no date, a post too short to time, a post whose difficulty the pipeline guessed, and an archive with nothing dated in it. Meanwhile <code>slug</code>, <code>title</code>, <code>source</code> and <code>date</code> are plain <code>string</code> &mdash; because upstream code guarantees a fallback for each. <strong>The type is a map of what the UI must handle.</strong></p>
+  </div>
+
+  <p><code>date</code> and <code>time</code> deserve a note. They are the same instant twice: one formatted for a human, one as a number for sorting. Storing both is not redundancy &mdash; it means the component never parses a date and never formats one. All the work happens once, here.</p>
+
+  <h3>Two module-level formatters</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>created once, used 244 times</em></div>
+    <pre><code><span class="c-key">const</span> MONTH_LABEL = <span class="c-key">new</span> Intl.DateTimeFormat(<span class="c-str">"en-US"</span>, {
+  month: <span class="c-str">"long"</span>, year: <span class="c-str">"numeric"</span>, timeZone: <span class="c-str">"UTC"</span>,
+});
+<span class="c-key">const</span> DAY_LABEL = <span class="c-key">new</span> Intl.DateTimeFormat(<span class="c-str">"en-US"</span>, {
+  month: <span class="c-str">"short"</span>, day: <span class="c-str">"numeric"</span>, timeZone: <span class="c-str">"UTC"</span>,
+});</code></pre>
+  </div>
+  <p>Constructing an <code>Intl.DateTimeFormat</code> is genuinely expensive &mdash; it loads locale data. Declared at module level it happens once per process; declared inside the mapping function it would happen once per row. Same output, meaningfully different cost, and the only difference is where the <code>const</code> sits.</p>
+  <p><code>timeZone: "UTC"</code> is the correctness half. Without it the formatter uses the server's zone, so an article published at 00:30 UTC on 1 July shows as 30 June for a server in Chicago &mdash; and lands in the wrong month bucket. Pinning UTC makes the output identical everywhere, which is a requirement for pre-rendered pages.</p>
+
+  <h3>The alias map: fixing upstream data without touching upstream</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>Map, with a normalised key</em></div>
+    <pre><code><span class="c-key">const</span> SOURCE_ALIASES = <span class="c-key">new</span> Map&lt;string, string&gt;([
+  [<span class="c-str">"marktechpost"</span>, <span class="c-str">"MarkTechPost"</span>],
+  …
+]);
+
+<span class="c-key">function</span> normaliseSource(raw: string) {
+  <span class="c-key">const</span> trimmed = raw.trim();
+  <span class="c-key">const</span> key = trimmed.toLowerCase().replace(/[^a-z0-9]/g, <span class="c-str">""</span>);
+  <span class="c-key">return</span> SOURCE_ALIASES.get(key) ?? trimmed;
+}</code></pre>
+  </div>
+  <p>The database contains <em>MarkTechPost</em>, <em>Marktechpost</em> and <em>marktechpost</em> as three separate sources. Left alone, the filter row shows three pills for one publication and each one hides two thirds of its articles.</p>
+  <p>The key line is the <code>replace</code>: strip everything that is not a letter or digit, lowercase the rest. So <code>"Mark Tech Post"</code>, <code>"MarkTechPost"</code> and <code>"mark-tech-post"</code> all collapse to <code>marktechpost</code>, and one map entry covers every spelling that will ever arrive. Writing out each variant as its own key would be a maintenance treadmill.</p>
+  <p><code>?? trimmed</code> is the escape hatch: an unknown source passes through with its own name intact. A new publication appears in the filter row without anyone editing this file &mdash; it just does not get canonicalised until someone notices a duplicate.</p>
+
+  <div class="note">
+    <span class="lab">Why a Map and not an object literal</span>
+    <p><code>Map</code> has real <code>.get</code>/<code>.set</code>/<code>.has</code>, cannot collide with inherited property names like <code>constructor</code>, and takes a generic (<code>Map&lt;string, string&gt;</code>) that documents both sides. A plain object works for a small lookup, but the moment keys come from data rather than from source code, <code>Map</code> is the safer default.</p>
+  </div>
+
+  <h3>The excerpt cut &mdash; a word boundary, not a character count</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>EXCERPT_LENGTH = 180</em></div>
+    <pre><code><span class="c-key">const</span> clipped = text.slice(0, EXCERPT_LENGTH);
+<span class="c-key">const</span> lastSpace = clipped.lastIndexOf(<span class="c-str">" "</span>);
+<span class="c-key">return</span> (lastSpace &gt; 80 ? clipped.slice(0, lastSpace) : clipped).trimEnd() + <span class="c-str">"…"</span>;</code></pre>
+  </div>
+  <p>Cut at 180 characters, then walk back to the last space so you end on a whole word rather than <code>"transfor…"</code>. The <code>&gt; 80</code> guard is the interesting part: if the last space is very early, the text is one long unbroken token (a URL, a model name) and backing up to it would throw away most of the excerpt. In that case the hard cut is the better of two imperfect options.</p>
+
+  <div class="note win">
+    <span class="lab">This function is also a performance decision</span>
+    <p>Full summaries average ~1,130 characters over 244 entries. Sending them all would put roughly 275&nbsp;KB of prose into a payload for text the CSS clamps to two lines. Cutting to 180 here is what makes the client-side filter in Part 10 affordable at all &mdash; the two decisions are load-bearing for each other.</p>
+  </div>
+
+  <h3><code>toEntry()</code> &mdash; narrowing a discriminated union</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>find, then check the tag, then read</em></div>
+    <pre><code><span class="c-key">const</span> titleBlock = post.blocks.find((block) =&gt; block.type === <span class="c-str">"title"</span>);
+<span class="c-key">const</span> title = titleBlock?.type === <span class="c-str">"title"</span> ? titleBlock.data : undefined;
+
+<span class="c-key">const</span> displayTitle =
+  title?.content || post.metadata?.title || <span class="c-str">"Untitled"</span>;</code></pre>
+  </div>
+  <p>The second line looks like it is checking the same thing twice. It is not, and the reason is worth understanding.</p>
+  <p><code>post.blocks</code> is <code>AllContentBlock[]</code> &mdash; a <strong>discriminated union</strong>, where every member has a <code>type</code> field acting as a tag. <code>.find()</code> returns <code>AllContentBlock | undefined</code>; TypeScript does not look inside the callback, so it has no idea the result is specifically a title block. Re-testing <code>titleBlock?.type === "title"</code> is what narrows it, and only after that narrowing is <code>titleBlock.data</code> known to be the title's data rather than a code block's or an image's.</p>
+  <p>This is the same limitation as the <code>.filter</code> case in Part 03, with a different remedy. <code>.filter</code> gets a type predicate; <code>.find</code> gets a re-check on the result.</p>
+
+  <div class="note">
+    <span class="lab">Why <code>||</code> here and <code>??</code> in blog-data</span>
+    <p><code>title?.content || post.metadata?.title || "Untitled"</code> uses <code>||</code> deliberately, because an empty-string title should fall through to the next option. <code>??</code> only catches <code>null</code> and <code>undefined</code>, so <code>"" ?? "Untitled"</code> would keep the empty string and render a blank heading. In <code>blog-data.ts:184</code> the values are objects, where <code>??</code> is the right choice. <strong>Pick the operator from what "empty" means for that field</strong> &mdash; not by habit.</p>
+  </div>
+
+  <h3>Difficulty: three values in, two out</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>deliberately dropping a value</em></div>
+    <pre><code><span class="c-key">const</span> level = asString(post.metadata?.difficulty).toLowerCase();
+<span class="c-key">const</span> difficulty =
+  level === <span class="c-str">"intermediate"</span> || level === <span class="c-str">"advanced"</span> ? level : <span class="c-key">null</span>;</code></pre>
+  </div>
+  <p>"beginner" is not rendered. That is not an oversight &mdash; the pipeline's <code>enrich_node</code> defaults difficulty to <code>"beginner"</code> whenever the model did not supply one, which means the value conflates <em>"we judged this beginner-level"</em> with <em>"we don't know"</em>. Since those are indistinguishable downstream, the honest move is to show the badge only for the two levels that were definitely a judgement. Note the type is <code>string | null</code> in the entry, and <code>null</code> is what a beginner post carries &mdash; identical to a post with no difficulty at all.</p>
+
+  <h3>Sorting with nulls at the back</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>-Infinity as a sort sentinel</em></div>
+    <pre><code>entries.sort((a, b) =&gt; (b.time ?? -Infinity) - (a.time ?? -Infinity));</code></pre>
+  </div>
+  <p>A comparator returns a negative number, zero, or positive. <code>b - a</code> gives descending order, so newest first. The <code>?? -Infinity</code> handles undated posts: any real timestamp beats negative infinity, so they sink to the bottom rather than sorting as <code>NaN</code> &mdash; which is what <code>null - 1700000000</code> would give you, and <code>NaN</code> comparisons are all false, which produces a scrambled list rather than an error.</p>
+
+  <h3>Bucketing with a Map, then two passes</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/archive.ts</span><em>the group-by idiom</em></div>
+    <pre><code><span class="c-key">const</span> buckets = <span class="c-key">new</span> Map&lt;string, ArchiveEntry[]&gt;();
+
+<span class="c-key">for</span> (<span class="c-key">const</span> entry <span class="c-key">of</span> entries) {
+  <span class="c-key">const</span> key = entry.time === <span class="c-key">null</span> ? <span class="c-str">"undated"</span> : monthKey(entry.time);
+  <span class="c-key">const</span> existing = buckets.get(key);
+  <span class="c-key">if</span> (existing) existing.push(entry);
+  <span class="c-key">else</span> buckets.set(key, [entry]);
+}</code></pre>
+  </div>
+  <p>The <code>get</code>-or-<code>set</code> shape is the standard group-by in JavaScript. It works here because the entries were <em>already sorted</em> before bucketing &mdash; insertion order into a <code>Map</code> is guaranteed, and each array is filled in the order it receives items, so both the groups and the entries inside them come out newest-first for free. Sorting after grouping would need a sort per bucket.</p>
+  <p>Then <code>"undated"</code> is spliced to the end, because it has no position on a timeline. And the source counts are a second small <code>Map&lt;string, number&gt;</code> pass, sorted by count descending so the filter row leads with the publications you actually have.</p>
+
+  <div class="note win">
+    <span class="lab">What this file gets right, in one line</span>
+    <p>Every awkward decision &mdash; date formatting, alias folding, excerpt cutting, difficulty suppression, null sorting &mdash; happens <strong>once, on the server, before the component exists.</strong> <code>ArchiveIndex.tsx</code> receives data that is already correct and spends its 366 lines on interaction instead of repair.</p>
+  </div>
+</section>
+
+<section id="p7">
+  <span class="snum">Part 07</span>
+  <h2 class="sh"><code>source-hues.ts</code> &mdash; 39 lines, three tricks</h2>
+  <p class="deck">The smallest interesting file in the repo. It assigns a colour to a publication, and does it in a way that survives filtering, matches across pages, and costs nothing.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/source-hues.ts</span><em>the whole file, minus comments</em></div>
+    <pre><code><span class="c-key">const</span> HUE_CLASSES = [
+  { dot: <span class="c-str">"bg-hue-1"</span>, text: <span class="c-str">"text-hue-1"</span>, wash: <span class="c-str">"bg-hue-1-wash"</span> },
+  { dot: <span class="c-str">"bg-hue-2"</span>, text: <span class="c-str">"text-hue-2"</span>, wash: <span class="c-str">"bg-hue-2-wash"</span> },
+  { dot: <span class="c-str">"bg-hue-3"</span>, text: <span class="c-str">"text-hue-3"</span>, wash: <span class="c-str">"bg-hue-3-wash"</span> },
+  { dot: <span class="c-str">"bg-hue-4"</span>, text: <span class="c-str">"text-hue-4"</span>, wash: <span class="c-str">"bg-hue-4-wash"</span> },
+] <span class="c-key">as const</span>;
+
+<span class="c-key">export type</span> SourceHue = (<span class="c-key">typeof</span> HUE_CLASSES)[number];
+
+<span class="c-key">export function</span> hueFor(source: string): SourceHue {
+  <span class="c-key">let</span> hash = 0;
+  <span class="c-key">for</span> (<span class="c-key">let</span> i = 0; i &lt; source.length; i++) {
+    hash = (hash * 31 + source.charCodeAt(i)) &gt;&gt;&gt; 0;
+  }
+  <span class="c-key">return</span> HUE_CLASSES[hash % HUE_CLASSES.length];
+}</code></pre>
+  </div>
+
+  <h3>Trick 1 &mdash; derive the type from the data</h3>
+  <div class="sig"><b>export type SourceHue = (typeof HUE_CLASSES)[number];</b></div>
+  <p>Read it inside-out. <code>typeof HUE_CLASSES</code> is the type of the array. <code>[number]</code> is <strong>indexed access with a number</strong>, which for an array type means "the type of any element". So <code>SourceHue</code> is exactly <code>{ dot: "bg-hue-1"; text: …; wash: … } | { dot: "bg-hue-2"; … } | …</code> &mdash; the union of the four literal shapes.</p>
+  <p>The alternative is to hand-write the type:</p>
+  <div class="ba">
+    <div class="col">
+      <span class="lab">Hand-written — two things to keep in sync</span>
+      <pre><code><span class="c-key">type</span> SourceHue = {
+  dot: string; text: string; wash: string;
+};</code></pre>
+    </div>
+    <div class="col">
+      <span class="lab">Derived — one thing, always in sync</span>
+      <pre><code><span class="c-key">type</span> SourceHue =
+  (<span class="c-key">typeof</span> HUE_CLASSES)[number];</code></pre>
+    </div>
+  </div>
+  <p>The derived version is not just shorter. Add a <code>ring</code> field to the objects and the hand-written type is now silently wrong &mdash; you can no longer read <code>hue.ring</code> even though it exists. The derived one already knows. <strong>Write the data, derive the type</strong> is the single highest-value TypeScript habit in this file.</p>
+
+  <h3>Trick 2 &mdash; <code>as const</code> is what makes it work</h3>
+  <p>Without <code>as const</code>, TypeScript widens the array to <code>{ dot: string; text: string; wash: string }[]</code> &mdash; the literal strings become plain <code>string</code>, and the derived type loses everything specific. <code>as const</code> does two things: it freezes the values to their literal types (<code>"bg-hue-1"</code>, not <code>string</code>) and it marks the array <code>readonly</code>, so nobody can <code>.push()</code> a fifth hue at runtime.</p>
+
+  <h3>Trick 3 &mdash; hash the name, not the position</h3>
+  <p>The obvious implementation is index-based: first source gets hue 1, second gets hue 2. It has a bug you would only find by using the page. Filter the archive down to three sources and the survivors <strong>renumber</strong> &mdash; every dot changes colour under the cursor. And a source's colour on the archive would not match its colour on the article page, because the two pages have different lists.</p>
+  <p>Hashing the name fixes both by construction. <em>Colour follows the entity, not its position.</em> Same name in, same slot out, on every page, under every filter, forever.</p>
+
+  <div class="note">
+    <span class="lab">The arithmetic, briefly</span>
+    <p><code>hash * 31 + charCodeAt(i)</code> is the classic string hash (31 is prime, which spreads values well and is cheap because <code>x*31</code> is a shift and a subtract). <code>&gt;&gt;&gt; 0</code> is an <strong>unsigned right shift by zero</strong> &mdash; it does not move any bits, it coerces the result to a 32-bit unsigned integer. Without it, repeated multiplication overflows into negative numbers, and <code>-7 % 4</code> is <code>-3</code> in JavaScript, which would index <code>HUE_CLASSES[-3]</code> and return <code>undefined</code>. That would crash on <code>hue.dot</code>. One three-character operator is the difference.</p>
+  </div>
+
+  <h3>Four slots, more than four sources</h3>
+  <p>Collisions are guaranteed and the file's own header comment says so. That is acceptable here because of a rule worth generalising: <strong>the colour is never the only carrier of the information.</strong> Every dot has the source name printed beside it &mdash; <code>ArchiveIndex.tsx:148</code>, <code>:162</code>, <code>:292</code> &mdash; and every dot is <code>aria-hidden="true"</code>, so assistive technology reads only the name.</p>
+  <p>The hue is a scanning aid for "those two rows are the same publication", not an identifier. Nothing is gated behind telling hue 2 from hue 4, which means a collision degrades the experience slightly rather than breaking it.</p>
+
+  <div class="note win">
+    <span class="lab">Why this lives in <code>lib/</code> and not next to the component</span>
+    <p><code>ArchiveIndex.tsx</code> is a client component; the article page is a server component. Both need <code>hueFor</code>. If it were exported from the client module, importing it from the server page would drag that whole <code>"use client"</code> graph along. A dependency-free file in <code>lib/</code> can be imported from either side &mdash; which is the same reasoning as Part 01's tier rule, applied to 39 lines.</p>
+  </div>
+</section>
+
+<section id="p8">
+  <span class="snum">Part 08</span>
+  <h2 class="sh"><code>pipeline-stats.ts</code> &mdash; one call, and the narrowing after it</h2>
+  <p class="deck">178 lines that produce the numbers on the homepage, down from 223. This file used to be the best place in the repo to learn <code>Promise.all</code>. It is now the best place to learn what to do when the database will not let you ask the question at all &mdash; and how to narrow a payload whose shape your tooling cannot describe.</p>
+
+  <div class="sig"><b>export async function getPipelineStats():</b> <i>Promise&lt;PipelineStats&gt;</i></div>
+
+  <p>An <code>async</code> function always returns a promise. Writing <code>Promise&lt;PipelineStats&gt;</code> explicitly is optional &mdash; TypeScript infers it &mdash; but stating it means the compiler checks every <code>return</code> inside against the shape you intended, including the failure path. That signature is the one thing in this file that did not change.</p>
+
+  <h3>What the file was, and what it became</h3>
+  <div class="ba">
+    <div class="before">
+      <span class="lab">before &mdash; 223 lines</span>
+      <p>Five helpers nested inside the export, each closing over one client. A <code>Promise.all</code> fanning them out. A paging loop with <code>PAGE</code> / <code>MAX_PAGES</code> to work around the missing <code>COUNT(DISTINCT)</code>. A <code>countIn()</code> taking literal-union table names, called twice per month inside a second, nested <code>Promise.all</code>.</p>
+      <p><strong>5 + 2&times;N round trips</strong> to draw one chart.</p>
+    </div>
+    <div class="after">
+      <span class="lab">after &mdash; 178 lines</span>
+      <p>One <code>await</code>. The counting is a single SQL function, <code>public.pipeline_stats()</code>, and everything after the call is narrowing the JSON it returns.</p>
+      <p><strong>1 round trip</strong>, and no row ceiling to page around.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="lab">The async lessons did not go away &mdash; they moved</span>
+    <p>None of the old code was bad, and all of it is still worth reading; it is simply no longer <em>here</em>. The same patterns still run elsewhere in this repo, so the rest of this document points at those instead: <code>Promise.all</code> over independently fallible work in <code>app/page.tsx:23</code>, and the paging loop with a natural exit plus a hard ceiling in <code>blog-data.ts:173</code>. The lesson about <code>{ count: "exact", head: true }</code> &mdash; ask for the number, not the rows &mdash; is now a lesson about the SQL that replaced it.</p>
+  </div>
+
+  <h3>Why the counting moved into the database</h3>
+  <p>Not for the round-trip count. That was a bonus. The real reason is that the old version could only ever have worked by accident.</p>
+
+  <div class="note bug">
+    <span class="lab">Row-Level Security answers with an empty array, not an error</span>
+    <p><code>raw_api_data</code> &mdash; the table every &ldquo;read&rdquo; figure is counted from &mdash; has RLS enabled and <strong>no policy at all</strong>. In Postgres that combination is a closed door, and PostgREST reports a closed door as an empty room: status <code>200</code>, <code>data: []</code>, <code>error: null</code>. A count request comes back <code>Content-Range: */0</code>.</p>
+    <p>That is indistinguishable, in code, from a table that is genuinely empty. Every guard in the old file tested <code>error</code>, and <code>error</code> was <code>null</code>. It would have counted zero articles read and reported complete success.</p>
+  </div>
+
+  <p>So why did the homepage ever show real numbers? Because the build was not using the public key. <code>frontend/.env</code> sets <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> to an <code>sb_secret_</code> value, and a secret key runs as <code>service_role</code>, which bypasses RLS entirely. The figures were right and the mechanism was a security bug &mdash; the one filed as <em>handle this first</em> in Volume I. Fixing that bug on its own would have silently zeroed every read count on the landing page, while the keep counts, which come from the publicly-readable <code>posts</code> table, kept working. The chart would have drawn a kept segment taller than the column containing it.</p>
+
+  <div class="note warn">
+    <span class="lab">The shape of this bug is worth more than the bug</span>
+    <p>Two correct-looking things &mdash; a query that returns no error, and a key that works &mdash; were covering for each other. Neither is wrong on its own. <strong>When a permission system reports absence rather than refusal, testing with the credentials you deploy with is the only test that means anything.</strong> The same page, built with the key it claims to use, produces different numbers.</p>
+  </div>
+
+  <p>The fix is a <strong>Security Definer</strong> function: SQL that runs with its author's privileges instead of the caller's. It counts rows the caller cannot see and returns only aggregates &mdash; never a row. The table stays shut, and the landing page still gets its proof.</p>
+
+  <div class="spec">
+    <div class="tag"><span>supabase/migrations/20260618121728_redesign_schema.sql</span><em>the privacy seam</em></div>
+    <pre><code>Create Or Replace Function public.pipeline_stats()
+Returns jsonb
+Language sql
+Stable
+Security Definer
+Set search_path = <span class="c-str">''</span>          <span class="c-com">-- the hardening that makes the line above safe</span>
+As $$ &hellip; $$;
+
+Revoke All On Function public.pipeline_stats() From Public;
+Grant Execute On Function public.pipeline_stats() To anon, authenticated, service_role;</code></pre>
+  </div>
+
+  <div class="note warn">
+    <span class="lab"><code>Security Definer</code> is a loaded gun, and <code>search_path</code> is the safety</span>
+    <p>A definer function resolves unqualified names using the <em>caller's</em> <code>search_path</code> unless you pin it. Anyone who can create a table can then create their own <code>posts</code>, put it first on the path, and have your elevated function read it. <code>Set search_path = ''</code> switches that off by requiring every name inside the body to be schema-qualified &mdash; which is why the SQL says <code>public.raw_api_data</code> rather than <code>raw_api_data</code>.</p>
+    <p>The matching habit on the outside: <code>Revoke All &hellip; From Public</code> first, then grant to exactly the roles that should have it. A definer function you forgot to revoke is a definer function everyone has.</p>
+  </div>
+
+  <p>The two older functions in the same migration are pinned to <code>search_path = public</code> instead, and that is not an inconsistency. They are reachable only by <code>service_role</code> &mdash; a caller who already holds every privilege the function could lend them. This one is reachable by <code>anon</code>, so it is the only one where the caller has something to gain.</p>
+
+  <h3>The three exported types, in dependency order</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/pipeline-stats.ts</span><em>the contract the component reads</em></div>
+    <pre><code><span class="c-key">export type</span> Granularity = <span class="c-str">"week"</span> | <span class="c-str">"month"</span>;
+
+<span class="c-key">export type</span> PipelineBucket = {
+  start: <span class="c-key">string</span>;      <span class="c-com">// first instant of the bucket, ISO &mdash; sort key and label source</span>
+  read: <span class="c-key">number</span>;      <span class="c-com">// raw items ingested in this window</span>
+  kept: <span class="c-key">number</span>;      <span class="c-com">// of those, the ones that produced a live entry</span>
+  resolved: <span class="c-key">number</span>;  <span class="c-com">// of those, the ones the queue has finished with</span>
+  partial: <span class="c-key">boolean</span>;  <span class="c-com">// true while the window is still open</span>
+};</code></pre>
+  </div>
+  <p>Note where <code>| null</code> is and is not. The top-level figures on <code>PipelineStats</code> are <code>number | null</code>, because a failed read has nothing to report. The fields inside a bucket are plain <code>number</code>, because a bucket either parsed completely or does not exist &mdash; there is no such thing as a bucket with a known <code>read</code> and an unknown <code>kept</code>. <strong>Optionality belongs at the level where the failure actually happens</strong>, and pushing it one level too deep means every consumer writes null checks for a state that cannot occur.</p>
+  <p><code>resolved</code> is the field that did not exist before, and it is the whole reason the chart stopped lying. A raw item that is still <code>pending</code> has not been rejected; it has not been judged. Dividing keeps by <em>reads</em> counted the queue backlog as noise, which is how two recent months came to show a confident 0%. Dividing by <code>resolved</code> counts only the decided population, and a bucket with nothing decided yet gets no percentage at all.</p>
+
+  <h3>One call, and a return type the generator cannot describe</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/pipeline-stats.ts</span><em>the entire network layer of this file</em></div>
+    <pre><code><span class="c-key">const</span> { data, error } = <span class="c-key">await</span> supabase.rpc(<span class="c-str">"pipeline_stats"</span>);
+<span class="c-key">if</span> (error) {
+  console.error(<span class="c-str">"Pipeline stats: pipeline_stats() failed"</span>, error.message);
+  <span class="c-key">return</span> EMPTY;
+}</code></pre>
+  </div>
+  <p>The function name is a literal string for the same reason table names are: the generated <code>Database</code> type keys off it, so <code>rpc("pipeline_stats")</code> is checked against the real schema and <code>rpc(someVariable)</code> is not.</p>
+  <p>And this time a permission problem <em>is</em> an <code>error</code>. A caller without <code>EXECUTE</code> gets a <code>42501</code>, not an empty success. Moving the read behind a function did not only widen what could be counted &mdash; it converted a silent wrong answer into a loud one, which is the better half of the trade.</p>
+
+  <p>The function returns <code>jsonb</code>. Supabase's type generator maps that to <code>Json</code>, the recursive any-JSON type, because nothing in the schema records what is inside it. So the payload arrives as the moral equivalent of <code>unknown</code>, and the narrowing discipline from Part 03 applies in full &mdash; this is exactly the <em>&ldquo;a value arriving from outside your program&rdquo;</em> case that <code>unknown</code> exists for.</p>
+
+  <h3>Four narrowing helpers, each returning the value or <code>null</code></h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/pipeline-stats.ts</span><em>three JavaScript warts, handled in one line each</em></div>
+    <pre><code><span class="c-key">function</span> asRecord(value: <span class="c-key">unknown</span>): Record&lt;<span class="c-key">string</span>, unknown&gt; | <span class="c-key">null</span> {
+  <span class="c-key">if</span> (<span class="c-key">typeof</span> value !== <span class="c-str">"object"</span> || value === <span class="c-key">null</span> || Array.isArray(value)) {
+    <span class="c-key">return null</span>;
+  }
+  <span class="c-key">return</span> value <span class="c-key">as</span> Record&lt;<span class="c-key">string</span>, unknown&gt;;
+}
+
+<span class="c-key">function</span> asCount(value: <span class="c-key">unknown</span>): <span class="c-key">number</span> | <span class="c-key">null</span> {
+  <span class="c-key">return typeof</span> value === <span class="c-str">"number"</span> &amp;&amp; Number.isFinite(value) ? value : <span class="c-key">null</span>;
+}
+
+<span class="c-key">function</span> asIso(value: <span class="c-key">unknown</span>): <span class="c-key">string</span> | <span class="c-key">null</span> {
+  <span class="c-key">if</span> (<span class="c-key">typeof</span> value !== <span class="c-str">"string"</span>) {
+    <span class="c-key">return null</span>;
+  }
+  <span class="c-key">return</span> Number.isNaN(<span class="c-key">new</span> Date(value).getTime()) ? <span class="c-key">null</span> : value;
+}</code></pre>
+  </div>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>The check</th><th>The wart it exists for</th></tr></thead>
+      <tbody>
+        <tr><td><code>value === null</code></td><td><code>typeof null</code> is <code>"object"</code>. A twenty-year-old bug in JavaScript that can never be fixed, and the reason a bare <code>typeof x === "object"</code> guard lets <code>null</code> straight through.</td></tr>
+        <tr><td><code>Array.isArray(value)</code></td><td><code>typeof []</code> is also <code>"object"</code>. Without this line an array satisfies <code>asRecord</code>, and every field lookup on it quietly yields <code>undefined</code>.</td></tr>
+        <tr><td><code>Number.isFinite(value)</code></td><td><code>NaN</code> and <code>Infinity</code> are both of type <code>number</code>. <code>NaN</code> is the dangerous one: it propagates through every arithmetic operation without throwing, so one bad field becomes <code>NaN%</code> on the page.</td></tr>
+        <tr><td><code>Number.isNaN(new Date(v).getTime())</code></td><td><code>new Date("banana")</code> does not throw. It returns a Date object whose time is <code>NaN</code>, and formatting it prints <code>"Invalid Date"</code> into your markup.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The prefix naming is deliberate and worth copying. <code>asX</code> reads as <em>a conversion that may decline</em>, in contrast to <code>isX</code>, which is a type predicate that answers yes or no. Both appear in this repo &mdash; <code>blog-data.ts</code> uses predicates because it is filtering a list; this file uses converters because it is building one value out of another.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/pipeline-stats.ts</span><em>composition: one guard per field, one exit</em></div>
+    <pre><code><span class="c-key">function</span> asBucket(value: <span class="c-key">unknown</span>): PipelineBucket | <span class="c-key">null</span> {
+  <span class="c-key">const</span> row = asRecord(value);
+  <span class="c-key">if</span> (!row) {
+    <span class="c-key">return null</span>;
+  }
+  <span class="c-key">const</span> start = asIso(row.start);
+  <span class="c-key">const</span> read = asCount(row.read);
+  <span class="c-key">const</span> kept = asCount(row.kept);
+  <span class="c-key">const</span> resolved = asCount(row.resolved);
+  <span class="c-key">if</span> (start === <span class="c-key">null</span> || read === <span class="c-key">null</span> || kept === <span class="c-key">null</span> || resolved === <span class="c-key">null</span>) {
+    <span class="c-key">return null</span>;
+  }
+  <span class="c-key">return</span> { start, read, kept, resolved, partial: row.partial === <span class="c-key">true</span> };
+}</code></pre>
+  </div>
+
+  <p>Two details in there are the difference between a guard that works and a guard that looks like it works.</p>
+  <p><code>start === null</code>, not <code>!start</code>. A bucket where nothing was read has <code>read: 0</code>, and <code>0</code> is falsy &mdash; <code>if (!read)</code> would throw away every idle window in the series, which are precisely the windows the chart is careful to draw. <strong>Once a type is <code>number | null</code>, the only safe test is against <code>null</code> itself.</strong></p>
+  <p><code>row.partial === true</code>, not <code>Boolean(row.partial)</code> or a bare <code>row.partial</code>. The field is <code>unknown</code>, so the string <code>"false"</code> would pass a truthiness test. Comparing to <code>true</code> means anything that is not exactly the boolean becomes <code>false</code>, and the property lands in the object already typed &mdash; no cast needed.</p>
+
+  <h3>One bad bucket drops the whole series</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/pipeline-stats.ts</span><em>all or nothing, on purpose</em></div>
+    <pre><code><span class="c-key">const</span> rows = Array.isArray(payload.buckets) ? payload.buckets : [];
+<span class="c-key">const</span> parsed = rows.map(asBucket);
+<span class="c-key">const</span> malformed = parsed.some((bucket) =&gt; bucket === <span class="c-key">null</span>);
+<span class="c-key">if</span> (malformed) {
+  console.error(<span class="c-str">"Pipeline stats: pipeline_stats() returned a malformed bucket"</span>);
+}
+<span class="c-key">const</span> buckets = malformed
+  ? []
+  : (parsed <span class="c-key">as</span> PipelineBucket[]).sort((a, b) =&gt; a.start.localeCompare(b.start));</code></pre>
+  </div>
+  <p>The obvious move is <code>parsed.filter(Boolean)</code> &mdash; keep what worked, drop what did not. That is wrong here, and the reason generalises. The chart is a part-to-whole shape read left to right: a column missing from the middle does not omit a value, it <em>misstates the trend</em>, and nothing on screen indicates anything is absent. Same principle as drawing idle buckets at zero rather than skipping them. <strong>When individual values are read as a series, a partial series is worse than no series.</strong></p>
+  <p><code>localeCompare</code> on the ISO string rather than parsing dates to sort them: the format is fixed-width and zero-padded, so lexical order is chronological order. The SQL already returns them ordered; sorting again is a second lock on a door that is already locked, and it costs nothing on a dozen rows.</p>
+
+  <div class="note win">
+    <span class="lab">The transferable pattern</span>
+    <p>When a public surface needs a number derived from private rows, the choice is not between opening the table and doing without. A definer function is a third option: <strong>move the query to where the privilege already is, and let it return only the answer.</strong> Less data crosses the wire, the client keeps no read access it should not have, and a permissions mistake shows up as an exception instead of a plausible zero.</p>
+  </div>
+</section>
+
+<section id="p9">
+  <span class="snum">Part 09</span>
+  <h2 class="sh"><code>utils.ts</code> &mdash; six lines, used everywhere</h2>
+  <p class="deck">The most-imported file in the frontend. Worth a section because the reason it exists is a genuine problem, and the fix is invisible until you hit it.</p>
+
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/utils.ts</span><em>the entire file</em></div>
+    <pre><code><span class="c-key">import</span> { type ClassValue, clsx } <span class="c-key">from</span> <span class="c-str">"clsx"</span>;
+<span class="c-key">import</span> { twMerge } <span class="c-key">from</span> <span class="c-str">"tailwind-merge"</span>;
+
+<span class="c-key">export function</span> cn(...inputs: ClassValue[]) {
+  <span class="c-key">return</span> twMerge(clsx(inputs));
+}</code></pre>
+  </div>
+
+  <p><code>...inputs</code> is a <strong>rest parameter</strong>: collect every argument into an array. So <code>cn("a", "b", cond &amp;&amp; "c")</code> arrives as <code>["a", "b", false]</code>. <code>ClassValue[]</code> is clsx's own type, which accepts strings, arrays, nested arrays, objects, <code>false</code>, <code>null</code> and <code>undefined</code> &mdash; which is why conditional expressions can be passed inline without guarding them.</p>
+
+  <p><code>import { type ClassValue, clsx }</code> is worth noticing: the inline <code>type</code> keyword marks that import as types-only, so it is erased at build time rather than emitting a runtime require. In a file imported by nearly every component, that is the correct default.</p>
+
+  <h3>What the two libraries each do</h3>
+
+  <p><strong>clsx</strong> flattens and drops falsy values. Its job is turning conditional soup into a string:</p>
+  <div class="spec">
+    <div class="tag"><span>the clsx half</span><em>conditions collapse away</em></div>
+    <pre><code>clsx([<span class="c-str">"px-4"</span>, <span class="c-key">false</span>, <span class="c-key">null</span>, active &amp;&amp; <span class="c-str">"font-bold"</span>])
+<span class="c-com">// → "px-4 font-bold"   (or "px-4" when inactive)</span></code></pre>
+  </div>
+
+  <p><strong>tailwind-merge</strong> resolves conflicts. This is the part you cannot do yourself:</p>
+  <div class="ba">
+    <div class="col">
+      <span class="lab">Plain string join — broken</span>
+      <pre><code><span class="c-str">"px-4 px-8"</span>
+<span class="c-com">// CSS decides by stylesheet
+// order, not by argument
+// order. You get px-4 or
+// px-8 unpredictably.</span></code></pre>
+    </div>
+    <div class="col">
+      <span class="lab">twMerge — last wins</span>
+      <pre><code>twMerge(<span class="c-str">"px-4 px-8"</span>)
+<span class="c-com">// → "px-8"
+
+// Later argument wins,
+// which is what a caller
+// passing className means.</span></code></pre>
+    </div>
+  </div>
+
+  <div class="note win">
+    <span class="lab">The bug this prevents, concretely</span>
+    <p>A component sets <code>"rounded-full px-3 py-1.5"</code> as its base and accepts a <code>className</code> prop for overrides. A caller passes <code>"px-6"</code>. With a plain template string both classes end up in the attribute, and which one applies depends on where Tailwind happened to emit each rule in the stylesheet &mdash; so the override works or does not, apparently at random, and differently in development and production. <code>cn</code> makes "the caller's class wins" a guarantee.</p>
+  </div>
+
+  <p>Where it earns its keep in this codebase &mdash; <code>ArchiveIndex.tsx:279</code>, the source filter pills:</p>
+  <div class="spec">
+    <div class="tag"><span>frontend/components/archive/ArchiveIndex.tsx:278</span><em>base classes plus a two-way branch</em></div>
+    <pre><code>className={cn(
+  <span class="c-str">"inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs"</span>,
+  active
+    ? <span class="c-str">"border-indigo-600 bg-indigo-600 text-white"</span>
+    : <span class="c-str">"border-border text-muted-foreground hover:border-foreground/40"</span>
+)}</code></pre>
+  </div>
+  <p>The base string carries <code>border</code>; each branch carries a <code>border-*</code> colour. Both branches also set colours that would conflict with defaults elsewhere. <code>cn</code> guarantees the branch wins over the base, every time, which is what lets the base string stay readable instead of being split into two nearly identical full class lists.</p>
+</section>
+
+<section id="p10">
+  <span class="snum">Part 10</span>
+  <h2 class="sh"><code>ArchiveIndex.tsx</code> &mdash; the only real logic in the browser</h2>
+  <p class="deck">366 lines, one <code>"use client"</code>, two pieces of state. The single interactive component in the frontend, and the place to learn what React state is actually for.</p>
+
+  <p>Everything else on the public site is a server component: it runs once, produces HTML, and ships no JavaScript for its own logic. This file is the exception, because filtering and searching happen after the page has loaded, in response to typing.</p>
+
+  <h3>Two pieces of state, and nothing else</h3>
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx:174</span><em>note the explicit generic on the second</em></div>
+    <pre><code><span class="c-key">const</span> [query, setQuery] = useState(<span class="c-str">""</span>);
+<span class="c-key">const</span> [source, setSource] = useState&lt;string | <span class="c-key">null</span>&gt;(<span class="c-key">null</span>);</code></pre>
+  </div>
+  <p>The first needs no annotation: TypeScript infers <code>string</code> from <code>""</code>. The second does, and this is a case worth memorising &mdash; <code>useState(null)</code> alone infers the type <code>null</code>, so <code>setSource("TechCrunch")</code> would be a compile error. The explicit <code>&lt;string | null&gt;</code> is what makes the state able to hold a value later.</p>
+
+  <div class="note win">
+    <span class="lab">Why only two — the derive rule, mechanically</span>
+    <p>The component also displays the number of visible entries, whether a filter is on, and the filtered group list. None of those are state:</p>
+    <pre style="margin-top:8px"><code><span class="c-key">const</span> shown = groups.reduce((sum, g) =&gt; sum + g.entries.length, 0);
+<span class="c-key">const</span> filtered = Boolean(query.trim()) || source !== <span class="c-key">null</span>;</code></pre>
+    <p style="margin-top:8px">Plain <code>const</code>s, recomputed on every render. Three <code>useState</code>s and three <code>useEffect</code>s to keep them in sync would be the version that goes out of date &mdash; a count that says 12 while 40 rows are on screen. <strong>Anything computable from state is not state.</strong></p>
+  </div>
+
+  <h3>The filter: one <code>useMemo</code></h3>
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx:177</span><em>map groups, filter entries, drop empties</em></div>
+    <pre><code><span class="c-key">const</span> groups = useMemo(() =&gt; {
+  <span class="c-key">const</span> term = normalise(query);
+  <span class="c-key">if</span> (!term &amp;&amp; !source) <span class="c-key">return</span> archive.groups;   <span class="c-com">// nothing to do</span>
+
+  <span class="c-key">return</span> archive.groups
+    .map((group) =&gt; ({
+      ...group,
+      entries: group.entries.filter((entry) =&gt; {
+        <span class="c-key">if</span> (source &amp;&amp; entry.source !== source) <span class="c-key">return false</span>;
+        <span class="c-key">if</span> (!term) <span class="c-key">return true</span>;
+        <span class="c-key">return</span> (
+          normalise(entry.title).includes(term) ||
+          normalise(entry.excerpt).includes(term)
+        );
+      }),
+    }))
+    .filter((group) =&gt; group.entries.length &gt; 0);
+}, [archive.groups, query, source]);</code></pre>
+  </div>
+
+  <p><code>useMemo</code> caches the result and only recomputes when something in the dependency array changes. Without it, this runs on every render including ones caused by unrelated state elsewhere. With it, typing one character recomputes once.</p>
+
+  <p><code>{ ...group, entries: … }</code> is the <strong>spread-and-override</strong> idiom: copy every field of <code>group</code>, then replace <code>entries</code>. The original object is never mutated, which is what React relies on to detect changes. Mutating <code>group.entries</code> in place would filter <code>archive.groups</code> itself &mdash; and since that array came from the server as props, the second search would search the already-filtered list and results would never come back.</p>
+
+  <p>The early return is a real optimisation, not decoration. With no query and no source there is nothing to compute, so returning the original array means <code>useMemo</code> hands back the identical reference and React skips re-rendering the whole list. The trailing <code>.filter(group =&gt; group.entries.length &gt; 0)</code> is what stops empty month headers appearing above nothing.</p>
+
+  <div class="note">
+    <span class="lab">The three-line comment that documents a decision</span>
+    <p>Search matches title and excerpt, deliberately not source name. The code says why: searching "TechCrunch" would return that publication's entire output, which is what the source pills are for. Two mechanisms doing the same job differently is worse than either alone &mdash; and this is exactly the kind of choice that gets "fixed" by the next person unless the reason is written down.</p>
+  </div>
+
+  <h3>The functional updater</h3>
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx:272</span><em>click the active pill to clear it</em></div>
+    <pre><code>onClick={() =&gt;
+  setSource((current) =&gt; (current === item.name ? <span class="c-key">null</span> : item.name))
+}</code></pre>
+  </div>
+  <p>Passing a function to a setter gives you the current value as an argument. Here it makes the pill a toggle in one expression: clicking the selected source deselects it.</p>
+  <p>The alternative &mdash; <code>setSource(source === item.name ? null : item.name)</code> &mdash; reads the <code>source</code> variable captured when this render's closure was created. For a click handler that is almost always fine. The functional form is right unconditionally, and costs nothing, so it is the better default to build the habit around.</p>
+
+  <h3>Early return as a rendering decision</h3>
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx:47</span><em>one bar is not a distribution</em></div>
+    <pre><code><span class="c-key">function</span> MonthStrip({ groups }: { groups: MonthGroup[] }) {
+  <span class="c-key">if</span> (groups.length &lt; 2) <span class="c-key">return null</span>;
+  …
+}</code></pre>
+  </div>
+  <p><code>return null</code> from a component renders nothing at all. Filter to a single month and the chart disappears rather than showing one lonely bar at 100% height, which would be a chart that says nothing while looking like it says something.</p>
+  <p>Note the props type: <code>{ groups }: { groups: MonthGroup[] }</code> &mdash; destructuring on the left, the type of the whole props object on the right. Inline types like this are the convention throughout this codebase for single-use components; a named <code>type Props = …</code> starts to pay off past three or four fields.</p>
+
+  <h3>Array gymnastics for the chart order</h3>
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx:60</span><em>reverse, then move one item to the end</em></div>
+    <pre><code><span class="c-key">const</span> columns = [...groups].reverse();
+<span class="c-key">const</span> undated = columns.findIndex((group) =&gt; group.key === <span class="c-str">"undated"</span>);
+<span class="c-key">if</span> (undated !== -1) {
+  columns.push(...columns.splice(undated, 1));
+}</code></pre>
+  </div>
+  <p><code>[...groups]</code> before <code>.reverse()</code> matters: <code>reverse</code> mutates in place, so calling it on the prop would reverse the list the entry rows render from &mdash; the chart would fix itself and the list would silently invert. The spread makes a copy first. <strong><code>reverse</code>, <code>sort</code> and <code>splice</code> all mutate; <code>map</code>, <code>filter</code> and <code>slice</code> do not.</strong> Knowing which is which prevents a whole class of React bug.</p>
+  <p>The second line pair is a small trick: <code>splice(i, 1)</code> removes one element <em>and returns it as an array</em>, so <code>push(...that)</code> puts it back at the end. Two lines to move "undated" to the far right, because it has no place on a time axis.</p>
+  <p>Why reverse at all? The list reads newest-first, but a time axis reads left to right, oldest to newest. Reversing here rather than in <code>buildArchive</code> means the chart runs forwards and the list still opens on the most recent entry &mdash; one data structure, two correct orderings, decided at the point of use.</p>
+
+  <h3>The floor that keeps a small month visible</h3>
+  <div class="sig"><b>const height = Math.max(3, Math.round((count / max) * PLOT_H));</b></div>
+  <p>A month with one entry out of 120 would compute to under half a pixel and render as nothing &mdash; a gap in the row that looks like missing data rather than a small month. <code>Math.max(3, …)</code> guarantees a visible mark. The bar is no longer strictly proportional at the low end, which is the right trade: the number is printed above every bar anyway, so precision lives in the label and the bar carries the shape.</p>
+
+  <h3>Announcing the result to a screen reader</h3>
+  <div class="spec">
+    <div class="tag"><span>ArchiveIndex.tsx:302</span><em>visually absent, audibly present</em></div>
+    <pre><code>&lt;p className=<span class="c-str">"sr-only"</span> role=<span class="c-str">"status"</span> aria-live=<span class="c-str">"polite"</span>&gt;
+  {shown} entries shown
+&lt;/p&gt;</code></pre>
+  </div>
+  <p>A sighted user sees the list shrink. A screen reader user gets nothing &mdash; the DOM changed silently. <code>aria-live="polite"</code> makes the browser announce this element's new text whenever it changes, after the current utterance finishes. <code>sr-only</code> hides it visually because the count is already printed elsewhere.</p>
+  <p>The same discipline runs through the pills: <code>aria-pressed={active}</code> states the toggle's condition, and the coloured dot inside each one is <code>aria-hidden="true"</code> so it is not announced as a meaningless image. Selection is carried by <code>aria-pressed</code> and the solid fill, never by the dot alone.</p>
+
+  <div class="note win">
+    <span class="lab">Two CSS details doing structural work</span>
+    <ul>
+      <li><code>sticky top-16</code> on the month header, not <code>top-0</code>. The navbar is itself sticky at 64px; at <code>top-0</code> the month header slid underneath it and a 100-entry group scrolled unlabelled.</li>
+      <li><code>[&amp;&gt;li:first-child&gt;a]:border-t-0</code> &mdash; arbitrary-selector syntax targeting the first row's link. The month header already draws a rule; the first entry's own top border would double it into a 2px line. One class instead of a conditional prop threaded through <code>EntryRow</code>.</li>
+    </ul>
+  </div>
+
+  <h3>Where the server hands over</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/app/blog/page.tsx:136</span><em>the entire server→browser crossing</em></div>
+    <pre><code>&lt;ArchiveIndex archive={archive} /&gt;</code></pre>
+  </div>
+  <p>One prop. The server page fetched the posts, called <code>buildArchive</code>, and passes the finished object. That object gets serialised into the HTML and rehydrated in the browser, which is why <code>Archive</code> contains only plain data &mdash; strings, numbers, arrays, nulls. A <code>Date</code>, a function, or a <code>Map</code> in that type would break the crossing, and it is the real reason <code>archive.ts</code> pre-formats <code>date</code> into a string instead of passing a timestamp for the component to format.</p>
+</section>
+
+<section id="p11">
+  <span class="snum">Part 11</span>
+  <h2 class="sh"><code>api.ts</code> &mdash; the odd one out</h2>
+  <p class="deck">129 lines talking to the FastAPI backend for auth. Included honestly, because it was written under different assumptions than the rest of <code>lib/</code> and comparing them teaches more than either file alone.</p>
+
+  <p>Everything covered so far reads from Supabase. This file posts to a separate Python service, and it shows: different error handling, different typing discipline, no type predicates anywhere.</p>
+
+  <h3>The pattern it gets right</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/api.ts</span><em>interfaces for request and response shapes</em></div>
+    <pre><code><span class="c-key">const</span> API_URL = process.env.NEXT_PUBLIC_API_URL || <span class="c-str">"http://127.0.0.1:8000"</span>;
+
+<span class="c-key">interface</span> LoginPayload { username: string; password: string; }
+<span class="c-key">interface</span> RegisterPayload { email: string; username: string; password: string; }
+<span class="c-key">interface</span> RegisterResponse { id: string; email: string; username: string; }</code></pre>
+  </div>
+  <p><code>interface</code> and <code>type</code> are near-interchangeable for object shapes. <code>interface</code> can be reopened and added to later; <code>type</code> can also express unions and intersections. This codebase uses <code>type</code> almost everywhere and <code>interface</code> only here &mdash; a stylistic split that follows the file's origin rather than any rule.</p>
+  <p><code>process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"</code> is the third answer to the missing-env problem, after <code>static.ts</code>'s throw and <code>client.ts</code>'s <code>!</code>. A default is genuinely the right call here: local development should work with no configuration at all. Note it must be <code>||</code> and not <code>??</code>, so that an env var set to the empty string also falls back.</p>
+
+  <h3>The login: 204 by design</h3>
+  <div class="spec">
+    <div class="tag"><span>frontend/lib/api.ts</span><em>form encoding, cookies included</em></div>
+    <pre><code><span class="c-key">export async function</span> loginUser(payload: LoginPayload): Promise&lt;boolean&gt; {
+  <span class="c-key">const</span> body = <span class="c-key">new</span> URLSearchParams();
+  body.set(<span class="c-str">"username"</span>, payload.username);
+  body.set(<span class="c-str">"password"</span>, payload.password);
+
+  <span class="c-key">const</span> res = <span class="c-key">await</span> fetch(<span class="c-str">`</span>${API_URL}/auth/login<span class="c-str">`</span>, {
+    method: <span class="c-str">"POST"</span>,
+    headers: { <span class="c-str">"Content-Type"</span>: <span class="c-str">"application/x-www-form-urlencoded"</span> },
+    body,
+    credentials: <span class="c-str">"include"</span>,
+  });
+  …
+}</code></pre>
+  </div>
+  <p>Three details that are each load-bearing.</p>
+  <p><code>URLSearchParams</code> rather than JSON, because FastAPI's <code>OAuth2PasswordRequestForm</code> expects form encoding. Send JSON and you get a 422 that reads like a validation bug in your own code.</p>
+  <p><code>credentials: "include"</code> is what lets the browser store the session cookie the backend sets. Omit it and login "succeeds" &mdash; 204, no error &mdash; and the user is still anonymous on the next request. A silent failure with a success status, and one of the harder auth bugs to spot.</p>
+  <p><code>Promise&lt;boolean&gt;</code> as the return type is right for the caller's question. The endpoint returns 204 No Content by design, so there is no body to parse and nothing to hand back except whether it worked.</p>
+
+  <div class="note bug">
+    <span class="lab">The cast that breaks the file's own discipline</span>
+    <pre><code><span class="c-key">const</span> data = <span class="c-key">await</span> res.json();
+<span class="c-key">return</span> data <span class="c-key">as</span> RegisterResponse;</code></pre>
+    <p><code>as</code> is an <strong>assertion</strong>, not a check. It tells the compiler "treat this as <code>RegisterResponse</code>" and verifies nothing at runtime. If the backend renames <code>username</code> to <code>user_name</code>, TypeScript keeps reporting <code>data.username: string</code> and the value is <code>undefined</code> &mdash; a type error the type system has been instructed to ignore.</p>
+    <p>Compare <code>blog-data.ts</code>, which faces exactly the same problem with database JSON and answers it with a type predicate plus <code>asString</code> per field. Same category of untrusted input, two very different levels of care. The fix is a predicate like <code>isRegisterResponse</code>; the point of naming it here is that <strong><code>as</code> on the result of <code>res.json()</code> is always a promise you cannot keep.</strong></p>
+  </div>
+
+  <h3>Three more weak spots, stated plainly</h3>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Code</th><th>Problem</th><th>What it should be</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>.catch(() =&gt; {})</code> then <code>data?.detail</code></td>
+          <td>The catch returns <code>undefined</code>, so the next line reads a property off nothing. <code>?.</code> saves it from throwing, but the real error message is gone.</td>
+          <td><code>.catch(() =&gt; null)</code> and an explicit fallback message</td>
+        </tr>
+        <tr>
+          <td><code>console.log("Error occurred while loginUser")</code></td>
+          <td>Logs that something failed without logging what. Unusable in production.</td>
+          <td><code>console.error("loginUser failed", error)</code></td>
+        </tr>
+        <tr>
+          <td><code>getCurrentUser()</code> has no return type</td>
+          <td>Implicitly <code>any</code>. Every property read on the result is unchecked, so typos compile.</td>
+          <td>An explicit return type, plus a predicate on the parsed body</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>And a fourth, structural: of the four exported functions, some wrap their <code>fetch</code> in <code>try</code>/<code>catch</code> and some do not. So a network failure means a <code>false</code> return from one function and an unhandled rejection from another. Callers cannot use one strategy, which pushes error handling into the components where it is hardest to get right.</p>
+
+  <div class="note warn">
+    <span class="lab">Why this section exists</span>
+    <p>Not to score points. This file predates the rebuild and was not part of it. It is here because the contrast is the lesson: the difference between <code>blog-data.ts</code> and <code>api.ts</code> is not knowledge of TypeScript &mdash; both were written by someone who knows the language &mdash; it is whether the boundary was treated as a boundary. <strong>Every place data enters your program from outside is the same problem, and it deserves the same three steps every time.</strong></p>
+  </div>
+</section>
+
+<section id="p12">
+  <span class="snum">Part 12</span>
+  <h2 class="sh">Patterns worth stealing</h2>
+  <p class="deck">Twelve things this codebase does that transfer to any TypeScript project. Each one with the file that demonstrates it, so you can go read the real version.</p>
+
+  <div class="tbl">
+    <table>
+      <thead><tr><th style="width:24%">Pattern</th><th>What it is</th><th style="width:22%">See it in</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Write the data, derive the type</strong></td>
+          <td>Declare the array or object <code>as const</code>, then <code>(typeof X)[number]</code>. One source of truth instead of two that drift.</td>
+          <td><code>source-hues.ts:29</code></td>
+        </tr>
+        <tr>
+          <td><strong>Type predicates at the door</strong></td>
+          <td><code>value is T</code> converts a runtime check into compile-time knowledge, once, where data enters.</td>
+          <td><code>blog-data.ts:30</code></td>
+        </tr>
+        <tr>
+          <td><strong>Predicate in <code>.filter</code></strong></td>
+          <td><code>.filter((x): x is T =&gt; x !== null)</code> &mdash; the only way to tell the compiler a filter removed the nulls.</td>
+          <td><code>blog-data.ts:164</code>, <code>archive.ts:202</code></td>
+        </tr>
+        <tr>
+          <td><strong><code>| null</code> as an honesty mechanism</strong></td>
+          <td>If a value can be genuinely unknown, put it in the type. Every caller is then forced to handle absence.</td>
+          <td><code>markdown.ts</code> readingTime, <code>archive.ts</code> span</td>
+        </tr>
+        <tr>
+          <td><strong>Derive types from functions</strong></td>
+          <td><code>Awaited&lt;ReturnType&lt;typeof f&gt;&gt;</code> instead of re-typing a library's shapes by hand.</td>
+          <td><code>blog-data.ts:134</code></td>
+        </tr>
+        <tr>
+          <td><strong>Literal unions for parameters</strong></td>
+          <td><code>Granularity = "week" | "month"</code> &mdash; typos caught at compile time, autocomplete for free, and a value the union forbids cannot enter from JSON.</td>
+          <td><code>pipeline-stats.ts:31</code></td>
+        </tr>
+        <tr>
+          <td><strong>Expensive things at module scope</strong></td>
+          <td><code>Intl.DateTimeFormat</code> constructed once per process, not once per row.</td>
+          <td><code>archive.ts</code>, <code>blog-data.ts</code></td>
+        </tr>
+        <tr>
+          <td><strong>Two stop conditions on remote loops</strong></td>
+          <td>A natural exit plus a hard ceiling, so a misbehaving API cannot hang the request.</td>
+          <td><code>blog-data.ts:173</code> PAGE / MAX_PAGES</td>
+        </tr>
+        <tr>
+          <td><strong>Fan out with <code>Promise.all</code></strong></td>
+          <td>Start independent work together; wait once. Latency becomes the max, not the sum.</td>
+          <td><code>app/page.tsx:23</code></td>
+        </tr>
+        <tr>
+          <td><strong>A definer function as a privacy seam</strong></td>
+          <td>When a public page needs a figure counted from private rows, move the query into the database rather than opening the table. It returns the aggregate and never a row.</td>
+          <td><code>pipeline_stats()</code></td>
+        </tr>
+        <tr>
+          <td><strong>Narrow at the boundary, not at the use</strong></td>
+          <td>Convert <code>unknown</code> into your own types once, where it arrives. Everything downstream is then ordinary typed code with no defensive checks in it.</td>
+          <td><code>pipeline-stats.ts</code> <code>asBucket</code></td>
+        </tr>
+        <tr>
+          <td><strong>Derive, never store</strong></td>
+          <td>State only for what a user changes. Counts, flags and filtered lists are <code>const</code>s.</td>
+          <td><code>ArchiveIndex.tsx:205</code></td>
+        </tr>
+        <tr>
+          <td><strong>Copy before mutating</strong></td>
+          <td><code>[...arr].reverse()</code>. <code>reverse</code>/<code>sort</code>/<code>splice</code> mutate; props must never be mutated.</td>
+          <td><code>ArchiveIndex.tsx:60</code></td>
+        </tr>
+        <tr>
+          <td><strong>Comment the decision, not the code</strong></td>
+          <td>Not what the line does &mdash; why the alternative was rejected. Every non-obvious choice in <code>lib/</code> carries one.</td>
+          <td>every file in <code>lib/</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The three that matter most, if you only keep three</h3>
+
+  <div class="note win">
+    <span class="lab">1 — Put uncertainty in the type</span>
+    <p><code>string | null</code>, <code>BlogPost | null</code>, <code>number | null</code>. Every one of these appears because the honest answer is sometimes "unknown", and the type makes every caller deal with it. This is the mechanism behind "never render a lie" &mdash; it is not discipline, it is the compiler refusing to let you skip the case.</p>
+  </div>
+
+  <div class="note win">
+    <span class="lab">2 — Check once, at the boundary</span>
+    <p><code>isPostContentPayload</code> + <code>asString</code> + <code>mapRowToBlogPost</code> means untrusted JSON is validated in one file. Everything downstream &mdash; <code>archive.ts</code>, the components, the pages &mdash; works with <code>BlogPost</code> and never checks anything. Validation scattered through twenty components is how you get twenty slightly different definitions of "valid".</p>
+  </div>
+
+  <div class="note win">
+    <span class="lab">3 — Do the work where it happens once</span>
+    <p>Date formatting, alias folding, excerpt cutting, sorting, grouping &mdash; all in <code>buildArchive</code>, on the server, before any component exists. The client component receives correct data and spends its code on interaction. This is why the archive is 366 lines of UI rather than 900 lines of UI-and-repair.</p>
+  </div>
+</section>
+
+<section id="p13">
+  <span class="snum">Part 13</span>
+  <h2 class="sh">Syntax glossary</h2>
+  <p class="deck">Every piece of TypeScript and JavaScript notation used in this codebase, in one place, each with the file you can go and read it in. Skim it now; come back when a line stops making sense.</p>
+
+  <h3>Type notation</h3>
+  <dl class="gloss">
+    <dt><code>x: string</code></dt>
+    <dd>An annotation. Only needed where TypeScript cannot work it out itself &mdash; parameters, and variables declared without a value.</dd>
+
+    <dt><code>type X = { … }</code></dt>
+    <dd>Names an object shape. Erased at build time; it constrains code, it does not become code.</dd>
+
+    <dt><code>interface X { … }</code></dt>
+    <dd>Near-identical to <code>type</code> for object shapes, and can be reopened to add fields later. Only <code>api.ts</code> uses it here.</dd>
+
+    <dt><code>A | B</code></dt>
+    <dd>A union: one or the other. <code>string | null</code> is the workhorse &mdash; it makes absence part of the type.</dd>
+
+    <dt><code>"a" | "b"</code></dt>
+    <dd>A literal union: not any string, only those exact values. <code>Granularity</code> in <code>pipeline-stats.ts:31</code>.</dd>
+
+    <dt><code>x?: T</code></dt>
+    <dd>The key may be missing entirely. Describes data you were handed.</dd>
+
+    <dt><code>x: T | null</code></dt>
+    <dd>The key is always present; the value may be nothing. Describes a decision you made. Not interchangeable with the line above.</dd>
+
+    <dt><code>Array&lt;T&gt;</code> / <code>T[]</code></dt>
+    <dd>The same thing. <code>T[]</code> is the convention in this repo.</dd>
+
+    <dt><code>Map&lt;K, V&gt;</code>, <code>Set&lt;T&gt;</code></dt>
+    <dd>Generic collections. <code>Map&lt;string, number&gt;</code> in <code>markdown.ts</code>'s slugger and <code>archive.ts</code>'s counters; a <code>Set</code> in <code>SignalMeter.tsx:261</code> holding the two bucket dates that get a direct label, so the render asks <code>has()</code> once per column instead of comparing against both.</dd>
+
+    <dt><code>Promise&lt;T&gt;</code></dt>
+    <dd>What an <code>async</code> function returns. <code>await</code> unwraps it to <code>T</code>.</dd>
+
+    <dt><code>unknown</code></dt>
+    <dd>"A value, but no promises." You must narrow it before doing anything. The correct type for untrusted input.</dd>
+
+    <dt><code>any</code></dt>
+    <dd>"Stop checking this." Looks like <code>unknown</code>, does the opposite. Appears in this codebase only implicitly, in <code>api.ts</code>'s untyped return.</dd>
+
+    <dt><code>T["key"]</code></dt>
+    <dd>Indexed access: the type of that field. <code>TitleBlock["data"]</code> in <code>blog-data.ts:14</code>.</dd>
+
+    <dt><code>(typeof X)[number]</code></dt>
+    <dd>The element type of an array value. The "derive the type from the data" move &mdash; <code>source-hues.ts:29</code>.</dd>
+
+    <dt><code>Partial&lt;T&gt;</code></dt>
+    <dd>Every field of <code>T</code>, made optional. Built in.</dd>
+
+    <dt><code>ReturnType&lt;typeof f&gt;</code></dt>
+    <dd>What <code>f</code> returns. <code>app/blog/page.tsx:31</code>.</dd>
+
+    <dt><code>Awaited&lt;T&gt;</code></dt>
+    <dd>Unwraps a promise type. Combined with the above in <code>blog-data.ts:134</code>.</dd>
+
+    <dt><code>value is T</code></dt>
+    <dd>A type predicate, as a function's return type. The bridge from runtime check to compile-time knowledge. <code>blog-data.ts:30</code>.</dd>
+
+    <dt><code>x as T</code></dt>
+    <dd>An assertion. Changes nothing at runtime and verifies nothing. Once in this codebase, in <code>api.ts</code>, and flagged in Part 11.</dd>
+
+    <dt><code>as const</code></dt>
+    <dd>Freeze to literal types and mark readonly. What makes <code>source-hues.ts</code>'s derived type specific rather than <code>string</code>.</dd>
+
+    <dt><code>&lt;T&gt;</code> at a call site</dt>
+    <dd>Supplying a generic explicitly: <code>useState&lt;string | null&gt;(null)</code>, <code>createClient&lt;Database&gt;(…)</code>. In both cases inference would give you something useless.</dd>
+
+    <dt><code>import { type X }</code></dt>
+    <dd>A types-only import, erased at build. <code>utils.ts:1</code>.</dd>
+  </dl>
+
+  <h3>Operators</h3>
+  <dl class="gloss">
+    <dt><code>a ?? b</code></dt>
+    <dd>Nullish coalescing: <code>b</code> only when <code>a</code> is <code>null</code> or <code>undefined</code>. Keeps <code>0</code> and <code>""</code>.</dd>
+
+    <dt><code>a || b</code></dt>
+    <dd>Or: <code>b</code> when <code>a</code> is any falsy value &mdash; including <code>0</code>, <code>""</code>, <code>NaN</code>. Correct in <code>archive.ts:139</code>, where an empty title should fall through; wrong for numbers.</dd>
+
+    <dt><code>a?.b</code></dt>
+    <dd>Optional chaining: <code>undefined</code> instead of a crash when <code>a</code> is nullish. Chains: <code>post.metadata?.title</code>.</dd>
+
+    <dt><code>x!</code></dt>
+    <dd>Non-null assertion. Silences the compiler, changes nothing. Twice in <code>client.ts</code>; nowhere else, deliberately.</dd>
+
+    <dt><code>...x</code> (spread)</dt>
+    <dd>Copy out. <code>{ ...group, entries: … }</code> to override one field; <code>[...groups]</code> to copy before mutating.</dd>
+
+    <dt><code>...x</code> (rest)</dt>
+    <dd>Collect in. <code>function cn(...inputs: ClassValue[])</code>.</dd>
+
+    <dt><code>&gt;&gt;&gt; 0</code></dt>
+    <dd>Unsigned right shift by nothing &mdash; a coercion to a 32-bit unsigned integer. Keeps the hash in <code>source-hues.ts</code> positive.</dd>
+
+    <dt><code>"key" in obj</code></dt>
+    <dd>Property test that also narrows the type. <code>markdown.ts</code>'s <code>nodeText</code>.</dd>
+
+    <dt><code>catch {</code></dt>
+    <dd>A catch with no binding, for an error you deliberately will not inspect. <code>supabase/server.ts</code>.</dd>
+  </dl>
+
+  <h3>React and Next.js</h3>
+  <dl class="gloss">
+    <dt><code>"use client"</code></dt>
+    <dd>First line of a file: this component and its imports ship to the browser. One file in this frontend has it.</dd>
+
+    <dt><code>export const revalidate = 3600</code></dt>
+    <dd>ISR. Pre-render the route, rebuild at most hourly. <code>app/blog/page.tsx:22</code>.</dd>
+
+    <dt><code>cookies()</code></dt>
+    <dd>Reads request cookies &mdash; and opts the route out of static generation. The reason <code>static.ts</code> exists.</dd>
+
+    <dt><code>cache(fn)</code></dt>
+    <dd>Memoises for one server render pass. Not a cross-request cache. <code>blog-data.ts:178</code>.</dd>
+
+    <dt><code>useState&lt;T&gt;(init)</code></dt>
+    <dd>State. Returns <code>[value, setter]</code>. Needs an explicit generic when the initial value is <code>null</code>.</dd>
+
+    <dt><code>setX(cur =&gt; …)</code></dt>
+    <dd>Functional updater &mdash; the setter hands you the current value. Always correct; the direct form usually is.</dd>
+
+    <dt><code>useMemo(fn, deps)</code></dt>
+    <dd>Cache a computed value; recompute only when a dependency changes. <code>ArchiveIndex.tsx:177</code>.</dd>
+
+    <dt><code>return null</code> from a component</dt>
+    <dd>Render nothing. <code>MonthStrip</code> when there is only one month.</dd>
+
+    <dt><code>{cond ? <i>a</i> : null}</code></dt>
+    <dd>Conditional rendering. Preferred here over <code>&amp;&amp;</code>, which renders a literal <code>0</code> when the left side is the number zero.</dd>
+
+    <dt><code>aria-live="polite"</code></dt>
+    <dd>Announce this element's changes to a screen reader. Paired with <code>sr-only</code> and <code>role="status"</code> at <code>ArchiveIndex.tsx:302</code>.</dd>
+
+    <dt><code>[&amp;&gt;li:first-child&gt;a]:…</code></dt>
+    <dd>Tailwind arbitrary selector &mdash; a CSS selector inline. Used once, to avoid a doubled hairline.</dd>
+  </dl>
+
+  <h3>Four sentences worth keeping</h3>
+  <div class="note win">
+    <span class="lab">The whole volume, compressed</span>
+    <ul>
+      <li><strong>If a value can be unknown, say so in the type</strong> &mdash; then the compiler makes every caller handle it, and you cannot render a lie by accident.</li>
+      <li><strong>Validate once, at the boundary</strong> &mdash; a type predicate at the door beats defensive checks in twenty components.</li>
+      <li><strong>Write the data and derive the type from it</strong> &mdash; two hand-maintained descriptions of the same thing will drift, and the drift is silent.</li>
+      <li><strong>Do the work where it happens once</strong> &mdash; on the server, before the component exists, so the UI is about interaction rather than repair.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="closing">
+  <p><strong>Volume II ends here.</strong> Eight modules in <code>lib/</code>, one client component, and the TypeScript that holds them together. Every snippet above is real code from this repository, quoted at the line reference given &mdash; if a line has changed since, the file wins and this document is out of date.</p>
+  <p>Volume I &mdash; the Field Manual &mdash; covers the design decisions, the token layer, the accessibility work, and the bugs found during the rebuild. The two are meant to be read in either order.</p>
+</div>
+
+<div class="end">
+  <span>Volume II · frontend/lib &amp; the TypeScript in it</span>
+  <span>13 parts · 8 modules · 1 client component</span>
+</div>
+</main>
+</div>
+</div>
