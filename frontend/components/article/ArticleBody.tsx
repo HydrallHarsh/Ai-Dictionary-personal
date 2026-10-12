@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { isOptimizableImageSrc } from "@/lib/image-hosts";
 import {
 	createSlugger,
+	headingText,
 	nodeText,
 	sanitizeArticleMarkdown,
 } from "@/lib/markdown";
@@ -50,7 +51,7 @@ function headingRenderer(level: 2 | 3, slugify: (text: string) => string) {
 		children,
 		...props
 	}: ComponentPropsWithoutRef<"h2"> & { node?: unknown }) {
-		const id = slugify(nodeText(node));
+		const id = slugify(headingText(nodeText(node)));
 		const Tag = level === 2 ? "h2" : "h3";
 
 		return (

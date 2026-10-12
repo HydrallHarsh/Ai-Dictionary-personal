@@ -193,6 +193,7 @@ async function queryBlogPosts(supabase: PostsClient): Promise<BlogPost[]> {
 		const { data, error } = await supabase
 			.from("posts")
 			.select(POST_COLUMNS)
+			.eq("is_old_post", false)
 			.order("published_at", { ascending: false, nullsFirst: false })
 			.order("id", { ascending: false })
 			.range(from, from + PAGE - 1);

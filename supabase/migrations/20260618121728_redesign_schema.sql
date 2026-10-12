@@ -61,6 +61,10 @@ Create table posts_v2(
     embedding vector(768),        -- Gemini gemini-embedding-001 truncated to 768 dims; powers dedup + related posts
     raw_item_id uuid references raw_api_data(id),
     likes_count int Default 0,
+    -- Carried forward from the old post_content.isoldpost column so the listing
+    -- query can continue excluding rows that were hidden before the redesign.
+    -- New posts never set this; the default keeps them visible.
+    is_old_post boolean Not Null Default false,
     created_at timestamptz Default now(),
     published_at timestamptz Default now()
 );
@@ -68,7 +72,7 @@ Create table posts_v2(
 -- This step is where we extract the JSONB content to table content
 
 Insert into posts_v2(
-    id, slug, title, summary, description, source_url, source_name, image_url, tags, likes_count, created_at, published_at
+    id, slug, title, summary, description, source_url, source_name, image_url, tags, likes_count, is_old_post, created_at, published_at
 )
 
 Select
@@ -85,6 +89,7 @@ Select
     pc.content ->> 'generated_image',
     Array[] :: text[],
     p.likescount,
+    Coalesce(pc.isoldpost, false),   -- carry the hidden-post flag into the new schema
     -- `upload_date` and `approveddate` are `timestamp without time zone`, so the
     -- implicit cast into these `timestamptz` columns would interpret them using
     -- whatever TimeZone the session applying this migration happens to have. The
@@ -97,6 +102,7 @@ Select
     Coalesce(p.approveddate, p.upload_date) At Time Zone 'UTC'
 from posts p
 JOIN post_content pc on pc.postid = p.postid;
+
 
 -- Need to do this to enforce not Null slug for newer posts
 ALTER TABLE posts_v2 ADD CONSTRAINT slug_required_for_new_posts

@@ -1,3 +1,7 @@
+import remarkGfm from "remark-gfm";
+import remarkParse from "remark-parse";
+import { unified } from "unified";
+
 /**
  * Article markdown repair and heading extraction.
  *
@@ -143,6 +147,19 @@ export function createSlugger() {
 	};
 }
 
+const headingParser = unified().use(remarkParse).use(remarkGfm);
+
+/**
+ * A heading's display text, using the same Markdown parser and GFM rules as the
+ * article renderer. This handles inline markup and the complete set of
+ * character references consistently in the contents rail and rendered IDs.
+ */
+export function headingText(markdown: string): string {
+	const tree = headingParser.parse(`## ${markdown}`);
+	const heading = tree.children.find((node) => node.type === "heading");
+	return heading ? nodeText(heading).trim() : markdown.trim();
+}
+
 /**
  * The contents list, taken from the sanitized markdown.
  *
@@ -167,13 +184,7 @@ export function extractHeadings(sanitized: string): Heading[] {
 		if (!match) {
 			continue;
 		}
-		// Strip inline markup so the contents entry reads as plain text.
-		const text = match[2]
-			.replace(/`([^`]+)`/g, "$1")
-			.replace(/\*\*([^*]+)\*\*/g, "$1")
-			.replace(/\*([^*]+)\*/g, "$1")
-			.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-			.trim();
+		const text = headingText(match[2]);
 
 		headings.push({
 			id: slugify(text),
