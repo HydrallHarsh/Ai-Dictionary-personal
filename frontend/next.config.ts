@@ -12,9 +12,6 @@ if (!supabaseHost) {
 }
 
 const nextConfig: NextConfig = {
-	experimental: {
-		globalNotFound: true,
-	},
 	images: {
 		// Local IPs are rejected by the optimizer unless this is on, so without it
 		// the 127.0.0.1 entry below is inert and dev images 400. It stays off

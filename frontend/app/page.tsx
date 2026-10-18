@@ -1,7 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { LatestInsights } from "@/components/home/LatestInsights";
-import { Newsletter } from "@/components/home/Newsletter";
 import { type BlogPost, getPublicBlogPosts } from "@/lib/blog-data";
 import { getPipelineStats, type PipelineStats } from "@/lib/pipeline-stats";
 
@@ -38,7 +37,10 @@ export default async function Home() {
 		<div className="min-h-screen bg-background text-foreground">
 			<HeroSection stats={stats} latestSlug={posts[0]?.slug} />
 			<LatestInsights posts={posts} />
-			<Newsletter />
+			{/* The newsletter section used to close the page. Its form had no
+			    provider behind it, so it advertised something the site can't do —
+			    removed rather than left as furniture. Latest already rules itself
+			    off with a top border; the footer supplies the closing edge. */}
 			<Footer />
 		</div>
 	);
