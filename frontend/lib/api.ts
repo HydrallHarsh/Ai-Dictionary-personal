@@ -1,5 +1,15 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
+export class ApiRequestError extends Error {
+	constructor(
+		message: string,
+		readonly status: number,
+	) {
+		super(message);
+		this.name = "ApiRequestError";
+	}
+}
+
 // No Login Response Interface because response returns No Content (204) on successful login
 export interface LoginPayload {
 	username: string;
@@ -96,7 +106,10 @@ export async function getCurrentUser() {
 
 	if (!response.ok) {
 		const data = await response.json().catch(() => ({}));
-		throw new Error(data.detail || "Fetching user failed");
+		throw new ApiRequestError(
+			data.detail || "Fetching user failed",
+			response.status,
+		);
 	}
 	return await response.json();
 }
@@ -124,5 +137,78 @@ export async function logoutUser() {
 	} catch (error) {
 		console.error("Error occurred while logoutUser", error);
 		throw error;
+	}
+}
+
+/** One saved post. `post_id` is the `posts.id` in Supabase. */
+export interface Bookmark {
+	post_id: string;
+	created_at: string;
+}
+
+/**
+ * The signed-in user's saved posts, newest first.
+ *
+ * @throws Error when the request fails, including when the session is no longer
+ * valid. The provider only calls this for a signed-in user, so a 401 must not
+ * be interpreted as a genuinely empty saved list.
+ */
+export async function listBookmarks(): Promise<Bookmark[]> {
+	const response = await fetch(`${API_URL}/bookmarks`, {
+		method: "GET",
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		const data = await response.json().catch(() => ({}));
+		throw new ApiRequestError(
+			response.status === 401
+				? "Your session expired. Sign in again to load saved posts."
+				: data.detail || "Fetching saved posts failed",
+			response.status,
+		);
+	}
+
+	return await response.json();
+}
+
+/**
+ * Save a post for the signed-in user. Idempotent on the server.
+ *
+ * @throws Error if the user is not signed in or the request fails.
+ */
+export async function saveBookmark(postId: string): Promise<void> {
+	const response = await fetch(`${API_URL}/bookmarks/${postId}`, {
+		method: "PUT",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error(
+			response.status === 401
+				? "Sign in to save posts"
+				: "Could not save this post",
+		);
+	}
+}
+
+/**
+ * Remove a post from the signed-in user's saved list. Idempotent on the server.
+ *
+ * @throws Error if the user is not signed in or the request fails.
+ */
+export async function removeBookmark(postId: string): Promise<void> {
+	const response = await fetch(`${API_URL}/bookmarks/${postId}`, {
+		method: "DELETE",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error(
+			response.status === 401
+				? "Sign in to manage saved posts"
+				: "Could not remove this post",
+		);
 	}
 }

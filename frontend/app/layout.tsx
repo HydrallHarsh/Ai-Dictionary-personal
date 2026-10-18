@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthContext";
+import { BookmarksProvider } from "@/components/bookmarks/BookmarksContext";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -31,10 +32,12 @@ export default function RootLayout({
 					disableTransitionOnChange={false}
 				>
 					<AuthProvider>
-						<div className="mx-auto max-w-[1440px] min-h-screen bg-background border-x border-border shadow-2xl transition-colors duration-500">
-							<Navbar />
-							{children}
-						</div>
+						<BookmarksProvider>
+							<div className="mx-auto max-w-[1440px] min-h-screen bg-background border-x border-border shadow-2xl transition-colors duration-500">
+								<Navbar />
+								{children}
+							</div>
+						</BookmarksProvider>
 					</AuthProvider>
 					<Toaster position="top-center" expand={true} richColors />
 				</ThemeProvider>

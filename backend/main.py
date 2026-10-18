@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from services.authentication.auth import lifespan
 from services.authentication.auth import router as auth_router
+from services.bookmarks.router import router as bookmarks_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,6 +39,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(bookmarks_router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, log_level="info", reload=True)

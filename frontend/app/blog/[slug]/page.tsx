@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { TableOfContents } from "@/components/article/TableOfContents";
+import { BookmarkButton } from "@/components/bookmarks/BookmarkButton";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { normaliseSource } from "@/lib/archive";
@@ -184,12 +185,17 @@ export default async function BlogPostPage({ params }: PageProps) {
 							{title}
 						</h1>
 
-						{metaRows ? (
-							<p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-								<Clock className="h-3.5 w-3.5" aria-hidden="true" />
-								{metaRows}
-							</p>
-						) : null}
+						<div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+							{metaRows ? (
+								<p className="flex items-center gap-2 text-sm text-muted-foreground">
+									<Clock className="h-3.5 w-3.5" aria-hidden="true" />
+									{metaRows}
+								</p>
+							) : null}
+							{/* The bookmark is the one action on the page, so it sits with
+							    the metadata rather than floating over the prose. */}
+							<BookmarkButton postId={post.id} />
+						</div>
 
 						{lede ? (
 							/* Serif and upright — italic at any real length is a

@@ -56,6 +56,9 @@ export default function Navbar() {
 	const isActive = (href: string) =>
 		pathname === href || pathname.startsWith(`${href}/`);
 
+	/** Saved posts only exist for a signed-in reader, so the link appears with them. */
+	const links = user ? [...LINKS, { href: "/saved", label: "Saved" }] : LINKS;
+
 	async function handleLogout() {
 		// `logoutAction` already toasts the failure before rethrowing; this only
 		// consumes the rejection so it isn't an unhandled promise.
@@ -89,7 +92,7 @@ export default function Navbar() {
 				</Link>
 
 				<div className="hidden items-center gap-7 md:flex">
-					{LINKS.map((link) => (
+					{links.map((link) => (
 						<Link
 							key={link.href}
 							href={link.href}
@@ -160,7 +163,7 @@ export default function Navbar() {
 			{isOpen ? (
 				<div className="border-t border-border/60 bg-background md:hidden">
 					<div className="container mx-auto flex max-w-[1200px] flex-col px-4 py-2 sm:px-6">
-						{LINKS.map((link) => (
+						{links.map((link) => (
 							<Link
 								key={link.href}
 								href={link.href}

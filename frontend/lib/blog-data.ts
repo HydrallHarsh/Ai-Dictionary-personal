@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { parseDisplayDate } from "@/lib/dates";
+import { formatDisplayDate, parseDisplayDate } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import { createStaticClient } from "@/lib/supabase/static";
 import type { AllContentBlock, TitleBlock } from "@/types/content";
@@ -59,42 +59,6 @@ function asDifficulty(value: string | null): TitleBlock["data"]["difficulty"] {
 	return DIFFICULTIES.find((level) => level === normalised);
 }
 
-/**
- * An ISO date-time carrying no zone at all - "2026-04-23T00:00:00".
- *
- * `new Date` reads one of these in the *runtime's* zone while the formatter
- * below renders UTC, so a build east of Greenwich prints the day before. A
- * date-only string has no such problem: `new Date("2026-04-23")` is already
- * UTC midnight by spec, which is why this pattern requires the time part.
- */
-const ZONELESS_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/;
-
-function formatDate(value?: string | null) {
-	if (!value) {
-		return "Unknown Date";
-	}
-
-	// `published_at` and `created_at` are both `timestamptz`, so Postgres sends
-	// an offset and this is a no-op today. It is here because nothing in the
-	// generated types says so - the column type is the only thing standing
-	// between this formatter and a silent one-day shift.
-	const date = new Date(ZONELESS_DATE_TIME.test(value) ? `${value}Z` : value);
-	if (Number.isNaN(date.getTime())) {
-		return value;
-	}
-
-	// Pinned to UTC. Everything downstream — `parseDisplayDate`, and the month
-	// and day labels in the archive — reads this string back as UTC, so
-	// formatting it in the server's zone would shift entries a day either way
-	// depending on where the build ran.
-	return new Intl.DateTimeFormat("en", {
-		month: "long",
-		day: "numeric",
-		year: "numeric",
-		timeZone: "UTC",
-	}).format(date);
-}
-
 function makeBlocks(row: PostRow): AllContentBlock[] {
 	const postTitle = asString(row.title, "Untitled Post");
 
@@ -105,9 +69,9 @@ function makeBlocks(row: PostRow): AllContentBlock[] {
 			data: {
 				content: postTitle,
 				// `published_at` is the migration's coalesce of the old approved and
-				// upload dates, so it is the one date every entry has. formatDate
+				// upload dates, so it is the one date every entry has. formatDisplayDate
 				// passes through anything it cannot parse.
-				date: formatDate(row.published_at ?? row.created_at),
+				date: formatDisplayDate(row.published_at ?? row.created_at),
 				tags: row.tags ?? [],
 				// Difficulty and read time are left undefined when the pipeline did
 				// not record them, rather than defaulted to "beginner" and

@@ -31,16 +31,10 @@ router.include_router(
     prefix="/auth",
     tags=["auth"],
 )
-router.include_router(
-    fastapi_users.get_reset_password_router(),
-    prefix="/auth",
-    tags=["auth"],
-)
-router.include_router(
-    fastapi_users.get_verify_router(UserRead),
-    prefix="/auth",
-    tags=["auth"],
-)
+# There is no email sender yet, so the reset-password and verify routes are not
+# mounted. They previously existed and printed their tokens to the server log —
+# a reset token in a log is a password. Restore both routes together with the
+# mail transport, not before it.
 router.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",

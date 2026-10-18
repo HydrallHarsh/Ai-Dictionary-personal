@@ -101,6 +101,62 @@ const DAY_LABEL = new Intl.DateTimeFormat("en", {
 	timeZone: "UTC",
 });
 
+/**
+ * The fields any listing row needs, whether it came from an article page's
+ * blocks or a bare `posts` row.
+ */
+export type EntryFields = {
+	slug: string;
+	title: string | null | undefined;
+	summary: string | null | undefined;
+	body: string | null | undefined;
+	source: string | null | undefined;
+	difficulty: string | null | undefined;
+	/** Formatted, as `formatDisplayDate` produces it. */
+	displayDate: string;
+};
+
+/**
+ * Build one archive row.
+ *
+ * Shared by the archive (which assembles the fields from blog blocks) and the
+ * saved list (which reads the same columns off `posts` directly). Both need the
+ * excerpt cut, the date read back as UTC, and the same rules for which fields
+ * are allowed to appear — duplicating that in the second caller is how the two
+ * lists start formatting the same post differently.
+ */
+export function entryFromRow(fields: EntryFields): ArchiveEntry {
+	const display = fields.displayDate;
+	const time = parseDisplayDate(display);
+
+	// Difficulty is only present on a quarter of the corpus. Where it's absent
+	// the field is left null and the badge is dropped, rather than printing the
+	// "beginner" default as though the pipeline had actually graded it.
+	const rawDifficulty = fields.difficulty?.toLowerCase().trim();
+	const graded =
+		rawDifficulty === "intermediate" || rawDifficulty === "advanced"
+			? rawDifficulty
+			: null;
+
+	const summary = fields.summary ?? "";
+	const body = fields.body ?? "";
+
+	return {
+		slug: fields.slug,
+		title: fields.title || "Untitled",
+		excerpt: excerpt(summary === "No summary available." ? "" : summary),
+		date: time === null ? display : DAY_LABEL.format(new Date(time)),
+		time,
+		source: normaliseSource(fields.source),
+		difficulty: graded,
+		// Same reasoning as difficulty, one step further: `estimated_time` is
+		// absent on 178 of 244 entries and `blog-data` substitutes "5 min read",
+		// so the column read as measured while being a constant. The body is
+		// always there, so it's counted instead.
+		readingTime: readingTime(sanitizeArticleMarkdown(body)),
+	};
+}
+
 function toEntry(post: BlogPost): ArchiveEntry {
 	const titleBlock = post.blocks.find((block) => block.type === "title");
 	const summaryBlock = post.blocks.find((block) => block.type === "summary");
@@ -110,35 +166,19 @@ function toEntry(post: BlogPost): ArchiveEntry {
 		summaryBlock?.type === "summary" ? summaryBlock.data.content : "";
 	const body = bodyBlock?.type === "explanation" ? bodyBlock.data.content : "";
 
-	// `blog-data` formats dates for display before we see them, so the formatted
-	// string is parsed back to get a sort key. Anything unparseable sorts last
-	// rather than throwing the whole list out of order.
-	const display = title?.date ?? "";
-	const time = parseDisplayDate(display);
-
-	// Difficulty is only present on a quarter of the corpus. Where it's absent
-	// the field is left null and the badge is dropped, rather than printing the
-	// "beginner" default as though the pipeline had actually graded it.
-	const rawDifficulty = title?.difficulty?.toLowerCase().trim();
-	const graded =
-		rawDifficulty === "intermediate" || rawDifficulty === "advanced"
-			? rawDifficulty
-			: null;
-
-	return {
+	return entryFromRow({
 		slug: post.slug,
-		title: title?.content || post.metadata?.title || "Untitled",
-		excerpt: excerpt(summary === "No summary available." ? "" : summary),
-		date: time === null ? display : DAY_LABEL.format(new Date(time)),
-		time,
-		source: normaliseSource(post.metadata?.source),
-		difficulty: graded,
-		// Same reasoning as difficulty, one step further: `estimated_time` is
-		// absent on 178 of 244 entries and `blog-data` substitutes "5 min read",
-		// so the column read as measured while being a constant. The body is
-		// always there, so it's counted instead.
-		readingTime: readingTime(sanitizeArticleMarkdown(body)),
-	};
+		title: title?.content || post.metadata?.title,
+		summary,
+		body,
+		source: post.metadata?.source,
+		difficulty: title?.difficulty,
+		// `blog-data` formats dates for display before we see them, and
+		// `entryFromRow` parses the formatted string back to get a sort key.
+		// Anything unparseable sorts last rather than throwing the list out of
+		// order.
+		displayDate: title?.date ?? "",
+	});
 }
 
 function monthKey(time: number) {
