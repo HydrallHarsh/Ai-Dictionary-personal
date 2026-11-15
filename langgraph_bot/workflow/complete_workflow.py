@@ -29,10 +29,12 @@ from langgraph_bot.agentschema.stateschema import State
 from langgraph_bot.nodes.dedup_node import dedup_node
 from langgraph_bot.nodes.enrich_node import enrich_node
 from langgraph_bot.nodes.triage_node import triage_node
+from langgraph_bot.utils.errors import PipelineUnavailable
 from langgraph_bot.workflow.description_workflow import g
 from langgraph_bot.workflow.workflow import graph
 
-_RETRY = RetryPolicy(max_attempts=3)
+# Gate nodes wrap provider errors; explicitly retry that wrapper too.
+_RETRY = RetryPolicy(max_attempts=3, retry_on=PipelineUnavailable)
 
 
 def should_continue(state: State) -> list[str] | str:
@@ -63,8 +65,7 @@ completegraph.add_conditional_edges(
 )
 
 # Both branches join at enrich; the state reducers handle the concurrent writes.
-completegraph.add_edge("description_node", "enrich")
-completegraph.add_edge("summary_node", "enrich")
+completegraph.add_edge(["description_node", "summary_node"], "enrich")
 completegraph.add_edge("enrich", END)
 
 mjorgraph = completegraph.compile()

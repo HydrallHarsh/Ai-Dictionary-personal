@@ -10,8 +10,9 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
+from fastapi_users.exceptions import InvalidPasswordException
 
-from services.authentication.dbs import User, get_user_db
+from backend.services.authentication.dbs import User, get_user_db
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +26,10 @@ logger = logging.getLogger(__name__)
 #     python -c "import secrets; print(secrets.token_urlsafe(48))"
 #
 # Rotating this signs everyone out, which is the intended cost of a leak.
-_is_development = os.getenv("ENVIRONMENT", "development").lower() == "development"
-SECRET = os.getenv("AUTH_SECRET")
+_is_development = os.getenv("ENVIRONMENT", "").strip().lower() == "development"
+_configured_secret = os.getenv("AUTH_SECRET")
 
-if not SECRET:
+if _configured_secret is None:
     if not _is_development:
         raise RuntimeError(
             "AUTH_SECRET is not set. Generate one with "
@@ -42,11 +43,26 @@ if not SECRET:
         "AUTH_SECRET is not set; using a development-only secret. "
         "Set AUTH_SECRET before deploying."
     )
+else:
+    if not _configured_secret.strip():
+        raise RuntimeError("AUTH_SECRET must not be empty or whitespace-only.")
+    if len(_configured_secret.strip().encode("utf-8")) < 32:
+        raise RuntimeError(
+            "AUTH_SECRET must be at least 32 bytes. Generate one with "
+            '`python -c "import secrets; print(secrets.token_urlsafe(48))"`.'
+        )
+    SECRET = _configured_secret
 
 
 class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
+
+    async def validate_password(self, password: str, user) -> None:
+        if len(password) < 8:
+            raise InvalidPasswordException(
+                reason="Password must be at least 8 characters long."
+            )
 
     async def on_after_register(self, user: User, request: Request | None = None):
         logger.info("User %s has registered.", user.id)
@@ -72,7 +88,9 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
 
 
 cookie_transport = CookieTransport(
-    cookie_max_age=3600, cookie_secure=True, cookie_samesite="none"
+    cookie_max_age=3600,
+    cookie_secure=not _is_development,
+    cookie_samesite="lax" if _is_development else "none",
 )
 
 

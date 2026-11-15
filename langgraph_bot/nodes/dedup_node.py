@@ -17,6 +17,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from backend.db.client import supabase
 from langgraph_bot.agentschema.stateschema import State
 from langgraph_bot.utils.ratelimit import gemini_embed_limiter
+from langgraph_bot.utils.errors import PipelineUnavailable
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ def _get_embedder() -> GoogleGenerativeAIEmbeddings:
 
     Constructing it at module level made a missing GOOGLE_API_KEY an *import* error,
     which took the whole graph down (nothing could even be compiled or drawn). Lazily
-    it becomes a per-item failure that dedup_node fails open on.
+    it becomes a gate failure that halts generation and leaves work retryable.
     """
     global _embedder
     if _embedder is None:
@@ -76,9 +77,7 @@ def dedup_node(state: State) -> dict:
     try:
         embedding = get_embedding(text)
     except Exception as e:
-        
-        logger.error("dedup_node: embedding failed, skipping dedup check: %s", e)
-        return {}
+        raise PipelineUnavailable("Embedding provider unavailable") from e
 
     try:
         result = supabase.rpc(
@@ -91,8 +90,7 @@ def dedup_node(state: State) -> dict:
         ).execute()
         matches = result.data or []
     except Exception as e:
-        logger.error("dedup_node: match_posts RPC failed: %s", e)
-        return {"embedding": embedding}
+        raise PipelineUnavailable("Semantic duplicate lookup unavailable") from e
 
     is_duplicate = len(matches) > 0
     if is_duplicate:

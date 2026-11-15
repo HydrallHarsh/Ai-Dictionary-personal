@@ -1,5 +1,6 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/database.types";
+import { publicSupabaseConfig } from "./config";
 
 /**
  * Read-only client for public, cacheable pages.
@@ -15,14 +16,7 @@ import type { Database } from "@/database.types";
  * using the cookie-aware client.
  */
 export function createStaticClient() {
-	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-	const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-	if (!supabaseUrl || !supabaseKey) {
-		throw new Error(
-			"Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set",
-		);
-	}
+	const { url: supabaseUrl, key: supabaseKey } = publicSupabaseConfig();
 
 	return createSupabaseClient<Database>(supabaseUrl, supabaseKey, {
 		auth: { persistSession: false, autoRefreshToken: false },

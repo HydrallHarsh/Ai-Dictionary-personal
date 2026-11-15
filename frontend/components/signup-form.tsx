@@ -23,7 +23,7 @@ import { useAuth } from "./auth/AuthContext";
 /**
  * Renders a signup form UI that registers a new user and navigates to the home page on success.
  *
- * The form collects name, email, password and confirm-password fields, uses the app authentication
+ * The form collects email, password and confirm-password fields, uses the app authentication
  * context to perform registration, and on successful signup redirects to "/". On registration failure
  * it displays a toast notification with the error message.
  *
@@ -37,16 +37,26 @@ export function SignupForm({
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [confirmation, setConfirmation] = useState("");
+	const [submitting, setSubmitting] = useState(false);
 
 	const { registerAction } = useAuth();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (submitting) return;
+		if (password.length < 8 || password !== confirmation) {
+			toast.error(password.length < 8 ? "Password must be at least 8 characters long." : "Passwords do not match.");
+			return;
+		}
+		setSubmitting(true);
 		try {
 			await registerAction(email, password);
 			router.push("/");
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "Signup failed");
+		} finally {
+			setSubmitting(false);
 		}
 	};
 	return (
@@ -62,13 +72,10 @@ export function SignupForm({
 					<form onSubmit={handleSubmit}>
 						<FieldGroup>
 							<Field>
-								<FieldLabel htmlFor="name">Full Name</FieldLabel>
-								<Input id="name" type="text" placeholder="John Doe" required />
-							</Field>
-							<Field>
 								<FieldLabel htmlFor="email">Email</FieldLabel>
 								<Input
 									id="email"
+									autoComplete="email"
 									type="email"
 									placeholder="m@example.com"
 									onChange={(e) => setEmail(e.target.value)}
@@ -81,6 +88,8 @@ export function SignupForm({
 										<FieldLabel htmlFor="password">Password</FieldLabel>
 										<Input
 											id="password"
+											autoComplete="new-password"
+											minLength={8}
 											type="password"
 											onChange={(e) => setPassword(e.target.value)}
 											required
@@ -90,7 +99,7 @@ export function SignupForm({
 										<FieldLabel htmlFor="confirm-password">
 											Confirm Password
 										</FieldLabel>
-										<Input id="confirm-password" type="password" required />
+										<Input id="confirm-password" type="password" autoComplete="new-password" minLength={8} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} required />
 									</Field>
 								</Field>
 								<FieldDescription>
@@ -98,7 +107,7 @@ export function SignupForm({
 								</FieldDescription>
 							</Field>
 							<Field>
-								<Button type="submit">Create Account</Button>
+								<Button type="submit" disabled={submitting}>{submitting ? "Creating account…" : "Create Account"}</Button>
 								<FieldDescription className="text-center">
 									Already have an account? <a href="/login">Sign in</a>
 								</FieldDescription>
@@ -107,10 +116,6 @@ export function SignupForm({
 					</form>
 				</CardContent>
 			</Card>
-			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-				and <a href="#">Privacy Policy</a>.
-			</FieldDescription>
 		</div>
 	);
 }

@@ -2,9 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, Depends, FastAPI
 
-from services.authentication.dbs import User, create_db_and_tables
-from services.authentication.schema import UserCreate, UserRead, UserUpdate
-from services.authentication.users import (
+from backend.services.authentication.dbs import User, create_db_and_tables
+from backend.services.authentication.schema import UserCreate, UserRead, UserUpdate
+from backend.services.authentication.users import (
     auth_backend,
     current_active_user,
     fastapi_users,

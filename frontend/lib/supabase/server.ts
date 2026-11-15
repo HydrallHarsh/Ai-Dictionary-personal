@@ -1,18 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/database.types";
+import { publicSupabaseConfig } from "./config";
 
 export async function createClient() {
 	const cookieStore = await cookies();
 
-	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-	const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-	if (!supabaseUrl || !supabaseKey) {
-		throw new Error(
-			"Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set",
-		);
-	}
+	const { url: supabaseUrl, key: supabaseKey } = publicSupabaseConfig();
 
 	// Create a server's supabase client with newly configured cookie,
 	// which could be used to maintain user's session

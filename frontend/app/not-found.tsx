@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -6,18 +5,14 @@ import { Button } from "@/components/ui/button";
 /**
  * Not found.
  *
- * Lives beside the routes rather than in `global-not-found.js`, because that
- * file replaces the whole document: no navbar, no footer, and a second copy of
- * the theme provider. A reader who mistypes a URL should land somewhere that
- * still has a way back. `global-not-found.js` stays as the fallback for the
- * dev-server case where the root layout isn't mounted.
+ * This page renders inside the root layout, so the site navbar remains
+ * available when a reader reaches an unknown route.
  *
- * The copy is unchanged. The presentation is rebuilt from the same devices as
- * the rest of the site — left-aligned type on one margin, a hairline rule, the
- * ambient wash, teal as the "live/status" hue, and the cat treated as a figure
- * with a numbered caption rather than a rounded card. The previous version used
- * a gradient-clipped headline, a blurred purple orb and a dotted grid, none of
- * which appear on any other page.
+ * The composition is the earlier one: copy on the left, the cat in its own
+ * panel on the right, the two of them the same height. What changed is the
+ * dressing — the gradient-clipped heading, the blurred purple orb and the
+ * dotted grid are gone in favour of the ambient wash and hairlines the rest of
+ * the site uses.
  */
 export const metadata = {
 	title: "404 - Hallucination Detected",
@@ -29,54 +24,48 @@ export default function NotFound() {
 		<div className="relative min-h-screen bg-background text-foreground">
 			{/* Same opening temperature as the landing and about pages. */}
 			<div
-				className="ambient-wash pointer-events-none absolute inset-x-0 top-0 h-[34rem]"
+				className="ambient-wash pointer-events-none absolute inset-x-0 top-0 h-[34rem] opacity-70"
 				aria-hidden="true"
 			/>
 
-			<main className="relative container mx-auto max-w-[1200px] px-4 pt-16 pb-20 sm:px-6 md:pt-24">
-				<div className="animate-in fade-in slide-in-from-bottom-4 grid grid-cols-1 gap-x-16 gap-y-12 duration-700 ease-out lg:grid-cols-[minmax(0,1fr)_18rem]">
-					<div className="max-w-2xl">
-						{/* The status dot the hero uses, in the hue the site reserves
-						    for "something ran and needs attention". */}
-						<p className="flex items-center gap-2.5 text-sm text-muted-foreground">
-							<span className="h-1.5 w-1.5 shrink-0 rounded-full bg-hue-4" />
-							Not found
-						</p>
+			{/* Fills the viewport below the 64px navbar, so the pair sits centred
+			    rather than hugging the top of an otherwise empty page. */}
+			<main className="relative container mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1200px] items-center px-4 py-16 sm:px-6">
+				<div className="animate-in fade-in zoom-in grid w-full grid-cols-1 items-center justify-items-center gap-10 duration-500 md:grid-cols-2 md:gap-16">
+					{/* Copy first in the DOM, second on screen — the headline is what
+					    you read, the image is what you look at. */}
+					<div className="order-2 flex flex-col items-center space-y-6 text-center md:order-1 md:items-start md:space-y-7 md:text-left">
+						<div className="flex flex-col items-center md:items-start">
+							<h1 className="text-8xl leading-none font-black tracking-tighter select-none md:text-9xl lg:text-[10rem]">
+								404
+							</h1>
+							<p className="mt-3 rounded-full border border-border bg-muted/50 px-4 py-2 font-mono text-sm text-muted-foreground">
+								&gt; error: hallucination_detected
+							</p>
+						</div>
 
-						<h1 className="mt-5 text-7xl leading-none font-bold tracking-tighter sm:text-8xl md:text-9xl">
-							404
-						</h1>
+						<div className="max-w-lg space-y-4">
+							<h2 className="text-2xl leading-tight font-bold tracking-tight md:text-4xl">
+								&quot;Your model is hallucinating now...&quot;
+							</h2>
+							<p className="text-lg leading-relaxed text-muted-foreground md:text-xl">
+								We explicitly told the AI to{" "}
+								<span className="font-semibold text-foreground italic">
+									&quot;stick to the context info only&quot;
+								</span>
+								, but it decided to dream up this page anyway.
+							</p>
+							<p className="text-sm text-muted-foreground/80 italic">
+								(It probably thinks this page is real. It&rsquo;s not. Please
+								forgive it.)
+							</p>
+						</div>
 
-						{/* A monospace line is the one place a code fragment belongs;
-						    no pill, no blur. The leading rule is the same hairline the
-						    archive uses to separate rows. */}
-						<p className="mt-6 border-l-2 border-hue-4 pl-4 font-mono text-sm text-muted-foreground">
-							&gt; error: hallucination_detected
-						</p>
-
-						{/* The headline is a quotation, so it is set as one — serif and
-						    italic, like the standfirst on an article. */}
-						<h2 className="mt-10 font-serif text-2xl leading-snug italic text-foreground/85 md:text-3xl">
-							&quot;Your model is hallucinating now...&quot;
-						</h2>
-
-						<p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-							We explicitly told the AI to{" "}
-							<span className="font-semibold text-foreground italic">
-								&quot;stick to the context info only&quot;
-							</span>
-							, but it decided to dream up this page anyway.
-						</p>
-						<p className="mt-4 text-sm text-muted-foreground/80 italic">
-							(It probably thinks this page is real. It&rsquo;s not. Please
-							forgive it.)
-						</p>
-
-						<div className="mt-10 flex flex-wrap gap-3">
+						<div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
 							<Button
 								asChild
 								size="lg"
-								className="rounded-full bg-indigo-600 px-7 font-semibold text-white hover:bg-indigo-700"
+								className="h-14 rounded-full bg-indigo-600 px-10 text-lg font-bold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-indigo-700 hover:shadow-xl"
 							>
 								<Link href="/">Return to Reality</Link>
 							</Button>
@@ -84,56 +73,29 @@ export default function NotFound() {
 								asChild
 								variant="outline"
 								size="lg"
-								className="rounded-full border-border px-6"
+								className="h-14 rounded-full border-border px-7"
 							>
-								<Link href="/blog">
-									<ArrowLeft className="h-4 w-4" aria-hidden="true" />
-									Browse the archive
-								</Link>
+								<Link href="/blog">Browse the archive</Link>
 							</Button>
 						</div>
 					</div>
 
-					{/* The meme is evidence, so it sits in the margin as a figure with
-					    a caption — the same slot the article page gives its contents
-					    rail. Grayscale at rest and in colour on hover, which was the
-					    one idea in the old version worth keeping: the joke lands when
-					    the cat looks normal until you look at it properly. */}
-					<figure className="lg:pt-1">
-						<div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted">
+					{/* The cat panel, as it was: a bordered, rounded, shadowed frame.
+					    `object-contain` rather than `object-cover` — the meme carries
+					    its own caption, and cropping it cut the punchline off. It stays
+					    upright art at rest and colourises on hover, which was the one
+					    good idea in the old version. */}
+					<div className="group relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-muted shadow-2xl md:h-[500px] md:max-w-full">
+						<div className="relative aspect-square md:aspect-auto md:h-full">
 							<Image
 								src="/cat_2.png"
 								alt="AI Hallucination Meme"
 								fill
-								sizes="(min-width: 1024px) 18rem, 100vw"
-								className="object-cover grayscale transition-[filter,transform] duration-700 hover:scale-[1.03] hover:grayscale-0"
+								sizes="(min-width: 768px) 50vw, 100vw"
+								className="object-contain grayscale transition-[filter] duration-700 group-hover:grayscale-0"
 							/>
-							{/* The readout is the image's caption, so it is always legible
-							    rather than a hover-only overlay. */}
-							<div className="absolute inset-x-3 bottom-3 rounded-md bg-black/80 p-3 font-mono text-xs text-green-400">
-								<div className="flex flex-col gap-1">
-									<span>
-										&gt; query_context:{" "}
-										<span className="text-red-400">missing</span>
-									</span>
-									<span>
-										&gt; logic_integrity:{" "}
-										<span className="text-red-400">0%</span>
-									</span>
-									<span>
-										&gt; hallucination_status:{" "}
-										<span className="animate-pulse font-extrabold text-red-400">
-											CRITICAL
-										</span>
-									</span>
-								</div>
-							</div>
 						</div>
-						<figcaption className="mt-3 flex items-baseline justify-between gap-3 border-t border-border/60 pt-3 text-xs text-muted-foreground">
-							<span>Fig. 1 — A model, very confident, entirely wrong.</span>
-							<span className="tabular-nums">02 / 02</span>
-						</figcaption>
-					</figure>
+					</div>
 				</div>
 			</main>
 		</div>

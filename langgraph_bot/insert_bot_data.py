@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 BUCKET = "post-images"
 
 
+def find_published_post(raw_item_id: str) -> str | None:
+    """Reconcile a prior publication before running provider gates again."""
+    response = supabase.table("posts").select("id").eq("raw_item_id", raw_item_id).limit(1).execute()
+    return response.data[0]["id"] if response.data else None
+
+
 def _upload_image(
     image_data: bytes | None, post_id: str
 ) -> tuple[str | None, str | None]:

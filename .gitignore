@@ -1,3 +1,6 @@
 # Local tool state, not part of the app.
 .vibe-wise/
 .sensible-vibes/
+__pycache__/
+.pytest_cache/
+.ruff_cache/

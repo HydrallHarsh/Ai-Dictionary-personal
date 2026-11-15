@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 import { SUPABASE_STORAGE_PREFIX, supabaseImageHost } from "./lib/image-hosts";
+import { publicSupabaseConfig } from "./lib/supabase/config";
+
+publicSupabaseConfig();
 
 /** Local Supabase only exists while you're developing against it. */
 const isDev = process.env.NODE_ENV === "development";

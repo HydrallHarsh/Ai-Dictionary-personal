@@ -1,4 +1,3 @@
-import os
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
@@ -13,11 +12,11 @@ from sqlalchemy import DateTime, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from backend.services.authentication.config import account_database_url
 
 load_dotenv()
 
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
-DATABASE_URL = f"postgresql+asyncpg://postgres:{DB_PASSWORD}@localhost:5432/postgres"
+DATABASE_URL = account_database_url()
 
 
 class Base(DeclarativeBase):

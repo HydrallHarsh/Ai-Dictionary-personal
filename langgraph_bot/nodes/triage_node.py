@@ -1,13 +1,7 @@
-"""Triage gate - the cheap filter that runs before expensive generation.
+"""Cheap relevance gate before generation.
 
-One structured Groq call per raw item decides whether it is worth writing a post.
-Everything downstream is skipped when this says no: filtering costs one call,
-while generating a complete post costs several provider calls.
-
-This node is a pure function of its state. An isolated triage failure passes the item
-through with `triage["available"] = False` so the run loop can see it; deciding when
-repeated failures mean "stop the run" is the loop's job, not this node's, because only
-the loop can halt and release the rest of the claimed batch.
+A provider failure raises PipelineUnavailable so the worker can release its claim
+and stop. No downstream provider calls run without a successful triage decision.
 """
 
 import logging
@@ -18,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from langgraph_bot.agentschema.stateschema import State
 from langgraph_bot.models.generativemodel import triagemodel
+from langgraph_bot.utils.errors import PipelineUnavailable
 
 logger = logging.getLogger(__name__)
 
@@ -97,22 +92,7 @@ def triage_node(state: State) -> dict:
             ),
         )
     except Exception as error:
-        # Pass this one item through, and report the outage to the run loop via
-        # `available`. The loop halts the batch if these start stacking up.
-        logger.warning(
-            "triage_node: call failed, passing item through: %s: %s",
-            type(error).__name__,
-            error,
-        )
-        return {
-            "triage": {
-                "available": False,
-                "is_it_relevant": True,
-                "importance": MIN_IMPORTANCE,
-                "reason": f"triage unavailable ({type(error).__name__}), passed through",
-            },
-            "should_process": True,
-        }
+        raise PipelineUnavailable("Triage provider unavailable") from error
 
     should_process = result.is_it_relevant and result.importance >= MIN_IMPORTANCE
     logger.info(

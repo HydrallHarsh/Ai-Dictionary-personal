@@ -9,10 +9,10 @@ import { LoginForm } from "@/components/login-form";
 /**
  * Render the login page and redirect authenticated users to the homepage.
  *
- * If authentication is still loading, renders nothing. When a user is authenticated,
+ * Keeps the form mounted while authentication loads. When a user is authenticated,
  * performs a client-side navigation to "/"; otherwise displays the login UI.
  *
- * @returns The login page JSX element; `null` while authentication is loading.
+ * @returns The login page JSX element.
  */
 export default function LoginPage() {
 	const { user, loading } = useAuth();
@@ -24,7 +24,7 @@ export default function LoginPage() {
 			router.push("/");
 		}
 	}, [user, loading, router]);
-	if (loading) return null;
+	// Keep the form mounted while signing in so pending feedback remains visible.
 
 	return (
 		<div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">

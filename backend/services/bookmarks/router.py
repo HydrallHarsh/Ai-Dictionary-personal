@@ -18,9 +18,9 @@ from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.authentication.dbs import SavedPost, User, get_async_session
-from services.authentication.users import current_active_user
-from services.bookmarks.schema import BookmarkRead
+from backend.services.authentication.dbs import SavedPost, User, get_async_session
+from backend.services.authentication.users import current_active_user
+from backend.services.bookmarks.schema import BookmarkRead
 
 router = APIRouter(prefix="/bookmarks", tags=["bookmarks"])
 

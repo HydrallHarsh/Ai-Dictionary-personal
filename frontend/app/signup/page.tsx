@@ -9,9 +9,9 @@ import { SignupForm } from "@/components/signup-form";
 /**
  * Render the signup page and redirect authenticated users to the home route.
  *
- * Uses authentication context to check `user` and `loading`; if authentication is still loading the component renders `null`, and if a user is present it navigates to `/`. When unauthenticated and not loading, it renders the signup layout with branding and the `SignupForm` component.
+ * Uses authentication context to redirect signed-in users while keeping pending form feedback visible.
  *
- * @returns The signup page JSX element, or `null` while authentication state is loading.
+ * @returns The signup page JSX element.
  */
 export default function SignupPage() {
 	const { user, loading } = useAuth();
@@ -23,7 +23,7 @@ export default function SignupPage() {
 			router.push("/");
 		}
 	}, [user, loading, router]);
-	if (loading) return null;
+	// Keep the form mounted while signing in so pending feedback remains visible.
 	return (
 		<div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
 			<div className="flex w-full max-w-sm flex-col gap-6">
