@@ -40,11 +40,11 @@ export function SignupForm({
 	const [confirmation, setConfirmation] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 
-	const { registerAction } = useAuth();
+	const { registerAction, loading } = useAuth();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (submitting) return;
+		if (loading || submitting) return;
 		if (password.length < 8 || password !== confirmation) {
 			toast.error(password.length < 8 ? "Password must be at least 8 characters long." : "Passwords do not match.");
 			return;
@@ -107,7 +107,7 @@ export function SignupForm({
 								</FieldDescription>
 							</Field>
 							<Field>
-								<Button type="submit" disabled={submitting}>{submitting ? "Creating account…" : "Create Account"}</Button>
+								<Button type="submit" disabled={loading || submitting}>{submitting ? "Creating account…" : "Create Account"}</Button>
 								<FieldDescription className="text-center">
 									Already have an account? <a href="/login">Sign in</a>
 								</FieldDescription>

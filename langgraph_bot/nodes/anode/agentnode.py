@@ -5,6 +5,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langgraph_bot.agents.description_agent import agent
 from langgraph_bot.agents.summaryagent import s_agent
 from langgraph_bot.agentschema.stateschema import State
+from langgraph_bot.utils.errors import is_deterministic_provider_error, raise_provider_error
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +93,8 @@ def description_agent_node(state: State):
         logger.error("description agent returned no response")
         return {}
     except Exception as error:
+        if is_deterministic_provider_error(error):
+            raise_provider_error(error, "Description input exceeds provider limits")
         logger.exception("description agent invocation failed")
         return {
             "messages": [

@@ -6,6 +6,9 @@ ALTER Table raw_api_data
         Check (status in ('pending', 'processing', 'succeeded', 'skipped', 'failed')),
     Add Column retry_count int Default 0,
     Add Column last_error text,
+    -- Expiring ownership recovers committed claims even when their replies are lost.
+    Add Column claim_token uuid,
+    Add Column claim_expires_at timestamptz,
     Add Column source_type text
         Check (source_type in ('rss', 'api', 'scraper', 'other')),
     -- generic per-source signal bag (HN points/comments, GitHub stars, etc.).
@@ -155,6 +158,8 @@ Create index on posts(slug);
 Create index on posts Using hnsw (embedding vector_cosine_ops);
 
 Create index on raw_api_data(status) where status = 'pending';
+Create Index raw_items_processing_expiry_idx
+    On raw_api_data(claim_expires_at) Where status = 'processing';
 
 -- One post per raw item. claim_pending_raw_items already stops two concurrent runs
 -- from processing the same row; this is the backstop for what it does not cover, such
@@ -172,17 +177,40 @@ Grant Select on table posts to authenticated;
 Grant Select, Insert, Update, Delete on table posts to service_role;
 
 
--- Atomically claim queue work so overlapping workers cannot process the same item.
-Create Or Replace Function public.claim_pending_raw_items(p_limit integer Default 20)
+-- Queue ownership and retry RPCs.
+-- Remove unfenced signatures so older clients cannot silently bypass leases.
+Drop Function If Exists public.claim_pending_raw_items(integer);
+Drop Function If Exists public.transition_raw_item_status(uuid, text, text, text);
+
+Create Or Replace Function public.claim_pending_raw_items(
+    p_limit integer, p_claim_token uuid, p_lease_seconds integer Default 300
+)
 Returns Setof public.raw_api_data
 Language plpgsql
 Security Definer
 Set search_path = public
 As $$
 Begin
+    If p_claim_token Is Null Or p_lease_seconds <= 0 Or p_lease_seconds Is Null Then
+        Raise Exception 'a claim token and positive lease duration are required';
+    End If;
     If Coalesce(p_limit, 0) <= 0 Then
         Return;
     End If;
+
+    -- Recover abandoned claims before selecting work. A live lease is preserved;
+    -- NULL expiry covers claims left by workers predating leases.
+    With abandoned As (
+        Select item.id From public.raw_api_data As item
+        Where item.status = 'processing'
+          And (item.claim_expires_at Is Null Or item.claim_expires_at <= clock_timestamp())
+        Order By item.claim_expires_at Nulls First, item.id
+        For Update Skip Locked Limit 100
+    )
+    Update public.raw_api_data As item
+    Set status = 'pending', claim_expires_at = Null,
+        last_error = 'recovered expired processing claim'
+    From abandoned Where item.id = abandoned.id;
 
     Return Query
     With candidates As (
@@ -195,7 +223,9 @@ Begin
     )
     Update public.raw_api_data As item
     Set status = 'processing',
-        last_error = Null
+        last_error = Null,
+        claim_token = p_claim_token,
+        claim_expires_at = clock_timestamp() + make_interval(secs => p_lease_seconds)
     From candidates
     Where item.id = candidates.id
       And item.status = 'pending'
@@ -204,12 +234,35 @@ End;
 $$;
 
 
--- Require every terminal update to observe the state established by the claim.
+Create Or Replace Function public.renew_raw_item_claim(
+    p_raw_id uuid, p_claim_token uuid
+)
+Returns boolean
+Language plpgsql
+Security Definer
+Set search_path = public
+As $$
+Declare
+    updated_rows integer;
+Begin
+    Update public.raw_api_data
+    Set claim_expires_at = clock_timestamp() + interval '5 minutes'
+    Where id = p_raw_id And status = 'processing' And claim_token = p_claim_token
+      And claim_expires_at > clock_timestamp();
+    Get Diagnostics updated_rows = Row_Count;
+    Return updated_rows = 1;
+End;
+$$;
+
+
+-- Require the live owner for processing transitions and count deterministic attempts.
 Create Or Replace Function public.transition_raw_item_status(
     p_raw_id uuid,
     p_expected_status text,
     p_new_status text,
-    p_error text Default Null
+    p_error text Default Null,
+    p_claim_token uuid Default Null,
+    p_increment_retry boolean Default false
 )
 Returns boolean
 Language plpgsql
@@ -226,28 +279,41 @@ Begin
     If p_new_status Not In ('pending', 'processing', 'succeeded', 'skipped', 'failed') Then
         Raise Exception 'invalid new raw item status: %', p_new_status;
     End If;
+    If p_expected_status = 'processing' And p_claim_token Is Null Then
+        Raise Exception 'a processing transition requires its claim token';
+    End If;
+    If p_increment_retry And p_new_status Not In ('pending', 'failed') Then
+        Raise Exception 'attempt counts may only increment on pending or failed';
+    End If;
 
     Update public.raw_api_data
     Set status = p_new_status,
         last_error = p_error,
+        claim_expires_at = Null,
         retry_count = Case
-            When p_new_status = 'failed' Then Coalesce(retry_count, 0) + 1
+            When p_new_status = 'failed' Or p_increment_retry Then Coalesce(retry_count, 0) + 1
             Else retry_count
         End
     Where id = p_raw_id
-      And status = p_expected_status;
+      And status = p_expected_status
+      And (p_expected_status <> 'processing' Or (
+          claim_token = p_claim_token And claim_expires_at > clock_timestamp()
+      ));
 
+    -- Keep the last token after settlement so lost replies can be verified.
     Get Diagnostics updated_rows = Row_Count;
     Return updated_rows = 1;
 End;
 $$;
 
 
-Revoke All On Function public.claim_pending_raw_items(integer) From Public, anon, authenticated;
-Revoke All On Function public.transition_raw_item_status(uuid, text, text, text) From Public, anon, authenticated;
+Revoke All On Function public.claim_pending_raw_items(integer, uuid, integer) From Public, anon, authenticated;
+Revoke All On Function public.renew_raw_item_claim(uuid, uuid) From Public, anon, authenticated;
+Revoke All On Function public.transition_raw_item_status(uuid, text, text, text, uuid, boolean) From Public, anon, authenticated;
 
-Grant Execute On Function public.claim_pending_raw_items(integer) To service_role;
-Grant Execute On Function public.transition_raw_item_status(uuid, text, text, text) To service_role;
+Grant Execute On Function public.claim_pending_raw_items(integer, uuid, integer) To service_role;
+Grant Execute On Function public.renew_raw_item_claim(uuid, uuid) To service_role;
+Grant Execute On Function public.transition_raw_item_status(uuid, text, text, text, uuid, boolean) To service_role;
 
 
 -- Aggregate-only pipeline figures for the public landing page.
@@ -260,7 +326,7 @@ Grant Execute On Function public.transition_raw_item_status(uuid, text, text, te
 -- aggregates so nothing row-level can escape through it. It is the only object
 -- granted to anon that reads raw_api_data at all.
 --
--- search_path is emptied rather than set to `public` as the two service_role
+-- search_path is emptied rather than set to `public` as the queue service_role
 -- functions above do. Those are reachable only by a trusted role; this one is
 -- reachable by anyone with the publishable key, so every name it resolves is
 -- spelled out and none of them can be shadowed by a schema the caller controls.

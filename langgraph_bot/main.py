@@ -18,12 +18,12 @@ def check_configuration():
 
 def run_entire_flow() -> dict:
     check_configuration()
-    from backend.db.repository.fetch_raw_data import fetch_pending_items, update_status
+    from backend.db.repository.fetch_raw_data import fetch_pending_items, renew_claim, update_status
     from langgraph_bot.insert_bot_data import find_published_post, insert_cleaned_data
     from langgraph_bot.workflow.complete_workflow import mjorgraph
     return drain_queue(
         fetch=fetch_pending_items, transition=update_status, invoke=mjorgraph.invoke,
-        publish=insert_cleaned_data, find_existing=find_published_post,
+        publish=insert_cleaned_data, find_existing=find_published_post, renew=renew_claim,
     )
 
 

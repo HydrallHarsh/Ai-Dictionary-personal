@@ -17,7 +17,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from backend.db.client import supabase
 from langgraph_bot.agentschema.stateschema import State
 from langgraph_bot.utils.ratelimit import gemini_embed_limiter
-from langgraph_bot.utils.errors import PipelineUnavailable
+from langgraph_bot.utils.errors import PipelineUnavailable, raise_provider_error
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ def dedup_node(state: State) -> dict:
     try:
         embedding = get_embedding(text)
     except Exception as e:
-        raise PipelineUnavailable("Embedding provider unavailable") from e
+        raise_provider_error(e, "Embedding provider rejected or could not process this item")
 
     try:
         result = supabase.rpc(

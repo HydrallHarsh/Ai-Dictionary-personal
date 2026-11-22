@@ -35,11 +35,11 @@ export function LoginForm({
 	const [submitting, setLoad] = useState(false);
 
 	const router = useRouter(); //Simple Router Hook for redirecting after successful login
-	const { loginAction } = useAuth();
+	const { loginAction, loading } = useAuth();
 
 	async function handleLoginSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		if (submitting) return;
+		if (loading || submitting) return;
 		setLoad(true);
 
 		const form = e.target as HTMLFormElement;
@@ -83,7 +83,7 @@ export function LoginForm({
 								<Input id="password" autoComplete="current-password" type="password" required />
 							</Field>
 							<Field>
-				<Button type="submit" disabled={submitting}>{submitting ? "Signing in..." : "Login"}</Button>
+				<Button type="submit" disabled={loading || submitting}>{submitting ? "Signing in..." : "Login"}</Button>
 								<FieldDescription className="text-center">
 									Don&apos;t have an account? <a href="/signup">Sign up</a>
 								</FieldDescription>

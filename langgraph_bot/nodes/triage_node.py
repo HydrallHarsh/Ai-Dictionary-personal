@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from langgraph_bot.agentschema.stateschema import State
 from langgraph_bot.models.generativemodel import triagemodel
-from langgraph_bot.utils.errors import PipelineUnavailable
+from langgraph_bot.utils.errors import raise_provider_error
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ def triage_node(state: State) -> dict:
             ),
         )
     except Exception as error:
-        raise PipelineUnavailable("Triage provider unavailable") from error
+        raise_provider_error(error, "Triage provider rejected or could not process this item")
 
     should_process = result.is_it_relevant and result.importance >= MIN_IMPORTANCE
     logger.info(

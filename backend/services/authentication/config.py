@@ -20,11 +20,19 @@ def account_database_url() -> URL:
                 url = url.difference_update_query(["sslmode"]).update_query_dict(
                     {"ssl": ssl}
                 )
-            return url
         except Exception:
             raise ValueError(
                 "DATABASE_URL must be a valid PostgreSQL URL with host, user, and database."
             ) from None
+        certificate_options = {"sslrootcert", "sslcert", "sslkey", "sslcrl"}
+        unsupported = sorted(certificate_options.intersection(url.query))
+        if unsupported:
+            raise ValueError(
+                "DATABASE_URL certificate options are not supported by asyncpg: "
+                + ", ".join(unsupported)
+                + ". Remove them; custom certificates require an SSL context in connect_args."
+            )
+        return url
 
     password = os.getenv("DB_PASSWORD")
     if not password:
